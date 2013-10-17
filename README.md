@@ -21,14 +21,14 @@ type Place extends Address { name:String }
 type Empty {}
 
 model places {
-    GET                 => List[Place]
-    POST    Place       => Place | Error
+    list   GET            => List[Place]
+    create POST   Place   => Place | Error
 }
 
 model place {
-    GET                 => Place | Error
-    PUT     Address     => Place | Error
-    DELETE              => Empty | Error
+    get    GET            => Place | Error
+    update PUT    Address => Place | Error
+    delete DELETE         => Empty | Error
 }
 
 route places    [/places]
@@ -47,13 +47,13 @@ For instance based on the previous declaration a `python` example can be propose
 api = rapido.client("http://at.home:1337/rest");
 
 # Retrieve all place names
-allPlaces = api.places.get()
+allPlaces = api.places.list()
 
 # Create one element
-aPlace = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
+aPlace = api.places.create({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 # Update it ...
-aPlace = api.place(aPlace).put({"address":"A new address for Eat at Joe's"})
+aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
 
 # Delete it ...
 api.place(aPlace).delete()
@@ -71,13 +71,13 @@ Same example in `scala` ...
 val api = rapido.client("http://at.home:1337/rest");
 
 // Retrieve all place names
-val allPlaces = api.places.get()
+val allPlaces = api.places.list()
 
 // Create one element
-val aPlace = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
+val aPlace = api.places.create({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 // Update it ...
-val aPlace = api.place(aPlace).put({"address":"A new address for Eat at Joe's"})
+val aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
 
 //Delete it ...
 api.place(aPlace).delete()
