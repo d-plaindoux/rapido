@@ -32,7 +32,7 @@ model place {
 }
 
 route places    [/places]
-route place(name:String) [/places/<name>]
+route place(p:Place) [/places/<p.name>]
 ```
 
 Once such specification is done client API can be automatically generated targeting languages
@@ -47,19 +47,19 @@ For instance based on the previous declaration a `python` example can be propose
 api = rapido.client("http://at.home:1337/rest");
 
 # Retrieve all place names
-allPlaceNames = [ place.name for place in api.places.get() ]
+allPlaces = api.places.get()
 
 # Create one element
-place = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
+aPlace = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 # Update it ...
-place = api.place(place.name).update({"address":"A new address for Eat at Joe's"})
+aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
 
 # Delete it ...
-api.place(place.name).delete()
+api.place(aPlace).delete()
 
 # Delete all ...
-[ api.place(name).delete() for name in allPlaceNames ]
+[ api.place(aPlace).delete() for name in allPlaceNames ]
 ```
 
 #### Scala 
@@ -71,17 +71,17 @@ Same example in `scala` ...
 val api = rapido.client("http://at.home:1337/rest");
 
 // Retrieve all place names
-val allPlaceNames = for(place <- api.places.get()) yield place.name
+val allPlaces = api.places.get()
 
 // Create one element
-val place = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
+val aPlace = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 // Update it ...
-val place = api.place(place.name).update({"address":"A new address for Eat at Joe's"})
+val aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
 
 //Delete it ...
-api.place(place.name).delete()
+api.place(aPlace).delete()
 
 //Delete all ...
-for(name <- allPlaceNames) yield api.place(name).delete()
+for(aPlace <- allPlaceNames) yield api.place(aPlace).delete()
 ```
