@@ -16,19 +16,20 @@ Each service can be viewed as a function applied to a triplet (path,method,input
 and produces an output as a result.
 
 ```
+type Error { code:Int, reason:String }
 type Address { address:String }
 type Place extends Address { name:String }
 type Empty {}
 
 model places {
-    list   GET            => List[Place]
-    create POST   Place   => Place | Error
+    list   GET            => Array[Place]
+    create POST   Place   => Place or Error
 }
 
 model place {
-    get    GET            => Place | Error
-    update PUT    Address => Place | Error
-    delete DELETE         => Empty | Error
+    get    GET            => Place or Error
+    update PUT    Address => Place or Error
+    delete DELETE         => Empty or Error
 }
 
 route places         [/places]
