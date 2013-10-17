@@ -20,34 +20,41 @@ type Address { path:String }
 type Place extends Address { name:String }
 type Empty {}
 
-service places {
+model places {
     GET                 => List[Place]
     POST    Place       => Place | Error
 }
 
-service template {
+model place {
     GET                 => Place | Error
-    PUT     Place       => Place | Error
+    PUT     Address     => Place | Error
     DELETE              => Empty | Error
 }
 
-route templates [/templates]
-route template  [/templates/<id:String>]
+route places    [/places]
+route place(name:String) [/places/<name>]
 ```
 
-## Python API
-
-Based on the previous declaration a `python` example can be proposed.
+Once such specification is done client API can be automatically generated targeting languages
+like Scala, Java, Javascript and Python. For instance based on the previous declaration a `python` 
+example can be proposed.
 
 ``` python
 # Create the service defining the rest root path
-services = service.get("http://myserver/rest");
+api = rest.client("http://myserver/rest");
 
-# Retrieve all elements
-descriptions = [ element.get() for element in service.templates.get() ]
+# Retrieve all place names
+allPlaceNames = [ place.name for place in api.places.get() ]
 
 # Create one element
-template service.templates.post({path:"a/b/c"})
+place = api.places.post({name:"Eat at Joe's",address:'Somewhere ...})
 
-[ element.get() for element in service.templates.delete() ]
+# Update it ...
+place = api.place(place.name).update({address:"A new address for Eat at Joe's"})
+
+# Delete it ...
+api.place(place.name).delete()
+
+# Delete all ...
+[ api.place(name).delete() for name in allPlaceNames ]
 ```
