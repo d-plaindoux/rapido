@@ -53,7 +53,7 @@ allPlaces = api.places.get()
 aPlace = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 # Update it ...
-aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
+aPlace = api.place(aPlace).put({"address":"A new address for Eat at Joe's"})
 
 # Delete it ...
 api.place(aPlace).delete()
@@ -77,7 +77,7 @@ val allPlaces = api.places.get()
 val aPlace = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 // Update it ...
-val aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
+val aPlace = api.place(aPlace).put({"address":"A new address for Eat at Joe's"})
 
 //Delete it ...
 api.place(aPlace).delete()
