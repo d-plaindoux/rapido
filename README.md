@@ -44,7 +44,7 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-api = rapido.client("http://myserver/rest");
+api = rapido.client("http://at.home:1337/rest");
 
 # Retrieve all place names
 allPlaceNames = [ place.name for place in api.places.get() ]
@@ -68,7 +68,7 @@ Same example in `scala` ...
 
 ``` scala
 // Create the service defining the rest root path
-val api = rapido.client("http://myserver/rest");
+val api = rapido.client("http://at.home:1337/rest");
 
 // Retrieve all place names
 val allPlaceNames = for(place <- api.places.get()) yield place.name
