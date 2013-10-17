@@ -36,25 +36,52 @@ route place(name:String) [/places/<name>]
 ```
 
 Once such specification is done client API can be automatically generated targeting languages
-like Scala, Java, Javascript and Python. For instance based on the previous declaration a `python` 
-example can be proposed.
+like Scala, Java, Javascript and Python. 
+
+#### Python
+
+For instance based on the previous declaration a `python` example can be proposed.
 
 ``` python
 # Create the service defining the rest root path
-api = rest.client("http://myserver/rest");
+api = rapido.client("http://myserver/rest");
 
 # Retrieve all place names
 allPlaceNames = [ place.name for place in api.places.get() ]
 
 # Create one element
-place = api.places.post({name:"Eat at Joe's",address:'Somewhere ...})
+place = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
 
 # Update it ...
-place = api.place(place.name).update({address:"A new address for Eat at Joe's"})
+place = api.place(place.name).update({"address":"A new address for Eat at Joe's"})
 
 # Delete it ...
 api.place(place.name).delete()
 
 # Delete all ...
 [ api.place(name).delete() for name in allPlaceNames ]
+```
+
+#### Scala 
+
+Same example in `scala` ...
+
+``` scala
+// Create the service defining the rest root path
+val api = rapido.client("http://myserver/rest");
+
+// Retrieve all place names
+val allPlaceNames = for(place <- api.places.get()) yield place.name
+
+// Create one element
+val place = api.places.post({"name":"Eat at Joe's","address":"Somewhere ..."})
+
+// Update it ...
+val place = api.place(place.name).update({"address":"A new address for Eat at Joe's"})
+
+//Delete it ...
+api.place(place.name).delete()
+
+//Delete all ...
+for(name <- allPlaceNames) yield api.place(name).delete()
 ```
