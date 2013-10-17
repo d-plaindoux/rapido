@@ -16,7 +16,7 @@ Each service can be viewed as a function applied to a triplet (path,method,input
 and produces an output as a result.
 
 ```
-type Address { path:String }
+type Address { address:String }
 type Place extends Address { name:String }
 type Empty {}
 
@@ -31,7 +31,7 @@ model place {
     delete DELETE         => Empty | Error
 }
 
-route places    [/places]
+route places         [/places]
 route place(p:Place) [/places/<p.name>]
 ```
 
