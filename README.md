@@ -51,10 +51,10 @@ api = rapido.client("http://at.home:1337/rest");
 allPlaces = api.places.list()
 
 # Create one element
-aPlace = api.places.create({"name":"Eat at Joe's","address":"Somewhere ..."})
+aPlace = api.places.create(name="Eat at Joe's",address="Somewhere ...")
 
 # Update it ...
-aPlace = api.place(aPlace).update({"address":"A new address for Eat at Joe's"})
+aPlace = api.place(aPlace).update(address="A new address for Eat at Joe's")
 
 # Delete it ...
 api.place(aPlace).delete()
