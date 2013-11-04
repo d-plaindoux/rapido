@@ -1,11 +1,11 @@
 rapido
 ======
 
-A restlet API design tool 
+A rest API design tool 
 
 ## Introduction
 
-The *rAPIdo* project proposes a specific declarative language dedicated client side
+The *rAPIdo* project proposes a specific declarative language dedicated to client side
 rest service specification. Such specification describes:
 - the resource path
 - the method i.e. `GET`, `POST`, `PUT` and `DELETE`
