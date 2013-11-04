@@ -22,7 +22,7 @@ type Place extends Address { name:String }
 type Empty {}
 
 model places {
-    list   GET            => Array[Place]
+    list   GET            => Set[Place]
     create POST   Place   => Place or Error
 }
 
