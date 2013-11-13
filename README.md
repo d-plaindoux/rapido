@@ -21,12 +21,12 @@ type Address { address:String }
 type Place extends Address { name:String }
 type Empty {}
 
-model places {
-    list   GET            => Set[Place]
+data places {
+    list   GET            => Place[]
     create POST   Place   => Place or Error
 }
 
-model place {
+date place {
     get    GET            => Place or Error
     update PUT    Address => Place or Error
     delete DELETE         => Empty or Error
@@ -34,6 +34,8 @@ model place {
 
 route places         [/places]
 route place(p:Place) [/places/<p.name>]
+
+service PlaceRest provides places, place
 ```
 
 Once such specification is done client API can be automatically generated targeting languages
@@ -45,7 +47,7 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-api = rapido.client("http://at.home:1337/rest");
+api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 
 # Retrieve all place names
 allPlaces = api.places.list()
@@ -69,7 +71,7 @@ Same example in `scala` ...
 
 ``` scala
 // Create the service defining the rest root path
-val api = rapido.client("http://at.home:1337/rest");
+api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 
 // Retrieve all place names
 val allPlaces = api.places.list()
