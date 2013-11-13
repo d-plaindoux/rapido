@@ -22,7 +22,7 @@ type Place extends Address { name:String }
 type Empty {}
 
 data places {
-    list            GET => Place[]
+    list            GET    => Place[]
     create(Place)   POST   => Place or Error
 }
 
