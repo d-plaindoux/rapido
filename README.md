@@ -22,14 +22,14 @@ type Place extends Address { name:String }
 type Empty {}
 
 data places {
-    list   GET            => Place[]
-    create POST   Place   => Place or Error
+    list            GET => Place[]
+    create(Place)   POST   => Place or Error
 }
 
 date place {
-    get    GET            => Place or Error
-    update PUT    Address => Place or Error
-    delete DELETE         => Empty or Error
+    get             GET    => Place or Error
+    update(Address) PUT    => Place or Error
+    delete          DELETE => Empty or Error
 }
 
 route places         [/places]
