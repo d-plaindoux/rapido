@@ -62,7 +62,7 @@ aPlace = api.place(aPlace).update(dict(address="A new address for Eat at Joe's")
 api.place(aPlace).delete()
 
 # Delete all ...
-[ api.place(aPlace).delete() for name in allPlaceNames ]
+[ api.place(aPlace).delete() for name in allPlace ]
 ```
 
 #### Scala 
@@ -86,5 +86,5 @@ val aPlace = api.place(aPlace).update(Map("address" -> "A new address for Eat at
 api.place(aPlace).delete()
 
 //Delete all ...
-for(aPlace <- allPlaceNames) yield api.place(aPlace).delete()
+for(aPlace <- allPlace) yield api.place(aPlace).delete()
 ```
