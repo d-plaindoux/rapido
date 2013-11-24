@@ -71,7 +71,7 @@ Same example in `scala` ...
 
 ``` scala
 // Create the service defining the rest root path
-api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
+val api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 
 // Retrieve all place names
 val allPlaces = api.places.list()
