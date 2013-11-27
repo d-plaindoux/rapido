@@ -53,7 +53,7 @@ api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 allPlaces = api.places.list()
 
 # Create one element
-aPlace = api.places.create(dict(name="Eat at Joe's",address="Somewhere ..."))
+aPlace = api.places.create(dict(name="Eat at Joe's", address="Somewhere ..."))
 
 # Update it ...
 aPlace = api.place(aPlace).update(dict(address="A new address for Eat at Joe's"))
@@ -77,7 +77,7 @@ val api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 val allPlaces = api.places.list()
 
 // Create one element
-val aPlace = api.places.create(Map("name" -> "Eat at Joe's","address" -> "Somewhere ..."))
+val aPlace = api.places.create(Map("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
 
 // Update it ...
 val aPlace = api.place(aPlace).update(Map("address" -> "A new address for Eat at Joe's"))
