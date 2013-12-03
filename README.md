@@ -17,21 +17,21 @@ and produces an output as a result. Such design gives a language independent for
 wich can be generated to multiple targeted languages. 
 
 ```
-type Error { code:Int, reason:String }
-type Address { address:String }
-type Place extends Address with { name:String }
+type Error  = { code:Int, reason:String }
+type Address = { address:String }
+type Place = Address and { name:String }
 type Places = Place[]
-type Empty {}
+type Empty = {}
 
 service places {
-    list(): Places
-    create(Place): Place or Error 
+	list:   GET        => Places
+    create: POST Place => Place or Error 
 }
 
 service place {
-    get             GET    => Place or Error
-    update(Address) PUT    => Place or Error
-    delete          DELETE => Empty or Error
+   	get:    GET         => Place or Error
+   	update: PUT Address => Place or Error
+   	delete: DELETE      => Empty or Error
 }
 
 route places         [/places]
@@ -69,7 +69,8 @@ client.place(aPlace).delete()
 
 #### Scala 
 
-Same example in `scala` ...
+Same example in `scala` (may be we have to rely on asynchronous layer in order
+to have a better integration with reactive programming approach).
 
 ``` scala
 // Create the service defining the rest root path

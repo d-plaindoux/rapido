@@ -1,6 +1,6 @@
 package smallibs.rapido
 
-sealed trait Entity 
+trait Entity 
 case class Type(values: Map[String,Type]) extends Entity
 case class Data(values: Map[String,DataEntry]) extends Entity 
 case class Route() extends Entity
