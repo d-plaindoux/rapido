@@ -9,24 +9,26 @@ The *rAPIdo* project proposes a specific declarative language dedicated to clien
 rest service specification. Such specification describes:
 - the resource path
 - the method i.e. `GET`, `POST`, `PUT` and `DELETE`
-- the input type i.e. JSON or ...
-- the output type i.e. JSON or ...
+- the input type
+- the output type
 
 Each service can be viewed as a function applied to a triplet (path,method,input)
-and produces an output as a result.
+and produces an output as a result. Such design gives a language independent formalism
+wich can be generated to multiple targeted languages. 
 
 ```
 type Error { code:Int, reason:String }
 type Address { address:String }
-type Place extends Address { name:String }
+type Place extends Address with { name:String }
+type Places = Place[]
 type Empty {}
 
-data places {
-    list            GET    => Place[]
-    create(Place)   POST   => Place or Error
+service places {
+    list(): Places
+    create(Place): Place or Error 
 }
 
-date place {
+service place {
     get             GET    => Place or Error
     update(Address) PUT    => Place or Error
     delete          DELETE => Empty or Error
@@ -35,11 +37,11 @@ date place {
 route places         [/places]
 route place(p:Place) [/places/<p.name>]
 
-service PlaceRest provides places, place
+client PlaceRest provides places, place
 ```
 
 Once such specification is done client API can be automatically generated targeting languages
-like Scala, Java, Javascript and Python. 
+like Scala, Java, Javascript, Python etc. 
 
 #### Python
 
@@ -47,22 +49,22 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
+client = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 
 # Retrieve all place names
-allPlaces = api.places.list()
+allPlaces = client.places.list()
 
 # Create one element
-aPlace = api.places.create(dict(name="Eat at Joe's", address="Somewhere ..."))
+aPlace = client.places.create(dict(name="Eat at Joe's", address="Somewhere ..."))
 
 # Update it ...
-aPlace = api.place(aPlace).update(dict(address="A new address for Eat at Joe's"))
+aPlace = client.place(aPlace).update(dict(address="A new address for Eat at Joe's"))
 
 # Delete it ...
-api.place(aPlace).delete()
+client.place(aPlace).delete()
 
 # Delete all ...
-[ api.place(aPlace).delete() for name in allPlace ]
+[ client.place(aPlace).delete() for name in allPlace ]
 ```
 
 #### Scala 
@@ -74,17 +76,17 @@ Same example in `scala` ...
 val api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
 
 // Retrieve all place names
-val allPlaces = api.places.list()
+val allPlaces = client.places.list()
 
 // Create one element
-val aPlace = api.places.create(Map("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
+val aPlace = client.places.create(Map("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
 
 // Update it ...
-val aPlace = api.place(aPlace).update(Map("address" -> "A new address for Eat at Joe's"))
+val aPlace = client.place(aPlace).update(Map("address" -> "A new address for Eat at Joe's"))
 
 //Delete it ...
-api.place(aPlace).delete()
+client.place(aPlace).delete()
 
 //Delete all ...
-for(aPlace <- allPlace) yield api.place(aPlace).delete()
+for(aPlace <- allPlace) yield client.place(aPlace).delete()
 ```
