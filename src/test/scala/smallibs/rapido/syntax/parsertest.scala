@@ -3,7 +3,7 @@ package smallibs.rapido.syntax
 import org.specs2.mutable._
 import smallibs.rapido.ast._
 
-object ArithmeticSpec extends Specification {
+object RapidoSpec extends Specification {
   "Parser" should {
     "provides a number type" in {
       val parsed = Parser.parseAll(Parser.integer, "Number")
