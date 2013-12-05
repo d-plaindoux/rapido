@@ -17,7 +17,7 @@ and produces an output as a result. Such design gives a language independent for
 wich can be generated to multiple targeted languages. 
 
 ```
-type Error  = { code:Int, reason:String }
+type Error  = { code:Int; reason:String }
 type Address = { address:String }
 type Place = Address and { name:String }
 type Places = Place[]

@@ -13,3 +13,5 @@ case object TypeBoolean extends Type
 case object TypeString extends Type
 
 case object TypeNumber extends Type
+
+// Builders
