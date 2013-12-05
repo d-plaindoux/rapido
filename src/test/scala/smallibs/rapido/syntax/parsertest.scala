@@ -5,31 +5,31 @@ import smallibs.rapido.ast._
 
 object ArithmeticSpec extends Specification {
   "Parser" should {
-    "provide a TypeNumber" in {
+    "provides a number type" in {
       val parsed = Parser.parseAll(Parser.integer, "Number")
       parsed.get mustEqual TypeNumber
     }
-    "provide a TypeString" in {
+    "provides a string type" in {
       val parsed = Parser.parseAll(Parser.string, "String")
       parsed.get mustEqual TypeString
     }
-    "provide a TypeBoolean" in {
+    "provides a boolean type" in {
       val parsed = Parser.parseAll(Parser.boolean, "Boolean")
       parsed.get mustEqual TypeBoolean
     }
-    "provide a attribute" in {
+    "provides an attribute type" in {
       val parsed  = Parser.parseAll(Parser.attribute, "valid : Boolean")
       parsed.get mustEqual ("valid", TypeBoolean)
     }
-    "provide an empty data object" in {
+    "provides an empty data object type" in {
       val parsed  = Parser.parseAll(Parser.dataObject, "{}")
       parsed.get mustEqual TypeObject(Map())
     }
-    "provide a data object with one attribute" in {
+    "provides a data object type with one attribute" in {
       val parsed  = Parser.parseAll(Parser.dataObject, "{ valid : Boolean }")
       parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
     }
-    "provide a data object with two attributes" in {
+    "provides a data object type with two attributes" in {
       val parsed  = Parser.parseAll(Parser.dataObject, "{ valid : Boolean ; content : {} }")
       val expected: TypeObject = TypeObject(Map("valid" -> TypeBoolean, "content" -> TypeObject(Map())))
       parsed.get mustEqual expected
