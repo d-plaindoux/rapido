@@ -1,9 +1,10 @@
 package smallibs.rapido.syntax
 
-import scala.util.parsing.combinator._
+import scala.util.matching.Regex
+import scala.util.parsing.combinator.JavaTokenParsers
 import smallibs.rapido.ast._
 
-object Parser extends JavaTokenParsers {
+object RapidoParser extends JavaTokenParsers {
 
   //
   // Public behaviors
@@ -16,12 +17,28 @@ object Parser extends JavaTokenParsers {
 
   def serviceSpecification: Parser[Entity] =
     ("service" ~> ident <~ "{") ~ (rep(serviceDefinition) <~ "}") ^^ {
-      case n ~ l => ServiceEntity(n, Services(l))
+      case n ~ l => ServiceEntity(n, l)
+    }
+
+  def routeSpecification: Parser[Entity] =
+    ("route" ~> ident) ~ ("(" ~> repsep(routeParameter, ",") <~ ")").? ~ path ^^ {
+      case name ~ None ~ path => RouteEntity(name, Nil, path)
+      case name ~ Some(params) ~ path => RouteEntity(name, params, path)
+    }
+
+  def clientSpecification: Parser[Entity] =
+    ("client" ~> ident) ~ ("provides" ~> repsep(ident, ",")) ^^ {
+      case n ~ l => ClientEntity(n,l)
     }
 
   //
-  // Internal public behaviors
+  // Internal behaviors
   //
+
+  def routeParameter: Parser[(String, Type)] =
+    (ident <~ ":") ~ typeDefinition ^^ {
+      case n ~ t => (n, t)
+    }
 
   def typeDefinition: Parser[Type] =
     (atomic | extensible) ~ ("[" ~ "]").* ^^ {
@@ -32,14 +49,10 @@ object Parser extends JavaTokenParsers {
 
   def serviceDefinition: Parser[Service] =
     (ident <~ ":") ~ restAction ~ (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ^^ {
-      case name ~ action ~ in ~ out ~ err => Service(name,action,ServiceType(in,out,err))
+      case name ~ action ~ in ~ out ~ err => Service(name, action, ServiceType(in, out, err))
     }
 
-  //
-  // Private behaviors
-  //
-
-  private def restAction: Parser[Operation] =
+  def restAction: Parser[Operation] =
     ("GET" | "POST" | "PUT" | "DELETE") ^^ {
       case "GET" => GET
       case "POST" => POST
@@ -47,49 +60,65 @@ object Parser extends JavaTokenParsers {
       case "DELETE" => DELETE
     }
 
-  private class Terminal(s: String) {
+  class Terminal(s: String) {
     def produces(t: Type): Parser[Type] = s ^^ {
       _ => t
     }
   }
 
-  private object Terminal {
+  object Terminal {
     def apply(s: String): Terminal = new Terminal(s)
   }
 
-  private def integer: Parser[Type] =
+  def number: Parser[Type] =
     Terminal("Number") produces TypeNumber
 
-  private def string: Parser[Type] =
+  def string: Parser[Type] =
     Terminal("String") produces TypeString
 
-  private def boolean: Parser[Type] =
+  def boolean: Parser[Type] =
     Terminal("Boolean") produces TypeBoolean
 
-  private def identified: Parser[Type] =
+  def identified: Parser[Type] =
     ident ^^ {
       s => TypeIdentifier(s)
     }
 
-  private def attribute: Parser[(String, Type)] =
+  def attribute: Parser[(String, Type)] =
     (ident <~ ":") ~ typeDefinition ^^ {
       case i ~ t => (i, t)
     }
 
-  private def record: Parser[Type] =
+  def record: Parser[Type] =
     "{" ~> repsep(attribute, ";") <~ "}" ^^ {
       l => TypeObject(l)
     }
 
-  private def atomic: Parser[Type] =
-    (integer | string | boolean) ^^ {
+  def atomic: Parser[Type] =
+    (number | string | boolean) ^^ {
       t => t
     }
 
-  private def extensible: Parser[Type] =
+  def extensible: Parser[Type] =
     (record | identified) ~ ("with" ~> extensible).* ^^ {
       case t ~ l => l.foldLeft(t) {
         (r, t) => TypeComposed(r, t)
       }
     }
+
+  def path: Parser[Path] =
+    "[" ~> repsep(variableEntry | staticEntry, "/") <~ "]" ^^ {
+      l => Path(for (e <- l if e != StaticLevel("")) yield e)
+    }
+
+  def staticEntry: Parser[PathEntry] =
+    regex(new Regex("[^/\\]]*")) ^^ {
+      s => StaticLevel(s)
+    }
+
+  def variableEntry: Parser[PathEntry] =
+    "<" ~> repsep(ident, ".") <~ ">" ^^ {
+      s => DynamicLevel(s)
+    }
+
 }
