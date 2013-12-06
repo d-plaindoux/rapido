@@ -17,15 +17,15 @@ and produces an output as a result. Such design gives a language independent for
 wich can be generated to multiple targeted languages. 
 
 ```
-type Error  = { code:Int; reason:String }
+type Error = { code:Int; reason:String }
 type Address = { address:String }
-type Place = Address and { name:String }
+type Place = Address with { name:String }
 type Places = Place[]
 type Empty = {}
 
 service places {
 	list:   GET        => Places
-    create: POST Place => Place or Error 
+    create: POST Place => Place or Error
 }
 
 service place {
@@ -37,7 +37,7 @@ service place {
 route places         [/places]
 route place(p:Place) [/places/<p.name>]
 
-client PlaceRest provides places, place
+client placeRest provides places, place
 ```
 
 Once such specification is done client API can be automatically generated targeting languages
@@ -49,7 +49,7 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-client = rapido.client(PlacesRest).at("http://at.home:1337/rest");
+client = client.placesRest("http://at.home:1337/rest");
 
 # Retrieve all place names
 allPlaces = client.places.list()
@@ -74,7 +74,7 @@ to have a better integration with reactive programming approach).
 
 ``` scala
 // Create the service defining the rest root path
-val api = rapido.client(PlacesRest).at("http://at.home:1337/rest");
+val api = client.placesRest("http://at.home:1337/rest");
 
 // Retrieve all place names
 val allPlaces = client.places.list()
