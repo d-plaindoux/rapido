@@ -37,7 +37,7 @@ service place {
 route places         [/places]
 route place(p:Place) [/places/<p.name>]
 
-client placeRest provides places, place
+client placesRest provides places, place
 ```
 
 Once such specification is done client API can be automatically generated targeting languages
