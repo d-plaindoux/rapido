@@ -74,7 +74,7 @@ to have a better integration with reactive programming approach).
 
 ``` scala
 // Create the service defining the rest root path
-val api = client.placesRest("http://at.home:1337/rest");
+val client = client.placesRest("http://at.home:1337/rest");
 
 // Retrieve all place names
 val allPlaces = client.places.list()

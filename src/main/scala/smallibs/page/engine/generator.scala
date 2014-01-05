@@ -1,23 +1,21 @@
 package smallibs.page.engine
 
-import scala.tools.nsc.doc.html.page.Template
-import smallibs.rapido.ast._
+import smallibs.page.Bean
+import smallibs.page.ast.{Text, Template}
+
+class Engine(bean: Bean) {
+
+  def generate(template: Template): String =
+    template match {
+      case Text(t) => t
+      case _ => ???
+    }
+
+  def engine(path: List[String]): Engine =
+    Engine(path.foldLeft(bean)((bean, b) => bean get b))
+
+}
 
 object Engine {
-
-  def generate(specification: List[Entity], template: Template): String =
-    ""
-
-  def generate(specification: ServiceEntity, template: Template): String =
-    ""
-
-  def generate(specification: TypeEntity, template: Template): String =
-    ""
-
-  def generate(specification: RouteEntity, template: Template): String =
-    ""
-
-  def generate(specification: ClientEntity, template: Template): String =
-    ""
-
+  def apply(bean: Bean): Engine = new Engine(bean)
 }
