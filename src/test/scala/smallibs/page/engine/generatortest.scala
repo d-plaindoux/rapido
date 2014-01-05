@@ -21,8 +21,13 @@ case class Associations(map: Map[String, DataProvider]) extends DataProvider {
   def set(name: String, bean: DataProvider): Unit = ???
 }
 
-object PageSpec extends Specification {
+object EngineTest extends Specification {
   "Generator should" should {
+
+    "provides a result with an empty" in {
+      val engine = Engine(Associations(Map()))
+      engine.generate(Empty) mustEqual Success("")
+    }
 
     "provides a result with an input text" in {
       val engine = Engine(Associations(Map()))

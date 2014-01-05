@@ -10,6 +10,15 @@ object RapidoParser extends JavaTokenParsers {
   // Public behaviors
   //
 
+  def specification: Parser[Entity] =
+    (typeSpecification
+      | serviceSpecification
+      | serviceDefinition
+      | routeSpecification
+      | clientSpecification) ^^ {
+      case t: Entity => t
+    }
+
   def typeSpecification: Parser[Entity] =
     ("type" ~> ident <~ "=") ~ typeDefinition ^^ {
       case n ~ t => TypeEntity(n, t)
@@ -28,7 +37,7 @@ object RapidoParser extends JavaTokenParsers {
 
   def clientSpecification: Parser[Entity] =
     ("client" ~> ident) ~ ("provides" ~> repsep(ident, ",")) ^^ {
-      case n ~ l => ClientEntity(n,l)
+      case n ~ l => ClientEntity(n, l)
     }
 
   //

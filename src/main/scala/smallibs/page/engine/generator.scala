@@ -12,6 +12,7 @@ class Engine(bean: DataProvider) {
 
   def generate(template: Template): Try[String] =
     template match {
+      case Empty => Success("")
       case Text(t) => Success(t)
       case AnIdent(name) =>
         bean get name match {

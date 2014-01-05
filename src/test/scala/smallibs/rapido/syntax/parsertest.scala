@@ -2,6 +2,7 @@ package smallibs.rapido.syntax
 
 
 //import org.specs2.mutable._
+
 import org.specs2.mutable._
 import smallibs.rapido.ast._
 
@@ -186,8 +187,31 @@ object RapidoSpec extends Specification {
 
     "provides a client definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.clientSpecification, "client foo provides bar,baz")
-      parsed.get mustEqual ClientEntity("foo", List("bar","baz"))
+      parsed.get mustEqual ClientEntity("foo", List("bar", "baz"))
     }
+
+    "provides a type definition specification" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.specification, "type Action = { performed : Boolean }")
+      parsed.get mustEqual TypeEntity("Action", TypeObject(List("performed" -> TypeBoolean)))
+    }
+
+    "provides a service definition specification" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.specification, "service Test { list : GET => Action add : POST Param => Action }")
+      parsed.get mustEqual ServiceEntity("Test",
+        List(Service("list", GET, ServiceType(None, TypeIdentifier("Action"), None)),
+          Service("add", POST, ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
+    }
+
+    "provides a static route definition specification" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.specification, "route places [places]")
+      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places"))))
+    }
+
+    "provides a client definition specification" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.specification, "client foo provides bar,baz")
+      parsed.get mustEqual ClientEntity("foo", List("bar", "baz"))
+    }
+
 
   }
 }

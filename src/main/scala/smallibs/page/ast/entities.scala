@@ -16,6 +16,8 @@ case class ARepetition(name: String, content: Template) extends Template
 // Intrinsic
 //
 
+case object Empty extends Template
+
 case class Text(text: String) extends Template
 
 case class Sequence(sequence: List[Template]) extends Template
