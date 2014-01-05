@@ -1,9 +1,9 @@
 package smallibs.page
 
-trait Bean {
+trait DataProvider {
 
-  def get(name: String): Bean
+  def get(name: String): Option[DataProvider]
 
-  def set(name: String, bean: Bean): Unit
+  def set(name: String, bean: DataProvider): Unit
 
 }
