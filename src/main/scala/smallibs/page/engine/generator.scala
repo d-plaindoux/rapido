@@ -8,21 +8,19 @@ import scala.util.Try
 import smallibs.page.DataProvider
 import smallibs.page.ast._
 
-class Engine(bean: DataProvider) {
+class Engine(data: DataProvider) {
 
   def generate(template: Template): Try[String] =
     template match {
-      case Empty => Success("")
+      case NoTemplate => Success("")
       case Text(t) => Success(t)
-      case AnIdent(name) =>
-        bean get name match {
+      case Value(None) =>
+        Success(data.toString)
+      case Value(Some(name)) =>
+        data get name
+        data get name match {
           case None => Failure(new NoSuchElementException(name))
           case Some(value) => Success(value.toString)
-        }
-      case AString(name) =>
-        bean get name match {
-          case None => Failure(new NoSuchElementException(name))
-          case Some(value) => Success('"' + value.toString + '"')
         }
       case Sequence(seq) => {
         @tailrec
@@ -38,7 +36,18 @@ class Engine(bean: DataProvider) {
           }
         generate_list("", seq)
       }
-
+      case Repetition(None, content) =>
+        data.values.foldLeft[Try[String]](Success("")) {
+          (result: Try[String], data: DataProvider) =>
+            for (v <- result;
+                 c <- Engine(data).generate(content))
+            yield v + c
+        }
+      case Repetition(Some(name), content) =>
+        data.get(name) match {
+          case None => Failure(new NoSuchElementException(name))
+          case Some(data) => Engine(data).generate(Repetition(None, content))
+        }
     }
 
   def engine(path: List[String]): Try[Engine] = {
@@ -55,7 +64,7 @@ class Engine(bean: DataProvider) {
               engine_with_bean(path, bean)
           }
       }
-    engine_with_bean(path, bean)
+    engine_with_bean(path, data)
   }
 
 }

@@ -1,54 +1,68 @@
 package smallibs.page.engine
 
 //import org.specs2.mutable._
-
 import org.specs2.mutable._
 import scala.util.Success
-import smallibs.page.DataProvider
+import smallibs.page._
 import smallibs.page.ast._
-
-case class Value(value: String) extends DataProvider {
-  def get(name: String): Option[DataProvider] = None
-
-  def set(name: String, bean: DataProvider): Unit = ???
-
-  override def toString: String = value
-}
-
-case class Associations(map: Map[String, DataProvider]) extends DataProvider {
-  def get(name: String): Option[DataProvider] = map get name
-
-  def set(name: String, bean: DataProvider): Unit = ???
-}
 
 object EngineTest extends Specification {
   "Generator should" should {
 
     "provides a result with an empty" in {
-      val engine = Engine(Associations(Map()))
-      engine.generate(Empty) mustEqual Success("")
+      val engine = Engine(Provider.empty)
+      engine.generate(NoTemplate) mustEqual Success("")
     }
 
     "provides a result with an input text" in {
-      val engine = Engine(Associations(Map()))
+      val engine = Engine(Provider.empty)
       engine.generate(Text("Hello, World")) mustEqual Success("Hello, World")
     }
 
     "provides a result with an input Ident" in {
-      val engine = Engine(Associations(Map("hello" -> Value("World"))))
-      engine.generate(AnIdent("hello")) mustEqual Success("World")
-    }
-
-    "provides a result with an input String" in {
-      val engine = Engine(Associations(Map("hello" -> Value("World"))))
-      engine.generate(AString("hello")) mustEqual Success("\"World\"")
+      val engine = Engine(Provider.map(Map("hello" -> Provider.constant("World"))))
+      engine.generate(Value(Some("hello"))) mustEqual Success("World")
     }
 
     "provides a result with an input sequence" in {
-      val engine = Engine(Associations(Map("hello" -> Value("Hello"), "world" -> Value("World"))))
+      val engine = Engine(Provider.map(Map(
+        "hello" -> Provider.constant("Hello"),
+        "world" -> Provider.constant("World")
+      )))
       engine.generate(
-        Sequence(List(AnIdent("hello"), Text(", "), AnIdent("world"), Text("!")))
+        Sequence(List(Value(Some("hello")), Text(", "), Value(Some("world")), Text("!")))
       ) mustEqual Success("Hello, World!")
+    }
+
+    "provides a result with an anonymous repeatable" in {
+      val engine = Engine(Provider.map(Map(
+        "0" -> Provider.constant("Hello"),
+        "1" -> Provider.constant("World"))
+      ))
+      engine.generate(
+        Repetition(None, Sequence(List(Text(" - "), Value(None))))
+      ) mustEqual Success(" - Hello - World")
+    }
+
+    "provides a result with a named repeatable" in {
+      val engine = Engine(Provider.map(Map(
+        "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
+      )))
+      engine.generate(
+        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(None))))
+      ) mustEqual Success(" - Hello - World")
+    }
+
+    "provides a result with a named complex repeatable" in {
+      val engine = Engine(Provider.map(Map(
+        "keys" ->
+          Provider.map(Map(
+            "0" -> Provider.map(Map("name" -> Provider.constant("Hello"))),
+            "1" -> Provider.map(Map("name" -> Provider.constant("World")))))
+      )))
+      engine.generate(
+        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(Some("name")))))
+      ) mustEqual Success(" - Hello - World")
     }
   }
 }

@@ -13,7 +13,7 @@ object PageParser extends JavaTokenParsers {
   override def skipWhitespace: Boolean = false
 
   def aTemplate: Parser[Template] =
-    rep(aText | anIdent | aString | aRepetition) ^^ {
+    (aText | aValue | aRepetition).* ^^ {
       simplify
     }
 
@@ -22,37 +22,32 @@ object PageParser extends JavaTokenParsers {
   //
 
   private def anInnerTemplate: Parser[Template] =
-    rep(anInnerText | anIdent | aString | aRepetition) ^^ {
+    rep(anInnerText | aValue | aRepetition) ^^ {
       simplify
     }
 
   private def aText: Parser[Template] =
     regex(new Regex("[^@]+")) ^^ {
-      s => Text(s)
+      Text
     }
 
   private def anInnerText: Parser[Template] =
     regex(new Regex("[^@\\]]+")) ^^ {
-      s => Text(s)
+      Text
     }
 
-  private def anIdent: Parser[Template] =
-    "@ident:" ~> ident ^^ {
-      s => AnIdent(s)
-    }
-
-  private def aString: Parser[Template] =
-    "@string:" ~> ident ^^ {
-      s => AString(s)
+  private def aValue: Parser[Template] =
+    "@value" ~> (":" ~> ident).? ^^ {
+      Value
     }
 
   private def aRepetition: Parser[Template] =
-    ("@rep:" ~> ident) ~ ("[" ~> anInnerTemplate <~ "]") ^^ {
-      case s ~ t => ARepetition(s, t)
+    ("@rep" ~> (":" ~> ident).?) ~ ("[" ~> anInnerTemplate <~ "]") ^^ {
+      case s ~ t => Repetition(s, t)
     }
 
   private def simplify: Function[List[Template], Template] = {
-    case Nil => Empty // Simplification
+    case Nil => NoTemplate // Simplification
     case List(t) => t // Simplification
     case l => Sequence(l)
   }

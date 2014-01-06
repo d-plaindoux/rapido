@@ -11,13 +11,7 @@ object RapidoParser extends JavaTokenParsers {
   //
 
   def specification: Parser[Entity] =
-    (typeSpecification
-      | serviceSpecification
-      | serviceDefinition
-      | routeSpecification
-      | clientSpecification) ^^ {
-      case t: Entity => t
-    }
+    (typeSpecification | serviceSpecification | routeSpecification | clientSpecification)
 
   def typeSpecification: Parser[Entity] =
     ("type" ~> ident <~ "=") ~ typeDefinition ^^ {
@@ -25,7 +19,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def serviceSpecification: Parser[Entity] =
-    ("service" ~> ident <~ "{") ~ (rep(serviceDefinition) <~ "}") ^^ {
+    ("service" ~> ident <~ "{") ~ (serviceDefinition.* <~ "}") ^^ {
       case n ~ l => ServiceEntity(n, l)
     }
 
@@ -90,7 +84,7 @@ object RapidoParser extends JavaTokenParsers {
 
   def identified: Parser[Type] =
     ident ^^ {
-      s => TypeIdentifier(s)
+      TypeIdentifier
     }
 
   def attribute: Parser[(String, Type)] =
@@ -100,7 +94,7 @@ object RapidoParser extends JavaTokenParsers {
 
   def record: Parser[Type] =
     "{" ~> repsep(attribute, ";") <~ "}" ^^ {
-      l => TypeObject(l)
+      TypeObject
     }
 
   def atomic: Parser[Type] =
@@ -111,7 +105,7 @@ object RapidoParser extends JavaTokenParsers {
   def extensible: Parser[Type] =
     (record | identified) ~ ("with" ~> extensible).* ^^ {
       case t ~ l => l.foldLeft(t) {
-        (r, t) => TypeComposed(r, t)
+        TypeComposed
       }
     }
 
@@ -122,12 +116,12 @@ object RapidoParser extends JavaTokenParsers {
 
   def staticEntry: Parser[PathEntry] =
     regex(new Regex("[^/\\]]*")) ^^ {
-      s => StaticLevel(s)
+      StaticLevel
     }
 
   def variableEntry: Parser[PathEntry] =
     "<" ~> repsep(ident, ".") <~ ">" ^^ {
-      s => DynamicLevel(s)
+      DynamicLevel
     }
 
 }
