@@ -38,9 +38,8 @@ object EngineTest extends Specification {
 
     "provides a result with an anonymous repeatable" in {
       val template = PageParser.parseAll(PageParser.aTemplate, "@rep[ - @value]")
-      val engine = Engine(Provider.map(
-        "0" -> Provider.constant("Hello"),
-        "1" -> Provider.constant("World")
+      val engine = Engine(Provider.list(
+        Provider.constant("Hello"), Provider.constant("World")
       ))
       engine.generate(template.get) mustEqual Success(" - Hello - World")
     }
@@ -48,11 +47,7 @@ object EngineTest extends Specification {
     "provides a result with a named repeatable" in {
       val template = PageParser.parseAll(PageParser.aTemplate, "@rep:keys[ - @value]")
       val engine = Engine(Provider.map(
-        "keys" ->
-          Provider.map(
-            "0" -> Provider.constant("Hello"),
-            "1" -> Provider.constant("World")
-          )
+        "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
       ))
       engine.generate(template.get) mustEqual Success(" - Hello - World")
     }
@@ -61,9 +56,9 @@ object EngineTest extends Specification {
       val template = PageParser.parseAll(PageParser.aTemplate, "@rep:keys[ - @value:name]")
       val engine = Engine(Provider.map(
         "keys" ->
-          Provider.map(
-            "0" -> Provider.map("name" -> Provider.constant("Hello")),
-            "1" -> Provider.map("name" -> Provider.constant("World"))
+          Provider.list(
+            Provider.map("name" -> Provider.constant("Hello")),
+            Provider.map("name" -> Provider.constant("World"))
           )
       ))
       engine.generate(template.get) mustEqual Success(" - Hello - World")

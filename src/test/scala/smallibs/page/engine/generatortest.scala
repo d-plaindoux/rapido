@@ -35,9 +35,8 @@ object EngineTest extends Specification {
     }
 
     "provides a result with an anonymous repeatable" in {
-      val engine = Engine(Provider.map(
-        "0" -> Provider.constant("Hello"),
-        "1" -> Provider.constant("World")
+      val engine = Engine(Provider.list(
+        Provider.constant("Hello"), Provider.constant("World")
       ))
       engine.generate(
         Repetition(None, Sequence(List(Text(" - "), Value(None))))
@@ -56,9 +55,9 @@ object EngineTest extends Specification {
     "provides a result with a named complex repeatable" in {
       val engine = Engine(Provider.map(
         "keys" ->
-          Provider.map(
-            "0" -> Provider.map("name" -> Provider.constant("Hello")),
-            "1" -> Provider.map("name" -> Provider.constant("World"))
+          Provider.list(
+            Provider.map("name" -> Provider.constant("Hello")),
+            Provider.map("name" -> Provider.constant("World"))
           )))
       engine.generate(
         Repetition(Some("keys"), Sequence(List(Text(" - "), Value(Some("name")))))
