@@ -1,5 +1,3 @@
-%%spaces skip
-
 import httplib as http
 import json
 
