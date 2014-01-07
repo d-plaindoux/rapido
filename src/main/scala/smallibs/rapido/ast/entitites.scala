@@ -4,7 +4,7 @@ trait Entity
 
 case class TypeEntity(name: String, value: Type) extends Entity
 
-case class ServiceEntity(name: String, value: List[Service]) extends Entity
+case class ServiceEntity(name: String, entries: List[Service]) extends Entity
 
 case class RouteEntity(name: String, params: List[(String, Type)], path: Path) extends Entity
 

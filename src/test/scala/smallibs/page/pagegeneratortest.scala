@@ -22,13 +22,13 @@ object EngineTest extends Specification {
     }
 
     "provides a result with an input Ident" in {
-      val template = PageParser.parseAll(PageParser.aTemplate, "@value:hello")
+      val template = PageParser.parseAll(PageParser.aTemplate, "@VAL::hello")
       val engine = Engine(Provider.map("hello" -> Provider.constant("World")))
       engine.generate(template.get) mustEqual Success("World")
     }
 
     "provides a result with an input sequence" in {
-      val template = PageParser.parseAll(PageParser.aTemplate, "@value:hello, @value:world!")
+      val template = PageParser.parseAll(PageParser.aTemplate, "@VAL::hello, @VAL::world!")
       val engine = Engine(Provider.map(
         "hello" -> Provider.constant("Hello"),
         "world" -> Provider.constant("World")
@@ -37,7 +37,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with an anonymous repeatable" in {
-      val template = PageParser.parseAll(PageParser.aTemplate, "@rep[ - @value]")
+      val template = PageParser.parseAll(PageParser.aTemplate, "@REP[ - @VAL]")
       val engine = Engine(Provider.list(
         Provider.constant("Hello"), Provider.constant("World")
       ))
@@ -45,7 +45,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with a named repeatable" in {
-      val template = PageParser.parseAll(PageParser.aTemplate, "@rep:keys[ - @value]")
+      val template = PageParser.parseAll(PageParser.aTemplate, "@REP::keys[ - @VAL]")
       val engine = Engine(Provider.map(
         "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
       ))
@@ -53,7 +53,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with a named complex repeatable" in {
-      val template = PageParser.parseAll(PageParser.aTemplate, "@rep:keys[ - @value:name]")
+      val template = PageParser.parseAll(PageParser.aTemplate, "@REP::keys[ - @VAL::name]")
       val engine = Engine(Provider.map(
         "keys" ->
           Provider.list(

@@ -43,10 +43,18 @@ object Provider {
   def empty: DataProvider =
     map()
 
-  def list(list: DataProvider*): DataProvider =
-    new MapProvider(list.foldLeft[(Int, Map[String, DataProvider])](0, Map()) {
-      (result, element) => (result._1 + 1, result._2 + (result._1.toString -> element))
-    }._2)
+  def list(provides: DataProvider*): DataProvider =
+    list(provides.toList)
+
+  def list(providers: List[DataProvider]): DataProvider =
+    providers match {
+      case Nil => Provider.empty
+      case List(provider) => provider
+      case _ =>
+        new MapProvider(providers.foldLeft[(Int, Map[String, DataProvider])](0, Map()) {
+          (result, element) => (result._1 + 1, result._2 + (result._1.toString -> element))
+        }._2)
+    }
 
   def constant(value: String): DataProvider =
     new ConstantProvider(value)

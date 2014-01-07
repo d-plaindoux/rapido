@@ -1,23 +1,25 @@
+%%spaces skip
+
 import httplib as http
 import json
 
-@rep:services[
+@REP::services[
 class @value:name:
-    def __init__(self @rep:params[,@value:name]):
-        @rep:params[
-        self.@value:name = @value:name
+    def __init__(self @REP::params[,@VAL::name]):
+        @REP::params[
+        self.@VAL::name = @VAL::name
         ]
 
-    @rep:entries[
-    def @value:name(self,input=None):
-        path = "@value:path"
+    @REP::entries[
+    def @VAL::name(self,input=None):
+        path = "@VAL::path"
         headers = {"Content-Type": "application/json"}
         connection = http.HTTPConnection(url)
-        connection.request("@value:operation", path, json.dumps(none), headers)
+        connection.request("@VAL::operation", path, json.dumps(none), headers)
         try:
             response = connection.getresponse()
             data = response.read()
-            dd = json.loads(data)
+            return json.loads(data)
         finally:
             connection.close()
     ]
