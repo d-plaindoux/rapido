@@ -55,7 +55,8 @@ object Generation extends Specification {
 
     "provides complete interface" in {
       val template = PageParser.parseAll(PageParser.template, Resources content "/template.01.py").get
-      print(Engine(RapidoProvider.entities(entities)).generate(template))
+      val expected = Success(Resources content "/template.01.py.result")
+      Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
   }

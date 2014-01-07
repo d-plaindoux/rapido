@@ -1,0 +1,59 @@
+import httplib as http
+import json
+
+
+class basicService:
+    def __init__(self):
+        pass
+
+    def httpRequest(self,operation=None,input=None, header=None):
+        connection = http.HTTPConnection(self.path)
+        connection.request(operation, self.path, json.dumps(input), header)
+        try:
+            response = connection.getresponse()
+            data = response.read()
+            return json.loads(data)
+        finally:
+            connection.close()
+
+
+class places(basicService):
+    def __init__(self, url, ):
+        basicService.__init__(self)
+        self.url = url
+        self.path = "TODO:path"
+        
+    
+    def list(self,input=None, header=None):
+        self.httpRequest(operation="GET",
+                         input=input,
+                         header=header)
+
+    def create(self,input=None, header=None):
+        self.httpRequest(operation="POST",
+                         input=input,
+                         header=header)
+
+
+class place(basicService):
+    def __init__(self, url, ):
+        basicService.__init__(self)
+        self.url = url
+        self.path = "TODO:path"
+        
+    
+    def get(self,input=None, header=None):
+        self.httpRequest(operation="GET",
+                         input=input,
+                         header=header)
+
+    def update(self,input=None, header=None):
+        self.httpRequest(operation="PUT",
+                         input=input,
+                         header=header)
+
+    def delete(self,input=None, header=None):
+        self.httpRequest(operation="DELETE",
+                         input=input,
+                         header=header)
+

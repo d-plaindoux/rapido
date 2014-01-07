@@ -66,7 +66,7 @@ class RouteProvider(route: RouteEntity) extends DataProvider with AbstractProvid
     name match {
       case "name" => List(Provider.constant(route.name))
       case "params" => for (e <- route.params) yield Provider.constant(e._1)
-      case "path" => List(Provider.constant("TODO:signature"))
+      case "path" => List(Provider.constant("TODO:path"))
     }
 }
 
