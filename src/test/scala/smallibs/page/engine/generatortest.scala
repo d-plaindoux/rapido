@@ -21,7 +21,7 @@ object EngineTest extends Specification {
 
     "provides a result with an input Ident" in {
       val engine = Engine(Provider.map("hello" -> Provider.constant("World")))
-      engine.generate(Value(Some("hello"))) mustEqual Success("World")
+      engine.generate(Value(Some("hello"), None)) mustEqual Success("World")
     }
 
     "provides a result with an input sequence" in {
@@ -30,7 +30,7 @@ object EngineTest extends Specification {
         "world" -> Provider.constant("World")
       ))
       engine.generate(
-        Sequence(List(Value(Some("hello")), Text(", "), Value(Some("world")), Text("!")))
+        Sequence(List(Value(Some("hello"),None), Text(", "), Value(Some("world"), None), Text("!")))
       ) mustEqual Success("Hello, World!")
     }
 
@@ -39,7 +39,7 @@ object EngineTest extends Specification {
         Provider.constant("Hello"), Provider.constant("World")
       ))
       engine.generate(
-        Repetition(None, Sequence(List(Text(" - "), Value(None))))
+        Repetition(None, Sequence(List(Text(" - "), Value(None, None))))
       ) mustEqual Success(" - Hello - World")
     }
 
@@ -48,7 +48,7 @@ object EngineTest extends Specification {
         "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
       ))
       engine.generate(
-        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(None))))
+        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(None, None))))
       ) mustEqual Success(" - Hello - World")
     }
 
@@ -60,7 +60,7 @@ object EngineTest extends Specification {
             Provider.map("name" -> Provider.constant("World"))
           )))
       engine.generate(
-        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(Some("name")))))
+        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(Some("name"), None))))
       ) mustEqual Success(" - Hello - World")
     }
   }

@@ -6,7 +6,7 @@ trait Template
 // Models
 //
 
-case class Value(name: Option[String]) extends Template
+case class Value(name: Option[String], content: Option[Template]) extends Template
 
 case class Repetition(name: Option[String], content: Template) extends Template
 

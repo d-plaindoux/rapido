@@ -14,13 +14,14 @@ class Engine(data: DataProvider) {
     template match {
       case NoTemplate => Success("")
       case Text(t) => Success(t)
-      case Value(None) =>
+      case Value(None, None) =>
         Success(data.toString)
-      case Value(Some(name)) =>
-        data get name
+      case Value(None, Some(template)) =>
+        generate(template)
+      case Value(Some(name), value) =>
         data get name match {
           case None => Failure(new NoSuchElementException(name))
-          case Some(value) => Success(value.toString)
+          case Some(data) => Engine(data).generate(Value(None, value))
         }
       case Sequence(seq) => {
         @tailrec

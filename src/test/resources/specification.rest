@@ -1,0 +1,22 @@
+type Error = { code:Int; reason:String }
+type Address = { address:String }
+type Place = Address with { name:String }
+type Places = Place[]
+type Empty = {}
+
+service places {
+	list:   GET        => Places
+    create: POST Place => Place or Error
+}
+
+service place {
+   	get:    GET         => Place or Error
+   	update: PUT Address => Place or Error
+   	delete: DELETE      => Empty or Error
+}
+
+route place(p:Place) [/places/<p.name>]
+route places         [/places]
+
+client placesRest1 provides places
+client placesRest2 provides places, place

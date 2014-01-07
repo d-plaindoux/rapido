@@ -10,8 +10,11 @@ object RapidoParser extends JavaTokenParsers {
   // Public behaviors
   //
 
+  def specifications: Parser[List[Entity]] =
+    specification.*
+
   def specification: Parser[Entity] =
-    (typeSpecification | serviceSpecification | routeSpecification | clientSpecification)
+    typeSpecification | serviceSpecification | routeSpecification | clientSpecification
 
   def typeSpecification: Parser[Entity] =
     ("type" ~> ident <~ "=") ~ typeDefinition ^^ {
