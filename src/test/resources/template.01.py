@@ -18,7 +18,7 @@ class basicService:
 @REP::services[
 
 class @VAL::name(basicService):
-    @VAL::route[def __init__(self, url, @REP::params[, @VAL::name]):
+    @VAL::route[def __init__(self, url@REP::params[, @VAL::name]):
         basicService.__init__(self)
         self.url = url
         self.path = "@VAL::path"

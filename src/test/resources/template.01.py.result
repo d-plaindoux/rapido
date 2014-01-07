@@ -18,7 +18,7 @@ class basicService:
 
 
 class places(basicService):
-    def __init__(self, url, ):
+    def __init__(self, url):
         basicService.__init__(self)
         self.url = url
         self.path = "TODO:path"
@@ -36,7 +36,7 @@ class places(basicService):
 
 
 class place(basicService):
-    def __init__(self, url, ):
+    def __init__(self, url):
         basicService.__init__(self)
         self.url = url
         self.path = "TODO:path"
