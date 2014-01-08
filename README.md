@@ -18,14 +18,14 @@ wich can be generated to multiple targeted languages.
 
 ```
 type Error = { code:Int; reason:String }
-type Address = { address:String }
+type Address = { address:String? }
 type Place = Address with { name:String }
-type Places = Place[]
+type Places = Place*
 type Empty = {}
 
 service places {
 	list:   GET        => Places
-    create: POST Place => Place or Error
+    	create: POST Place => Place or Error
 }
 
 service place {
