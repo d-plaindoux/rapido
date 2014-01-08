@@ -30,7 +30,7 @@ service places {
 
 service place {
    	get:    GET         => Place or Error
-   	update: PUT Address => Place or Error
+   	update: PUT Address => Empty or Error
    	delete: DELETE      => Empty or Error
 }
 
@@ -58,7 +58,7 @@ allPlaces = client.places.list()
 aPlace = client.places.create(Place(name="Eat at Joe's", address="Somewhere ..."))
 
 # Update it ...
-aPlace = client.place(aPlace).update(Address(address="A new address for Eat at Joe's"))
+client.place(aPlace).update(Address(address="A new address for Eat at Joe's"))
 
 # Delete it ...
 client.place(aPlace).delete()
@@ -83,7 +83,7 @@ val allPlaces = client.places.list()
 val aPlace = client.places.create(Place("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
 
 // Update it ...
-val aPlace = client.place(aPlace).update(Address("address" -> "A new address for Eat at Joe's"))
+client.place(aPlace).update(Address("address" -> "A new address for Eat at Joe's"))
 
 //Delete it ...
 client.place(aPlace).delete()
@@ -107,7 +107,7 @@ var allPlaces = client.places.list();
 var aPlace = client.places.create(Place({name:"Eat at Joe's", address: "Somewhere ..."}));
 
 // Update it ...
-var aPlace = client.place(aPlace).update(Address({address: "A new address for Eat at Joe's"}));
+client.place(aPlace).update(Address({address: "A new address for Eat at Joe's"}));
 
 //Delete it ...
 client.place(aPlace).delete();
