@@ -55,10 +55,10 @@ client = client.placesRest("http://at.home:1337/rest");
 allPlaces = client.places.list()
 
 # Create one element
-aPlace = client.places.create(name="Eat at Joe's", address="Somewhere ...")
+aPlace = client.places.create(Place(name="Eat at Joe's", address="Somewhere ..."))
 
 # Update it ...
-aPlace = client.place(aPlace).update(address="A new address for Eat at Joe's")
+aPlace = client.place(aPlace).update(Address(address="A new address for Eat at Joe's"))
 
 # Delete it ...
 client.place(aPlace).delete()
@@ -80,10 +80,10 @@ val client = client.placesRest("http://at.home:1337/rest");
 val allPlaces = client.places.list()
 
 // Create one element
-val aPlace = client.places.create("name" -> "Eat at Joe's", "address" -> "Somewhere ...")
+val aPlace = client.places.create(Place("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
 
 // Update it ...
-val aPlace = client.place(aPlace).update("address" -> "A new address for Eat at Joe's")
+val aPlace = client.place(aPlace).update(Address("address" -> "A new address for Eat at Joe's"))
 
 //Delete it ...
 client.place(aPlace).delete()
