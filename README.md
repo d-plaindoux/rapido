@@ -25,7 +25,7 @@ type Empty = {}
 
 service places {
 	list:   GET        => Places
-    	create: POST Place => Place or Error
+	create: POST Place => Place or Error
 }
 
 service place {
