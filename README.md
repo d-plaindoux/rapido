@@ -49,7 +49,7 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-client = placesRest("http://at.home:1337/rest");
+client = placesRest("http://at.home:1337/rest")
 
 # Retrieve all place names
 allPlaces = client.places.list()
@@ -74,7 +74,7 @@ to have a better integration with reactive programming approach).
 
 ``` scala
 // Create the service defining the rest root path
-val client = placesRest("http://at.home:1337/rest");
+val client = placesRest("http://at.home:1337/rest")
 
 // Retrieve all place names
 val allPlaces = client.places.list()
@@ -90,4 +90,31 @@ client.place(aPlace).delete()
 
 //Delete all ...
 for(aPlace <- allPlace) yield client.place(aPlace).delete()
+```
+
+#### Javascript
+
+Same example in `javascript` (may be we have to rely on asynchronous layer in order
+to have a better integration with reactive programming approach).
+
+``` javascript
+// Create the service defining the rest root path
+var client = placesRest("http://at.home:1337/rest");
+
+// Retrieve all place names
+var allPlaces = client.places.list();
+
+// Create one element
+var aPlace = client.places.create({name:"Eat at Joe's", address: "Somewhere ..."});
+
+// Update it ...
+var aPlace = client.place(aPlace).update({address: "A new address for Eat at Joe's"});
+
+//Delete it ...
+client.place(aPlace).delete();
+
+//Delete all ...
+allPlace.forEach(function(aPlace) {
+    client.place(aPlace).delete()
+});
 ```
