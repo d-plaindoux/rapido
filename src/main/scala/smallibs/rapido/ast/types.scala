@@ -5,7 +5,10 @@ trait Type
 case class TypeIdentifier(name: String) extends Type
 
 case class TypeObject(values: List[(String, Type)]) extends Type
-case class TypeArray(value: Type) extends Type
+
+case class TypeMultiple(value: Type) extends Type
+
+case class TypeOptional(value: Type) extends Type
 
 case object TypeBoolean extends Type
 

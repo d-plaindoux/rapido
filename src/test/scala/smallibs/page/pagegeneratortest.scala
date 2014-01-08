@@ -1,6 +1,5 @@
 package smallibs.page
 
-//import org.specs2.mutable._
 import org.specs2.mutable._
 import scala.util.Success
 import smallibs.page.engine.Engine

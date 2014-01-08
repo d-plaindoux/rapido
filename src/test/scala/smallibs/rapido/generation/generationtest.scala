@@ -1,6 +1,5 @@
 package smallibs.rapido.generation
 
-//import org.specs2.mutable._
 import org.specs2.mutable._
 import scala.io.Source
 import scala.util.Success
@@ -10,8 +9,14 @@ import smallibs.rapido.page.RapidoProvider
 import smallibs.rapido.syntax.RapidoParser
 
 object Resources {
-  def content(path: String): String =
-    Source.fromURL(getClass getResource path).mkString
+  def content(path: String): String = {
+    val source = Source.fromURL(getClass getResource path)
+    try {
+      source.getLines mkString "\n"
+    } finally {
+      source.close()
+    }
+  }
 }
 
 object Generation extends Specification {

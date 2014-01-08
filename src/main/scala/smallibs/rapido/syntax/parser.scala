@@ -47,9 +47,10 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def typeDefinition: Parser[Type] =
-    (atomic | extensible) ~ ("[" ~ "]").* ^^ {
+    (atomic | extensible) ~ ("*" | "?").* ^^ {
       case t ~ a => a.foldLeft(t) {
-        (r, _) => TypeArray(r)
+        case (r, "*") => TypeMultiple(r)
+        case (r, "?") => TypeOptional(r)
       }
     }
 
