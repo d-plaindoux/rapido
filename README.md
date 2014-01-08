@@ -104,10 +104,10 @@ var client = placesRest("http://at.home:1337/rest");
 var allPlaces = client.places.list();
 
 // Create one element
-var aPlace = client.places.create({name:"Eat at Joe's", address: "Somewhere ..."});
+var aPlace = client.places.create(Place({name:"Eat at Joe's", address: "Somewhere ..."}));
 
 // Update it ...
-var aPlace = client.place(aPlace).update({address: "A new address for Eat at Joe's"});
+var aPlace = client.place(aPlace).update(Address({address: "A new address for Eat at Joe's"}));
 
 //Delete it ...
 client.place(aPlace).delete();
