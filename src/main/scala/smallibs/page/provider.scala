@@ -49,7 +49,6 @@ object Provider {
   def list(providers: List[DataProvider]): DataProvider =
     providers match {
       case Nil => Provider.empty
-      case List(provider) => provider
       case _ =>
         new MapProvider(providers.foldLeft[(Int, Map[String, DataProvider])](0, Map()) {
           (result, element) => (result._1 + 1, result._2 + (result._1.toString -> element))

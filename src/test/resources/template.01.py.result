@@ -36,11 +36,12 @@ class places(basicService):
 
 
 class place(basicService):
-    def __init__(self, url):
+    def __init__(self, url, p):
         basicService.__init__(self)
         self.url = url
         self.path = "TODO:path"
         
+        self.p = p
     
     def get(self,input=None, header=None):
         self.httpRequest(operation="GET",

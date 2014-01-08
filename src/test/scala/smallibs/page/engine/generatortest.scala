@@ -38,7 +38,7 @@ object EngineTest extends Specification {
         Provider.constant("Hello"), Provider.constant("World")
       ))
       engine.generate(
-        Repetition(None, Sequence(List(Text(" - "), Value(None, None))))
+        Repetition(None, Some(Sequence(List(Text(" - "), Value(None, None)))))
       ) mustEqual Success(" - Hello - World")
     }
 
@@ -47,7 +47,7 @@ object EngineTest extends Specification {
         "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
       ))
       engine.generate(
-        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(None, None))))
+        Repetition(Some("keys"), Some(Sequence(List(Text(" - "), Value(None, None)))))
       ) mustEqual Success(" - Hello - World")
     }
 
@@ -59,7 +59,7 @@ object EngineTest extends Specification {
             Provider.map("name" -> Provider.constant("World"))
           )))
       engine.generate(
-        Repetition(Some("keys"), Sequence(List(Text(" - "), Value(Some("name"), None))))
+        Repetition(Some("keys"), Some(Sequence(List(Text(" - "), Value(Some("name"), None)))))
       ) mustEqual Success(" - Hello - World")
     }
   }
