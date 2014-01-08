@@ -1,4 +1,4 @@
-rapido
+rAPIdo
 ======
 
 A rest API design tool 
