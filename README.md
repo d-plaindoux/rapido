@@ -94,8 +94,7 @@ for(aPlace <- allPlace) yield client.place(aPlace).delete()
 
 #### Javascript
 
-Same example in `javascript` (may be we have to rely on asynchronous layer in order
-to have a better integration with reactive programming approach).
+Same example in `javascript`.
 
 ``` javascript
 // Create the service defining the rest root path
