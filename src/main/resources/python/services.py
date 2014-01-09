@@ -26,9 +26,9 @@ class @VAL::name(basicService):
     @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
         basicService.__init__(self)
         self.url = url
-        self.path = "@VAL::path"
         @REP::params[|
         self.@VAL::name = @VAL::name|]|]
+        self.path = @VAL::path[|@OR::values[|"@VAL::name"|][|self@REP::values[|.@VAL]]|]
     @REP::entries[|
     def @VAL::name(self,input=None, header=None):
         self.httpRequest(operation="@VAL::operation",

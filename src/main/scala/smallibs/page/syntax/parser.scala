@@ -22,7 +22,7 @@ object PageParser extends JavaTokenParsers {
   //
 
   private def innerTemplate: Parser[Template] =
-    (innerText | value | repetition).* ^^ {
+    (innerText | value | repetition | alternate | innerSpecial).* ^^ {
       simplify
     }
 
@@ -52,7 +52,12 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def special: Parser[Template] =
-    ("@" | "|") ^^ {
+    "@" ^^ {
+      Text
+    }
+
+  private def innerSpecial: Parser[Template] =
+    "@" ^^ {
       Text
     }
 

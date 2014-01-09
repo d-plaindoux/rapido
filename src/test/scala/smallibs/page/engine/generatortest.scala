@@ -29,7 +29,7 @@ object EngineTest extends Specification {
         "world" -> Provider.constant("World")
       ))
       engine.generate(
-        Sequence(List(Value(Some("hello"),None), Text(", "), Value(Some("world"), None), Text("!")))
+        Sequence(List(Value(Some("hello"), None), Text(", "), Value(Some("world"), None), Text("!")))
       ) mustEqual Success("Hello, World!")
     }
 
@@ -62,5 +62,18 @@ object EngineTest extends Specification {
         Repetition(Some("keys"), Some(Sequence(List(Text(" - "), Value(Some("name"), None)))))
       ) mustEqual Success(" - Hello - World")
     }
+
+
+    "provides a result with a named alternative" in {
+      val engine = Engine(
+        Provider.set(
+          Provider.record("name" -> Provider.constant("Hello")),
+          Provider.record("key" -> Provider.constant("World"))
+        ))
+      engine.generate(
+        Repetition(None, Some(Alternate(None, List(Value(Some("name"), None), Text("...")))))
+      ) mustEqual Success("Hello...")
+    }
+
   }
 }

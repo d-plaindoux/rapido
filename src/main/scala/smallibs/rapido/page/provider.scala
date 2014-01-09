@@ -75,7 +75,7 @@ class RouteProvider(route: RouteEntity) extends DataProvider with AbstractProvid
     name match {
       case "name" => Some(Provider.constant(route.name))
       case "params" => Some(Provider.set(for (e <- route.params) yield new ParamProvider(e)))
-      case "path" => Some(Provider.constant("TODO:path"))
+      case "path" => Some(new PathProvider(route.path))
       case _ => None
     }
 }
@@ -87,6 +87,43 @@ class ParamProvider(param: (String, Type)) extends DataProvider with AbstractPro
     name match {
       case "name" => Some(Provider.constant(param._1))
       case "type" => Some(Provider.constant("TODO:type"))
+      case _ => None
+    }
+}
+
+class PathProvider(path: Path) extends DataProvider with AbstractProvider {
+  val keys = List("name", "type")
+
+  def get(name: String): Option[DataProvider] =
+    name match {
+      case "values" =>
+        Some(Provider.set(
+          for (p <- path.values)
+          yield p match {
+            case s@StaticLevel(_) => new StaticPathProvider(s)
+            case d@DynamicLevel(_) => new DynamicPathProvider(d)
+          }
+        ))
+      case _ => None
+    }
+}
+
+class StaticPathProvider(path: StaticLevel) extends DataProvider with AbstractProvider {
+  val keys = List("name", "type")
+
+  def get(name: String): Option[DataProvider] =
+    name match {
+      case "name" => Some(Provider.constant(path.name))
+      case _ => None
+    }
+}
+
+class DynamicPathProvider(param: DynamicLevel) extends DataProvider with AbstractProvider {
+  val keys = List("name", "type")
+
+  def get(name: String): Option[DataProvider] =
+    name match {
+      case "values" => Some(Provider.set(for (param <- param.values) yield Provider.constant(param)))
       case _ => None
     }
 }
