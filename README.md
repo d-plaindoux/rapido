@@ -64,7 +64,7 @@ client.place(aPlace).update(Address(address="A new address for Eat at Joe's"))
 client.place(aPlace).delete()
 
 # Delete all ...
-[ client.place(aPlace).delete() for name in allPlace ]
+[ client.place(aPlace).delete() for name in allPlaces ]
 ```
 
 #### Scala 
@@ -89,7 +89,7 @@ client.place(aPlace).update(Address("address" -> "A new address for Eat at Joe's
 client.place(aPlace).delete()
 
 //Delete all ...
-for(aPlace <- allPlace) yield client.place(aPlace).delete()
+for(aPlace <- allPlaces) yield client.place(aPlace).delete()
 ```
 
 #### Javascript
@@ -113,7 +113,7 @@ client.place(aPlace).update(Address({address: "A new address for Eat at Joe's"})
 client.place(aPlace).delete();
 
 //Delete all ...
-allPlace.forEach(function(aPlace) {
+allPlaces.forEach(function(aPlace) {
     client.place(aPlace).delete()
 });
 ```
