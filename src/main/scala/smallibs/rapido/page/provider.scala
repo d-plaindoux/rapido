@@ -29,25 +29,29 @@ class EntitiesProvider(elements: List[Entity]) extends DataProvider with Abstrac
           }
         }
 
-        Some(Provider.list(
+        Some(Provider.set(
           for (e <- elements if e.isInstanceOf[ServiceEntity])
           yield {
             val service = e.asInstanceOf[ServiceEntity]
             val route = routeByName(service.name)
             new ServiceProvider(service, route)
-          }))
+          })
+        )
       case "routes" =>
-        Some(Provider.list(
+        Some(Provider.set(
           for (e <- elements if e.isInstanceOf[RouteEntity])
-          yield new RouteProvider(e.asInstanceOf[RouteEntity])))
+          yield new RouteProvider(e.asInstanceOf[RouteEntity]))
+        )
       case "clients" =>
-        Some(Provider.list(
+        Some(Provider.set(
           for (e <- elements if e.isInstanceOf[ClientEntity])
-          yield new ClientProvider(e.asInstanceOf[ClientEntity])))
+          yield new ClientProvider(e.asInstanceOf[ClientEntity]))
+        )
       case "types" =>
-        Some(Provider.list(
+        Some(Provider.set(
           for (e <- elements if e.isInstanceOf[TypeEntity])
-          yield new TypeProvider(e.asInstanceOf[TypeEntity])))
+          yield new TypeProvider(e.asInstanceOf[TypeEntity]))
+        )
       case _ => None
     }
 }
@@ -58,7 +62,7 @@ class ServiceProvider(service: ServiceEntity, route: DataProvider) extends DataP
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(service.name))
-      case "entries" => Some(Provider.list(for (entry <- service.entries) yield new EntryProvider(entry)))
+      case "entries" => Some(Provider.set(for (entry <- service.entries) yield new EntryProvider(entry)))
       case "route" => Some(route)
       case _ => None
     }
@@ -70,7 +74,7 @@ class RouteProvider(route: RouteEntity) extends DataProvider with AbstractProvid
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(route.name))
-      case "params" => Some(Provider.list(for (e <- route.params) yield new ParamProvider(e)))
+      case "params" => Some(Provider.set(for (e <- route.params) yield new ParamProvider(e)))
       case "path" => Some(Provider.constant("TODO:path"))
       case _ => None
     }
@@ -85,7 +89,6 @@ class ParamProvider(param: (String, Type)) extends DataProvider with AbstractPro
       case "type" => Some(Provider.constant("TODO:type"))
       case _ => None
     }
-
 }
 
 class ClientProvider(client: ClientEntity) extends DataProvider with AbstractProvider {
@@ -94,7 +97,7 @@ class ClientProvider(client: ClientEntity) extends DataProvider with AbstractPro
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(client.name))
-      case "provides" => Some(Provider.list(for (name <- client.provides) yield Provider.constant(name)))
+      case "provides" => Some(Provider.set(for (name <- client.provides) yield Provider.constant(name)))
       case _ => None
     }
 }

@@ -19,12 +19,12 @@ object EngineTest extends Specification {
     }
 
     "provides a result with an input Ident" in {
-      val engine = Engine(Provider.map("hello" -> Provider.constant("World")))
+      val engine = Engine(Provider.record("hello" -> Provider.constant("World")))
       engine.generate(Value(Some("hello"), None)) mustEqual Success("World")
     }
 
     "provides a result with an input sequence" in {
-      val engine = Engine(Provider.map(
+      val engine = Engine(Provider.record(
         "hello" -> Provider.constant("Hello"),
         "world" -> Provider.constant("World")
       ))
@@ -34,7 +34,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with an anonymous repeatable" in {
-      val engine = Engine(Provider.list(
+      val engine = Engine(Provider.set(
         Provider.constant("Hello"), Provider.constant("World")
       ))
       engine.generate(
@@ -43,8 +43,8 @@ object EngineTest extends Specification {
     }
 
     "provides a result with a named repeatable" in {
-      val engine = Engine(Provider.map(
-        "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
+      val engine = Engine(Provider.record(
+        "keys" -> Provider.set(Provider.constant("Hello"), Provider.constant("World"))
       ))
       engine.generate(
         Repetition(Some("keys"), Some(Sequence(List(Text(" - "), Value(None, None)))))
@@ -52,11 +52,11 @@ object EngineTest extends Specification {
     }
 
     "provides a result with a named complex repeatable" in {
-      val engine = Engine(Provider.map(
+      val engine = Engine(Provider.record(
         "keys" ->
-          Provider.list(
-            Provider.map("name" -> Provider.constant("Hello")),
-            Provider.map("name" -> Provider.constant("World"))
+          Provider.set(
+            Provider.record("name" -> Provider.constant("Hello")),
+            Provider.record("name" -> Provider.constant("World"))
           )))
       engine.generate(
         Repetition(Some("keys"), Some(Sequence(List(Text(" - "), Value(Some("name"), None)))))

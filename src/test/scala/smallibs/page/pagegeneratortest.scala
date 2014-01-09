@@ -22,13 +22,13 @@ object EngineTest extends Specification {
 
     "provides a result with an input Ident" in {
       val template = PageParser.parseAll(PageParser.template, "@VAL::hello")
-      val engine = Engine(Provider.map("hello" -> Provider.constant("World")))
+      val engine = Engine(Provider.record("hello" -> Provider.constant("World")))
       engine.generate(template.get) mustEqual Success("World")
     }
 
     "provides a result with an input sequence" in {
       val template = PageParser.parseAll(PageParser.template, "@VAL::hello, @VAL::world!")
-      val engine = Engine(Provider.map(
+      val engine = Engine(Provider.record(
         "hello" -> Provider.constant("Hello"),
         "world" -> Provider.constant("World")
       ))
@@ -37,7 +37,7 @@ object EngineTest extends Specification {
 
     "provides a result with an anonymous repeatable" in {
       val template = PageParser.parseAll(PageParser.template, "@REP[ - @VAL]")
-      val engine = Engine(Provider.list(
+      val engine = Engine(Provider.set(
         Provider.constant("Hello"), Provider.constant("World")
       ))
       engine.generate(template.get) mustEqual Success(" - Hello - World")
@@ -45,19 +45,19 @@ object EngineTest extends Specification {
 
     "provides a result with a named repeatable" in {
       val template = PageParser.parseAll(PageParser.template, "@REP::keys[ - @VAL]")
-      val engine = Engine(Provider.map(
-        "keys" -> Provider.list(Provider.constant("Hello"), Provider.constant("World"))
+      val engine = Engine(Provider.record(
+        "keys" -> Provider.set(Provider.constant("Hello"), Provider.constant("World"))
       ))
       engine.generate(template.get) mustEqual Success(" - Hello - World")
     }
 
     "provides a result with a named complex repeatable" in {
       val template = PageParser.parseAll(PageParser.template, "@REP::keys[ - @VAL::name]")
-      val engine = Engine(Provider.map(
+      val engine = Engine(Provider.record(
         "keys" ->
-          Provider.list(
-            Provider.map("name" -> Provider.constant("Hello")),
-            Provider.map("name" -> Provider.constant("World"))
+          Provider.set(
+            Provider.record("name" -> Provider.constant("Hello")),
+            Provider.record("name" -> Provider.constant("World"))
           )
       ))
       engine.generate(template.get) mustEqual Success(" - Hello - World")

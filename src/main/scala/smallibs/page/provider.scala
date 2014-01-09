@@ -25,36 +25,45 @@ class ConstantProvider(value: String) extends DataProvider {
 
 // ------------------------------------------------------------------
 
-class MapProvider(map: Map[String, DataProvider]) extends DataProvider {
+class RecordProvider(map: Map[String, DataProvider]) extends DataProvider {
   def values: List[DataProvider] = map.values.toList
 
   def get(name: String): Option[DataProvider] = map get name
 
   def set(name: String, data: DataProvider): DataProvider =
-    new MapProvider(map + (name -> data))
+    new RecordProvider(map + (name -> data))
+}
+
+// ------------------------------------------------------------------
+
+class SetProvider(set: List[DataProvider]) extends DataProvider {
+  def values: List[DataProvider] = set
+
+  def get(name: String): Option[DataProvider] =
+    throw new IllegalAccessException
+
+  def set(name: String, data: DataProvider): DataProvider =
+    throw new IllegalAccessException
 }
 
 // ------------------------------------------------------------------
 
 object Provider {
-  def map(values: (String, DataProvider)*): DataProvider =
-    new MapProvider(values.toMap)
-
-  def empty: DataProvider =
-    map()
-
-  def list(provides: DataProvider*): DataProvider =
-    list(provides.toList)
-
-  def list(providers: List[DataProvider]): DataProvider =
-    providers match {
-      case Nil => Provider.empty
-      case _ =>
-        new MapProvider(providers.foldLeft[(Int, Map[String, DataProvider])](0, Map()) {
-          (result, element) => (result._1 + 1, result._2 + (result._1.toString -> element))
-        }._2)
-    }
-
   def constant(value: String): DataProvider =
     new ConstantProvider(value)
+
+  def record(values: (String, DataProvider)*): DataProvider =
+    record(values.toMap)
+
+  def record(values: Map[String, DataProvider]): DataProvider =
+    new RecordProvider(values)
+
+  def empty: DataProvider =
+    set()
+
+  def set(provides: DataProvider*): DataProvider =
+    set(provides.toList)
+
+  def set(providers: List[DataProvider]): DataProvider =
+    new SetProvider(providers)
 }

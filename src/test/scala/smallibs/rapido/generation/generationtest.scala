@@ -32,7 +32,7 @@ object Generation extends Specification {
 
     "provides type names" in {
       val template = PageParser.parseAll(PageParser.template, Resources content "/template.02").get
-      val expected = Success("Empty,Address,Error,Place,Places,")
+      val expected = Success("Error,Address,Place,Places,Empty,")
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
