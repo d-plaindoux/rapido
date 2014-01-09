@@ -1,1 +1,1 @@
-@REP::routes[@VAL::name(@REP::params[@VAL::name,]),]
+@REP::routes[|@VAL::name(@REP::params[|@VAL::name,|]),|]

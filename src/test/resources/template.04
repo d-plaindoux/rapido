@@ -1,1 +1,1 @@
-@REP::clients[@VAL::name,]
+@REP::clients[|@VAL::name,|]

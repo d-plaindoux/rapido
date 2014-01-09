@@ -1,1 +1,1 @@
-@REP::types[@VAL::name,]
+@REP::types[|@VAL::name,|]

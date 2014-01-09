@@ -15,18 +15,18 @@ class basicService:
             return json.loads(data)
         finally:
             connection.close()
-@REP::services[
+@REP::services[|
 
 class @VAL::name(basicService):
-    @VAL::route[def __init__(self, url@REP::params[, @VAL::name]):
+    @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
         basicService.__init__(self)
         self.url = url
         self.path = "@VAL::path"
-        @REP::params[
-        self.@VAL::name = @VAL::name]]
-    @REP::entries[
+        @REP::params[|
+        self.@VAL::name = @VAL::name|]|]
+    @REP::entries[|
     def @VAL::name(self,input=None, header=None):
         self.httpRequest(operation="@VAL::operation",
                          input=input,
                          header=header)
-]]
+|]|]

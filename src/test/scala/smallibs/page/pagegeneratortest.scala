@@ -36,7 +36,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with an anonymous repeatable" in {
-      val template = PageParser.parseAll(PageParser.template, "@REP[ - @VAL]")
+      val template = PageParser.parseAll(PageParser.template, "@REP[| - @VAL|]")
       val engine = Engine(Provider.set(
         Provider.constant("Hello"), Provider.constant("World")
       ))
@@ -44,7 +44,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with a named repeatable" in {
-      val template = PageParser.parseAll(PageParser.template, "@REP::keys[ - @VAL]")
+      val template = PageParser.parseAll(PageParser.template, "@REP::keys[| - @VAL|]")
       val engine = Engine(Provider.record(
         "keys" -> Provider.set(Provider.constant("Hello"), Provider.constant("World"))
       ))
@@ -52,7 +52,7 @@ object EngineTest extends Specification {
     }
 
     "provides a result with a named complex repeatable" in {
-      val template = PageParser.parseAll(PageParser.template, "@REP::keys[ - @VAL::name]")
+      val template = PageParser.parseAll(PageParser.template, "@REP::keys[| - @VAL::name|]")
       val engine = Engine(Provider.record(
         "keys" ->
           Provider.set(
