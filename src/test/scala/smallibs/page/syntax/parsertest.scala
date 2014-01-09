@@ -70,5 +70,26 @@ object PageSpec extends Specification {
       val parsed = PageParser.parseAll(PageParser.template, "@REP[|@REP::value|]")
       parsed.get mustEqual Repetition(None, Some(Repetition(Some("value"), None)))
     }
+
+    "provides an anonymous empty alternate" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@OR[||]")
+      parsed.get mustEqual Alternate(None, List(NoTemplate))
+    }
+
+    "provides an anonymous empty alternate with one choice" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@OR[|1|][|2|]")
+      parsed.get mustEqual Alternate(None, List(Text("1"), Text("2")))
+    }
+
+    "provides an anonymous empty alternate" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@OR::name[||]")
+      parsed.get mustEqual Alternate(Some("name"), List(NoTemplate))
+    }
+
+    "provides an anonymous empty alternate with one choice" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@OR::name[|1|][|2|]")
+      parsed.get mustEqual Alternate(Some("name"), List(Text("1"), Text("2")))
+    }
+
   }
 }
