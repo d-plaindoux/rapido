@@ -22,7 +22,7 @@ object PageParser extends JavaTokenParsers {
   //
 
   private def innerTemplate: Parser[Template] =
-    rep(innerText | value | repetition) ^^ {
+    (innerText | value | repetition).* ^^ {
       simplify
     }
 
@@ -37,7 +37,7 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def value: Parser[Template] =
-    "@VAL" ~> ("::" ~> ident).? ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
+    ("@VAL" ~> ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
       case s ~ v => Value(s, v)
     }
 
