@@ -1,1 +1,1 @@
-@REP::services[|@VAL::name(@REP::entries[|@VAL::name,|]),|]
+@REP(,)::services[|@VAL::name(@REP(,)::entries[|@VAL::name|])|]

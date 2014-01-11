@@ -28,47 +28,52 @@ object PageSpec extends Specification {
 
     "provides an empty repeatable" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP::name[||]")
-      parsed.get mustEqual Repetition(Some("name"), Some(NoTemplate))
+      parsed.get mustEqual Repetition(Some("name"), None, Some(NoTemplate))
     }
 
     "provides a repeatable with a text" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP::name[|Hello, World!|]")
-      parsed.get mustEqual Repetition(Some("name"), Some(Text("Hello, World!")))
+      parsed.get mustEqual Repetition(Some("name"), None, Some(Text("Hello, World!")))
     }
 
     "provides a repeatable with an ident" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP::name[|@VAL::name|]")
-      parsed.get mustEqual Repetition(Some("name"), Some(Value(Some("name"), None)))
+      parsed.get mustEqual Repetition(Some("name"), None, Some(Value(Some("name"), None)))
     }
 
     "provides a repeatable with an empty repeatable" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP::name[|@REP::value[||]|]")
-      parsed.get mustEqual Repetition(Some("name"), Some(Repetition(Some("value"), Some(NoTemplate))))
+      parsed.get mustEqual Repetition(Some("name"), None, Some(Repetition(Some("value"), None, Some(NoTemplate))))
     }
 
     "provides an anonymous empty repeatable" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP[||]")
-      parsed.get mustEqual Repetition(None, Some(NoTemplate))
+      parsed.get mustEqual Repetition(None, None, Some(NoTemplate))
     }
 
     "provides a anonymous repeatable with a text" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP[|Hello, World!|]")
-      parsed.get mustEqual Repetition(None, Some(Text("Hello, World!")))
+      parsed.get mustEqual Repetition(None, None, Some(Text("Hello, World!")))
     }
 
     "provides a anonymous repeatable with an ident" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP[|@VAL::name|]")
-      parsed.get mustEqual Repetition(None, Some(Value(Some("name"), None)))
+      parsed.get mustEqual Repetition(None, None, Some(Value(Some("name"), None)))
     }
 
     "provides a anonymous repeatable with an empty repeatable" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP[|@REP::value[||]|]")
-      parsed.get mustEqual Repetition(None, Some(Repetition(Some("value"), Some(NoTemplate))))
+      parsed.get mustEqual Repetition(None, None, Some(Repetition(Some("value"), None, Some(NoTemplate))))
     }
 
     "provides a anonymous repeatable with an implicit repeatable" in {
       val parsed = PageParser.parseAll(PageParser.template, "@REP[|@REP::value|]")
-      parsed.get mustEqual Repetition(None, Some(Repetition(Some("value"), None)))
+      parsed.get mustEqual Repetition(None, None, Some(Repetition(Some("value"), None, None)))
+    }
+
+    "provides a anonymous repeatable with an implicit repeatable and a separator" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@REP(.)[|@REP(,)::value|]")
+      parsed.get mustEqual Repetition(None, Some("."), Some(Repetition(Some("value"), Some(","), None)))
     }
 
     "provides an anonymous empty alternate" in {

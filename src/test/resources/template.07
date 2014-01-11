@@ -1,0 +1,1 @@
+@REP(,)::routes[|@VAL::path[|"@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OR[|@REP(.)::values[|@VAL|]|][||]|])|]|]

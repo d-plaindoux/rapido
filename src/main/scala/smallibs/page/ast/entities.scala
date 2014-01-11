@@ -8,7 +8,7 @@ trait Template
 
 case class Value(name: Option[String], content: Option[Template]) extends Template
 
-case class Repetition(name: Option[String], content: Option[Template]) extends Template
+case class Repetition(name: Option[String], separator: Option[String], content: Option[Template]) extends Template
 
 case class Alternate(name: Option[String], content: List[Template]) extends Template
 

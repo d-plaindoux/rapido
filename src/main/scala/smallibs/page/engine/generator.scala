@@ -20,11 +20,11 @@ class Engine(path: List[String], data: DataProvider) {
         case Some(newData) => new Engine(name :: path, newData).generate(Value(None, value))
       }
       case Sequence(seq) => generate_list("", seq)
-      case Repetition(None, None) => generate_repetition(Value(None, None))
-      case Repetition(None, Some(content)) => generate_repetition(content)
-      case Repetition(Some(name), content) => data get name match {
+      case Repetition(None, sep, None) => generate_repetition(sep, Value(None, None))
+      case Repetition(None, sep, Some(content)) => generate_repetition(sep, content)
+      case Repetition(Some(name), sep, content) => data get name match {
         case None => Failure(new NoSuchElementException(data + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData).generate(Repetition(None, content))
+        case Some(newData) => new Engine(name :: path, newData).generate(Repetition(None, sep, content))
       }
       case Alternate(None, l) => generate_alternate(l)
       case Alternate(Some(name), l) => data get name match {
@@ -43,13 +43,24 @@ class Engine(path: List[String], data: DataProvider) {
         }
     }
 
-  def generate_repetition(template: Template): Try[String] =
-    data.values.foldLeft[Try[String]](Success("")) {
-      (result: Try[String], data: DataProvider) =>
-        for (v <- result;
-             c <- new Engine(path, data).generate(template))
-        yield v + c
+  def generate_repetition(sep: Option[String], template: Template): Try[String] = {
+    def generate_from_list(values: List[DataProvider]): List[String] =
+      values match {
+        case Nil => Nil
+        case data :: values =>
+          new Engine(path, data).generate(template) match {
+            case Success("") => generate_from_list(values)
+            case Success(e) => e :: generate_from_list(values)
+            case Failure(f) => throw f
+          }
+      }
+
+    try {
+      Success(generate_from_list(data.values).mkString(sep.getOrElse("")))
+    } catch {
+      case e:Throwable => Failure(e)
     }
+  }
 
   def generate_alternate(l: List[Template]): Try[String] =
     l match {

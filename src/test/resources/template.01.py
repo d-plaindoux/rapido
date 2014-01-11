@@ -2,7 +2,7 @@ import httplib as http
 import json
 
 
-class basicService:
+class BasicService:
     def __init__(self):
         pass
 
@@ -17,16 +17,23 @@ class basicService:
             connection.close()
 @REP::services[|
 
-class @VAL::name(basicService):
+class Service_@VAL::name(BasicService):
     @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
-        basicService.__init__(self)
+        BasicService.__init__(self)
         self.url = url
-        self.path = "TODO:path"
-        @REP::params[|
-        self.@VAL::name = @VAL::name|]|]
-    @REP::entries[|
-    def @VAL::name(self,input=None, header=None):
+        @VAL::path[|self.path = "@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OR[|@REP(.)::values[|@VAL|]|][||]|])|]
+        @REP(        )::params[|self.@VAL::name = @VAL::name|]|]
+
+    @REP(    )::entries[|def @VAL::name(self,input=None, header=None):
         self.httpRequest(operation="@VAL::operation",
                          input=input,
                          header=header)
+
+|]|]
+
+@REP::clients[|
+class @VAL::name(ClientAPI):
+    def __init__(self, url):
+        ClientAPI.__init__(self, url)
+        @REP(        )::provides[|self.@VAL = Service_@VAL
 |]|]

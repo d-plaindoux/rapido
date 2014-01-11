@@ -42,8 +42,8 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def repetition: Parser[Template] =
-    ("@REP" ~> ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
-      case s ~ t => Repetition(s, t)
+    ("@REP" ~> ("(" ~> regex(new Regex("[^)]+")) <~ ")").? ~ ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
+      case s ~ v ~ t => Repetition(v, s, t)
     }
 
   private def alternate: Parser[Template] =

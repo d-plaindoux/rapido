@@ -92,7 +92,7 @@ class ParamProvider(param: (String, Type)) extends DataProvider with AbstractPro
 }
 
 class PathProvider(path: Path) extends DataProvider with AbstractProvider {
-  val keys = List("name", "type")
+  val keys = List("values")
 
   def get(name: String): Option[DataProvider] =
     name match {
