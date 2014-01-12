@@ -35,13 +35,3 @@ class Service@VAL::name(BasicService):
 
 |]|]
 
-#
-# Clients:@REP::clients[| @VAL::name|]
-#
-
-@REP::clients[|
-class @VAL::name(ClientAPI):
-    def __init__(self, url):
-        ClientAPI.__init__(self, url)
-        @REP(        )::clients[|self.@VAL = Service@VAL|]
-|]

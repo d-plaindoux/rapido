@@ -1,3 +1,7 @@
+#
+# Types:@REP::types[| @VAL::name|]
+#
+
 @REP::types[|
 class Class@VAL::name:
     def __init__(self@REP::params[|, VAL::name=None|]):
