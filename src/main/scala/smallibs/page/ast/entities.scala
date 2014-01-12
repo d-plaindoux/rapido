@@ -10,6 +10,8 @@ case class Value(name: Option[String], content: Option[Template]) extends Templa
 
 case class Repetition(name: Option[String], separator: Option[String], content: Option[Template]) extends Template
 
+case class Optional(name: Option[String], content: Option[Template]) extends Template
+
 case class Alternate(name: Option[String], content: List[Template]) extends Template
 
 case object NoTemplate extends Template

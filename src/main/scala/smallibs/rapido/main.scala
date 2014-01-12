@@ -30,7 +30,7 @@ object GenAPI {
     val languageURL = Resources getURL args(1)
     val language = PageParser.parseAll(PageParser.template, Resources getContent languageURL).get
 
-    print(Engine(RapidoProvider.entities(specification)).generate(language).get)
+    print(Engine(RapidoProvider.entities(specification)).generate(language).get.get)
   }
 
 }

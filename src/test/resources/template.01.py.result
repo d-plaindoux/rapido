@@ -1,0 +1,75 @@
+import httplib as http
+import json
+
+
+class BasicService:
+    def __init__(self):
+        pass
+
+    def httpRequest(self,operation=None,input=None, header=None):
+        connection = http.HTTPConnection(self.path)
+        connection.request(operation, self.path, json.dumps(input), header)
+        try:
+            response = connection.getresponse()
+            data = response.read()
+            return json.loads(data)
+        finally:
+            connection.close()
+
+
+class Service_places(BasicService):
+    def __init__(self, url):
+        BasicService.__init__(self)
+        self.url = url
+        self.path = "/places" % ()
+        
+
+    def list(self,input=None, header=None):
+        self.httpRequest(operation="GET",
+                         input=input,
+                         header=header)
+
+    def create(self,input=None, header=None):
+        self.httpRequest(operation="POST",
+                         input=input,
+                         header=header)
+
+
+
+class Service_place(BasicService):
+    def __init__(self, url, p):
+        BasicService.__init__(self)
+        self.url = url
+        self.path = "/places/%s" % (p.name)
+        self.p = p
+
+    def get(self,input=None, header=None):
+        self.httpRequest(operation="GET",
+                         input=input,
+                         header=header)
+
+    def update(self,input=None, header=None):
+        self.httpRequest(operation="PUT",
+                         input=input,
+                         header=header)
+
+    def delete(self,input=None, header=None):
+        self.httpRequest(operation="DELETE",
+                         input=input,
+                         header=header)
+
+
+
+
+class placesRest1(ClientAPI):
+    def __init__(self, url):
+        ClientAPI.__init__(self, url)
+        self.places = Service_places
+
+class placesRest2(ClientAPI):
+    def __init__(self, url):
+        ClientAPI.__init__(self, url)
+        self.places = Service_places
+        self.place = Service_place
+
+#end of file

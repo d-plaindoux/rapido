@@ -96,5 +96,10 @@ object PageSpec extends Specification {
       parsed.get mustEqual Alternate(Some("name"), List(Text("1"), Text("2")))
     }
 
+    "provides an anonymous empty optional" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@OPT[||]")
+      parsed.get mustEqual Optional(None, Some(NoTemplate))
+    }
+
   }
 }

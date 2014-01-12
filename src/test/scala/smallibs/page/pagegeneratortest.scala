@@ -5,25 +5,25 @@ import scala.util.Success
 import smallibs.page.engine.Engine
 import smallibs.page.syntax.PageParser
 
-object EngineTest extends Specification {
+object EngineGeneratorTest extends Specification {
   "Template and generator should" should {
 
     "provides a result with an empty" in {
       val template = PageParser.parseAll(PageParser.template, "")
       val engine = Engine(Provider.empty)
-      engine.generate(template.get) mustEqual Success("")
+      engine.generate(template.get) mustEqual Success(Some(""))
     }
 
     "provides a result with an input text" in {
       val template = PageParser.parseAll(PageParser.template, "Hello, World")
       val engine = Engine(Provider.empty)
-      engine.generate(template.get) mustEqual Success("Hello, World")
+      engine.generate(template.get) mustEqual Success(Some("Hello, World"))
     }
 
     "provides a result with an input Ident" in {
       val template = PageParser.parseAll(PageParser.template, "@VAL::hello")
       val engine = Engine(Provider.record("hello" -> Provider.constant("World")))
-      engine.generate(template.get) mustEqual Success("World")
+      engine.generate(template.get) mustEqual Success(Some("World"))
     }
 
     "provides a result with an input sequence" in {
@@ -32,7 +32,7 @@ object EngineTest extends Specification {
         "hello" -> Provider.constant("Hello"),
         "world" -> Provider.constant("World")
       ))
-      engine.generate(template.get) mustEqual Success("Hello, World!")
+      engine.generate(template.get) mustEqual Success(Some("Hello, World!"))
     }
 
     "provides a result with an anonymous repeatable" in {
@@ -40,7 +40,7 @@ object EngineTest extends Specification {
       val engine = Engine(Provider.set(
         Provider.constant("Hello"), Provider.constant("World")
       ))
-      engine.generate(template.get) mustEqual Success(" - Hello - World")
+      engine.generate(template.get) mustEqual Success(Some(" - Hello - World"))
     }
 
     "provides a result with a named repeatable" in {
@@ -48,7 +48,7 @@ object EngineTest extends Specification {
       val engine = Engine(Provider.record(
         "keys" -> Provider.set(Provider.constant("Hello"), Provider.constant("World"))
       ))
-      engine.generate(template.get) mustEqual Success(" - Hello - World")
+      engine.generate(template.get) mustEqual Success(Some(" - Hello - World"))
     }
 
     "provides a result with a named complex repeatable" in {
@@ -60,7 +60,7 @@ object EngineTest extends Specification {
             Provider.record("name" -> Provider.constant("World"))
           )
       ))
-      engine.generate(template.get) mustEqual Success(" - Hello - World")
+      engine.generate(template.get) mustEqual Success(Some(" - Hello - World"))
     }
 
   }

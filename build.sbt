@@ -11,3 +11,4 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "1.12.3" % "test"
 )
 
+fork in Test := true

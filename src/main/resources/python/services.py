@@ -17,15 +17,15 @@ class BasicService:
             connection.close()
 
 #
-# Services:@REP::services[| @VAL::name|]
+# Services:@REP(,)::services[| @VAL::name|]
 #
-@REP::services[|
 
+@REP::services[|
 class Service@VAL::name(BasicService):
     @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
         basicService.__init__(self)
         self.url = url
-        @VAL::path[|self.path = "@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OR[|@REP(.)::values[|@VAL|]|][||]|])|]
+        @VAL::path[|self.path = "@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OPT[|@REP(.)::values[|@VAL|]|]|])|]
         @REP(        )::params[|self.@VAL::name = @VAL::name|]|]
 
     @REP(    )::entries[|def @VAL::name(self,input=None, header=None):
