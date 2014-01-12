@@ -49,13 +49,13 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-client = placesRest("http://at.home:1337/rest")
+client = placesRest("http://at.home:1337")
 
 # Retrieve all place names
-allPlaces = client.places.list()
+allPlaces = client.places().list()
 
 # Create one element
-aPlace = client.places.create(Place(name="Eat at Joe's", address="Somewhere ..."))
+aPlace = client.places().create(Place(name="Eat at Joe's", address="Somewhere ..."))
 
 # Update it ...
 client.place(aPlace).update(Address(address="A new address for Eat at Joe's"))
@@ -74,13 +74,13 @@ to have a better integration with reactive programming approach).
 
 ``` scala
 // Create the service defining the rest root path
-val client = placesRest("http://at.home:1337/rest")
+val client = placesRest("http://at.home:1337")
 
 // Retrieve all place names
-val allPlaces = client.places.list()
+val allPlaces = client.places().list()
 
 // Create one element
-val aPlace = client.places.create(Place("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
+val aPlace = client.places().create(Place("name" -> "Eat at Joe's", "address" -> "Somewhere ..."))
 
 // Update it ...
 client.place(aPlace).update(Address("address" -> "A new address for Eat at Joe's"))
@@ -98,13 +98,13 @@ Same example in `javascript`.
 
 ``` javascript
 // Create the service defining the rest root path
-var client = placesRest("http://at.home:1337/rest");
+var client = placesRest("http://at.home:1337");
 
 // Retrieve all place names
-var allPlaces = client.places.list();
+var allPlaces = client.places().list();
 
 // Create one element
-var aPlace = client.places.create(Place({name:"Eat at Joe's", address: "Somewhere ..."}));
+var aPlace = client.places().create(Place({name:"Eat at Joe's", address: "Somewhere ..."}));
 
 // Update it ...
 client.place(aPlace).update(Address({address: "A new address for Eat at Joe's"}));
