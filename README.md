@@ -49,7 +49,7 @@ For instance based on the previous declaration a `python` example can be propose
 
 ``` python
 # Create the service defining the rest root path
-client = placesRest("http://at.home:1337")
+client = placesRest("at.home:1337")
 
 # Retrieve all place names
 allPlaces = client.places().list()
@@ -74,7 +74,7 @@ to have a better integration with reactive programming approach).
 
 ``` scala
 // Create the service defining the rest root path
-val client = placesRest("http://at.home:1337")
+val client = placesRest("at.home:1337")
 
 // Retrieve all place names
 val allPlaces = client.places().list()
@@ -98,7 +98,7 @@ Same example in `javascript`.
 
 ``` javascript
 // Create the service defining the rest root path
-var client = placesRest("http://at.home:1337");
+var client = placesRest("at.home:1337");
 
 // Retrieve all place names
 var allPlaces = client.places().list();
