@@ -106,52 +106,52 @@ object RapidoSpec extends Specification {
 
     "provides an empty path" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[]")
-      parsed.get mustEqual Path(Nil)
+      parsed.get mustEqual Path(Nil,Nil)
     }
 
     "provides a simple static path" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[toto]")
-      parsed.get mustEqual Path(List(StaticLevel("toto")))
+      parsed.get mustEqual Path(List(StaticLevel("toto")),Nil)
     }
 
     "provides a simple static path even when starting with /" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[/toto]")
-      parsed.get mustEqual Path(List(StaticLevel("toto")))
+      parsed.get mustEqual Path(List(StaticLevel("toto")),Nil)
     }
 
     "provides a simple static path even when ending with /" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[toto/]")
-      parsed.get mustEqual Path(List(StaticLevel("toto")))
+      parsed.get mustEqual Path(List(StaticLevel("toto")),Nil)
     }
 
     "provides a simple static path even when starting and ending with /" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[/toto/]")
-      parsed.get mustEqual Path(List(StaticLevel("toto")))
+      parsed.get mustEqual Path(List(StaticLevel("toto")),Nil)
     }
 
     "provides a simple static path starting with an open tag" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[<toto]")
-      parsed.get mustEqual Path(List(StaticLevel("<toto")))
+      parsed.get mustEqual Path(List(StaticLevel("<toto")),Nil)
     }
 
     "provides a complex static path" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[toto/titi]")
-      parsed.get mustEqual Path(List(StaticLevel("toto"), StaticLevel("titi")))
+      parsed.get mustEqual Path(List(StaticLevel("toto"), StaticLevel("titi")),Nil)
     }
 
     "provides a complex static path with multiple / (involutive)" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[toto///titi]")
-      parsed.get mustEqual Path(List(StaticLevel("toto"), StaticLevel("titi")))
+      parsed.get mustEqual Path(List(StaticLevel("toto"), StaticLevel("titi")),Nil)
     }
 
     "provides a simple variable path" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[<p>]")
-      parsed.get mustEqual Path(List(DynamicLevel(List("p"))))
+      parsed.get mustEqual Path(List(DynamicLevel(List("p"))),Nil)
     }
 
     "provides a simple variable chained path" in {
       val parsed = RapidoParser.parseAll(RapidoParser.path, "[<p.address.zip>]")
-      parsed.get mustEqual Path(List(DynamicLevel(List("p", "address", "zip"))))
+      parsed.get mustEqual Path(List(DynamicLevel(List("p", "address", "zip"))),Nil)
     }
 
     "provides a complex path" in {
@@ -160,7 +160,7 @@ object RapidoSpec extends Specification {
         DynamicLevel(List("p", "address", "zip")),
         StaticLevel("who"),
         DynamicLevel(List("h", "name")
-        )))
+        )),Nil)
     }
 
   }
@@ -181,14 +181,14 @@ object RapidoSpec extends Specification {
 
     "provides a static route definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.routeSpecification, "route places [places]")
-      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places"))))
+      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places")),Nil))
     }
 
     "provides a dynamic route definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.routeSpecification, "route places(p:Place) [places/<p.name>]")
       parsed.get mustEqual RouteEntity("places",
         List(("p", TypeIdentifier("Place"))),
-        Path(List(StaticLevel("places"), DynamicLevel(List("p", "name")))))
+        Path(List(StaticLevel("places"), DynamicLevel(List("p", "name"))),Nil))
     }
 
     "provides a client definition" in {
@@ -210,7 +210,7 @@ object RapidoSpec extends Specification {
 
     "provides a static route definition specification" in {
       val parsed = RapidoParser.parseAll(RapidoParser.specification, "route places [places]")
-      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places"))))
+      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places")),Nil))
     }
 
     "provides a client definition specification" in {

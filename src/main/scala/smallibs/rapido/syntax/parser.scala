@@ -97,7 +97,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def record: Parser[Type] =
-    "{" ~> repsep(attribute, (";"|",")) <~ "}" ^^ {
+    "{" ~> repsep(attribute, (";" | ",")) <~ "}" ^^ {
       TypeObject
     }
 
@@ -114,8 +114,13 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def path: Parser[Path] =
-    "[" ~> repsep(variableEntry | staticEntry, "/") <~ "]" ^^ {
-      l => Path(for (e <- l if e != StaticLevel("")) yield e)
+    "[" ~> repsep(variableEntry | staticEntry, "/") ~ ('?' ~> repsep(parameter, "&")).? <~ "]" ^^ {
+      case l ~ p => Path(for (e <- l if e != StaticLevel("")) yield e, p.getOrElse(Nil))
+    }
+
+  def parameter: Parser[(String, PathEntry)] =
+    (regex(new Regex("[^=]+")) <~ "=") ~ (variableEntry | parameterEntry) ^^ {
+      case i ~ t => (i, t)
     }
 
   def staticEntry: Parser[PathEntry] =
@@ -126,6 +131,11 @@ object RapidoParser extends JavaTokenParsers {
   def variableEntry: Parser[PathEntry] =
     "<" ~> repsep(ident, ".") <~ ">" ^^ {
       DynamicLevel
+    }
+
+  def parameterEntry: Parser[PathEntry] =
+    regex(new Regex("[^&]+")) ^^ {
+      StaticLevel
     }
 
 }
