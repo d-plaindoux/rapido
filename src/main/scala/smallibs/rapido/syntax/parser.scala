@@ -97,7 +97,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def record: Parser[Type] =
-    "{" ~> repsep(attribute, ";") <~ "}" ^^ {
+    "{" ~> repsep(attribute, (";"|",")) <~ "}" ^^ {
       TypeObject
     }
 

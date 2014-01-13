@@ -123,7 +123,8 @@ class DynamicPathProvider(param: DynamicLevel) extends DataProvider with Abstrac
 
   def get(name: String): Option[DataProvider] =
     name match {
-      case "values" => Some(Provider.set(for (param <- param.values) yield Provider.constant(param)))
+      case "object" => Some(Provider.constant(param.values.head))
+      case "fields" => Some(Provider.set(for (param <- param.values.tail) yield Provider.constant(param)))
       case _ => None
     }
 }

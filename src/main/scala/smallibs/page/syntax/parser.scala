@@ -37,22 +37,22 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def value: Parser[Template] =
-    ("@VAL" ~> ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
+    ("@VAL" ~> ("::" ~> ident).?) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? ^^ {
       case s ~ v => Value(s, v)
     }
 
   private def repetition: Parser[Template] =
-    ("@REP" ~> ("(" ~> regex(new Regex("[^)]+")) <~ ")").? ~ ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
+    ("@REP" ~> ("(" ~> regex(new Regex("[^)]+")) <~ ")").? ~ ("::" ~> ident).?) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? ^^ {
       case s ~ v ~ t => Repetition(v, s, t)
     }
 
   private def optional: Parser[Template] =
-    ("@OPT" ~> ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").? ^^ {
+    ("@OPT" ~> ("::" ~> ident).?) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? ^^ {
       case v ~ t => Optional(v, t)
     }
 
   private def alternate: Parser[Template] =
-    ("@OR" ~> ("::" ~> ident).?) ~ ("[|" ~> innerTemplate <~ "|]").+ ^^ {
+    ("@OR" ~> ("::" ~> ident).?) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").+ ^^ {
       case s ~ t => Alternate(s, t)
     }
 
@@ -64,6 +64,11 @@ object PageParser extends JavaTokenParsers {
   private def innerSpecial: Parser[Template] =
     "@" ^^ {
       Text
+    }
+
+  private def spaces: Parser[Unit] =
+    regex(new Regex("\\s*")) ^^ {
+      _ => ()
     }
 
   private def simplify: Function[List[Template], Template] = {

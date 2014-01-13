@@ -20,18 +20,13 @@ class Engine(path: List[String], data: DataProvider) {
         case Some(newData) => new Engine(name :: path, newData).generate(Value(None, value))
       }
       case Sequence(seq) => generate_list("", seq)
-      case Repetition(None, sep, None) => generate_repetition(sep, Value(None, None))
-      case Repetition(None, sep, Some(content)) => generate_repetition(sep, content)
+      case Repetition(None, sep, content) => generate_repetition(sep, content.getOrElse(Value(None, None)))
       case Repetition(Some(name), sep, content) => data get name match {
         case None => Failure(new NoSuchElementException(data + ": " + name))
         case Some(newData) => new Engine(name :: path, newData).generate(Repetition(None, sep, content))
       }
       case Optional(None, None) => generate(Value(None, None))
-      case Optional(None, Some(template)) =>
-        generate(template) match {
-          case s@Success(_) => s
-          case f@Failure(_) => Success(None)
-        }
+      case Optional(None, Some(template)) => Success(generate(template).getOrElse(None))
       case Optional(Some(name), template) => data get name match {
         case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
         case Some(newData) => new Engine(name :: path, newData).generate(Optional(None, template))

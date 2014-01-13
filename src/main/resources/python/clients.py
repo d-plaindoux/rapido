@@ -7,6 +7,9 @@ class BasicService:
         self.url=url
 
     def httpRequest(self,operation=None,input=None, header={}):
+        if header['Content-type'] is None:
+            header = dict(
+
         connection = http.HTTPConnection(self.url)
         connection.request(operation, self.path, json.dumps(input), header)
         try:
@@ -25,7 +28,7 @@ class BasicService:
 class __@VAL::name(BasicService):
     @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
         BasicService.__init__(self,url)
-        @VAL::path[|self.path = "@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OPT[|@REP(.)::values[|@VAL|]|]|])|]
+        @VAL::path[|self.path = "@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|])|]
         @REP(        )::params[|self.@VAL::name = @VAL::name
 |]|]
     @REP(    )::entries[|def @VAL::name(self,input=None, header={}):
@@ -46,13 +49,3 @@ class @VAL::name:
     def __init__(self, url):
         @REP(        )::provides[|self.@VAL = Service_@VAL(url)
 |]|]
-
-
-
-# Create the service defining the rest root path                                                                                                                                                    \
-
-client = cloudsRest("localhost:5000")
-
-# Retrieve all place names                                                                                                                                                                          \
-
-allPlaces = client.clouds().list()
