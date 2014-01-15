@@ -30,11 +30,11 @@ class BasicService:
 class __@VAL::name(BasicService):
     @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
         BasicService.__init__(self,url)
-        @VAL::path[|self.path = (lambda method:"@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|])|])
+        @VAL::path[|self.path = "@REP::values[|@OR[|@VAL::name|][|%s|]|]" % (@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|])|]
         @REP(        )::params[|self.@VAL::name = @VAL::name
 |]|]
     @REP(    )::entries[|def @VAL::name(self,input=None, header={}):
-        return self.httpRequest(self.path("@VAL::name),
+        return self.httpRequest(self.path,
                                 operation="@VAL::operation",
                                 input=input,
                                 header=header)

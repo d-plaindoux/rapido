@@ -157,7 +157,9 @@ class EntryProvider(entry: Service) extends DataProvider with AbstractProvider {
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(entry.name))
-      case "operation" => Some(Provider.constant(entry.operation.toString))
+      case "operation" => Some(Provider.constant(entry.action.operation.toString))
+      case "path" => for (p <- entry.action.path) yield new PathProvider(p)
+      case "body" => for (b <- entry.action.body) yield Provider.constant(b)
       case "signature" => Some(Provider.constant("TODO:signature"))
       case _ => None
     }

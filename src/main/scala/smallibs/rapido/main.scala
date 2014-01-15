@@ -65,13 +65,20 @@ object GenAPI {
 
   def rapido(spec: String, lang: String): String = {
     val specificationURL: URL = new File(spec).toURI.toURL
-    val specification = RapidoParser.parseAll(RapidoParser.specifications, Resources getContent specificationURL).get
+    val specification = RapidoParser.parseAll(RapidoParser.specifications, Resources getContent specificationURL)
+    if (!specification.successful) {
+      throw new Exception(specification.toString)
+    }
+
     val languageURL = (Resources getURL s"/${lang}/clients.py") getOrElse {
       throw new Exception(s"unsupported language ${lang}")
     }
-    val language = PageParser.parseAll(PageParser.template, Resources getContent languageURL).get
+    val language = PageParser.parseAll(PageParser.template, Resources getContent languageURL)
+    if (!language.successful) {
+      throw new Exception(language.toString)
+    }
 
-    Engine(RapidoProvider.entities(specification)).generate(language).get.get
+    Engine(RapidoProvider.entities(specification.get)).generate(language.get).get.get
   }
 
   def main(args: Array[String]) = {

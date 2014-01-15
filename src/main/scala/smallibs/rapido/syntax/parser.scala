@@ -17,23 +17,23 @@ object RapidoParser extends JavaTokenParsers {
     typeSpecification | serviceSpecification | routeSpecification | clientSpecification
 
   def typeSpecification: Parser[Entity] =
-    ("type" ~> ident <~ "=") ~ typeDefinition ^^ {
+    ("type" ~> ident <~ "=") ~! typeDefinition ^^ {
       case n ~ t => TypeEntity(n, t)
     }
 
   def serviceSpecification: Parser[Entity] =
-    ("service" ~> ident <~ "{") ~ (serviceDefinition.* <~ "}") ^^ {
+    ("service" ~> ident <~ "{") ~! (serviceDefinition.* <~ "}") ^^ {
       case n ~ l => ServiceEntity(n, l)
     }
 
   def routeSpecification: Parser[Entity] =
-    ("route" ~> ident) ~ ("(" ~> repsep(routeParameter, ",") <~ ")").? ~ path ^^ {
+    ("route" ~> ident) ~! ("(" ~> repsep(routeParameter, ",") <~ ")").? ~ path ^^ {
       case name ~ None ~ path => RouteEntity(name, Nil, path)
       case name ~ Some(params) ~ path => RouteEntity(name, params, path)
     }
 
   def clientSpecification: Parser[Entity] =
-    ("client" ~> ident) ~ ("provides" ~> repsep(ident, ",")) ^^ {
+    ("client" ~> ident) ~! ("provides" ~> repsep(ident, ",")) ^^ {
       case n ~ l => ClientEntity(n, l)
     }
 
@@ -42,7 +42,7 @@ object RapidoParser extends JavaTokenParsers {
   //
 
   def routeParameter: Parser[(String, Type)] =
-    (ident <~ ":") ~ typeDefinition ^^ {
+    (ident <~ ":") ~! typeDefinition ^^ {
       case n ~ t => (n, t)
     }
 
@@ -55,8 +55,10 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def serviceDefinition: Parser[Service] =
-    (ident <~ ":") ~ restAction ~ (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ^^ {
-      case name ~ action ~ in ~ out ~ err => Service(name, action, ServiceType(in, out, err))
+    (ident <~ ":") ~! (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ~
+      ("=" ~> restAction) ~ path.? ~ ("BODY" ~> "[" ~> ident <~ "]").? ^^ {
+      case name ~ in ~ out ~ err ~ action ~ path ~ body =>
+        Service(name, Action(action, path, body), ServiceType(in, out, err))
     }
 
   def restAction: Parser[Operation] =
@@ -114,28 +116,18 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def path: Parser[Path] =
-    "[" ~> repsep(variableEntry | staticEntry, "/") ~ ('?' ~> repsep(parameter, "&")).? <~ "]" ^^ {
-      case l ~ p => Path(for (e <- l if e != StaticLevel("")) yield e, p.getOrElse(Nil))
-    }
-
-  def parameter: Parser[(String, PathEntry)] =
-    (regex(new Regex("[^=]+")) <~ "=") ~ (variableEntry | parameterEntry) ^^ {
-      case i ~ t => (i, t)
+    "[" ~> (variableEntry | staticEntry).+ <~ "]" ^^ {
+      case l => Path(for (e <- l if e != StaticLevel("")) yield e)
     }
 
   def staticEntry: Parser[PathEntry] =
-    regex(new Regex("[^/\\]]*")) ^^ {
+    regex(new Regex("[^<\\]]+")) ^^ {
       StaticLevel
     }
 
   def variableEntry: Parser[PathEntry] =
     "<" ~> repsep(ident, ".") <~ ">" ^^ {
       DynamicLevel
-    }
-
-  def parameterEntry: Parser[PathEntry] =
-    regex(new Regex("[^&]+")) ^^ {
-      StaticLevel
     }
 
 }

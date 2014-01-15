@@ -13,7 +13,7 @@ object PageParser extends JavaTokenParsers {
   override def skipWhitespace: Boolean = false
 
   def template: Parser[Template] =
-    (text | value | repetition | alternate | optional | special).* ^^ {
+    (text | commonTemplate | special).* ^^ {
       simplify
     }
 
@@ -22,9 +22,12 @@ object PageParser extends JavaTokenParsers {
   //
 
   private def innerTemplate: Parser[Template] =
-    (innerText | value | repetition | alternate | optional | innerSpecial).* ^^ {
+    (innerText | commonTemplate | innerSpecial).* ^^ {
       simplify
     }
+
+  private def commonTemplate: Parser[Template] =
+    define | use | value | repetition | alternate | optional
 
   private def text: Parser[Template] =
     regex(new Regex("[^@]+")) ^^ {
@@ -34,6 +37,16 @@ object PageParser extends JavaTokenParsers {
   private def innerText: Parser[Template] =
     regex(new Regex("[^@|]+")) ^^ {
       Text
+    }
+
+  private def define: Parser[Template] =
+    ("@DEFINE" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]") ^^ {
+      case n ~ v => Define(n, v)
+    }
+
+  private def use: Parser[Template] =
+    "@USE" ~> "::" ~> ident ^^ {
+      case n => Use(n)
     }
 
   private def value: Parser[Template] =

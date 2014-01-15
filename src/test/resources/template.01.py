@@ -21,7 +21,7 @@ class Service_@VAL::name(BasicService):
     @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
         BasicService.__init__(self)
         self.url = url
-        @VAL::path[|self.path = "@REP::values[|@OR[|/@VAL::name|][|/%s|]|]" % (@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|.@VAL|]|]|])|]
+        @VAL::path[|self.path = "@REP::values[|@OR[|@VAL::name|][|%s|]|]" % (@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|.@VAL|]|]|])|]
         @REP(        )::params[|self.@VAL::name = @VAL::name|]|]
 
     @REP(    )::entries[|def @VAL::name(self,input=None, header=None):

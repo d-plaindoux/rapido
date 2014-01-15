@@ -1,6 +1,6 @@
 package smallibs.rapido.ast
 
-case class Path(values: List[PathEntry], parameters: List[(String, PathEntry)])
+case class Path(values: List[PathEntry])
 
 trait PathEntry
 

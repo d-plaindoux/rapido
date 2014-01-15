@@ -101,5 +101,15 @@ object PageSpec extends Specification {
       parsed.get mustEqual Optional(None, Some(NoTemplate))
     }
 
+    "provides a use" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@USE::type")
+      parsed.get mustEqual Use("type")
+    }
+
+    "provides an empty define" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@DEFINE::type[||]")
+      parsed.get mustEqual Define("type", NoTemplate)
+    }
+
   }
 }
