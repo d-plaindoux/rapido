@@ -24,14 +24,14 @@ type Places = Place*
 type Empty = {}
 
 service places {
-	list:   GET        => Places
-	create: POST Place => Place or Error
+	list:         => Places = GET
+	create: Place => Place or Error = POST
 }
 
 service place {
-   	get:    GET         => Place or Error
-   	update: PUT Address => Empty or Error
-   	delete: DELETE      => Empty or Error
+   	get:            => Place or Error = GET
+   	update: Address => Empty or Error = PUT
+   	delete:         => Empty or Error = DELETE
 }
 
 route places         [/places]
