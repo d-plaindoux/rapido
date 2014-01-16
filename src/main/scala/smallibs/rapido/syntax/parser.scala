@@ -133,7 +133,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def variableEntry: Parser[PathEntry] =
-    "<" ~> repsep(ident, ".") <~ ">" ^^ {
+    "<" ~> repsep(regex(new Regex("[^.>]+")), ".") <~ ">" ^^ {
       DynamicLevel
     }
 
