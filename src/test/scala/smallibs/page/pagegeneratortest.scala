@@ -63,5 +63,17 @@ object EngineGeneratorTest extends Specification {
       engine.generate(template.get) mustEqual Success(Some(" - Hello - World"))
     }
 
+    "provides a result using Define and Use" in {
+      val template = PageParser.parseAll(PageParser.template, "@DEFINE::keys[|@REP::keys[| - @VAL::name|]|]\n@USE::keys")
+      val engine = Engine(Provider.record(
+        "keys" ->
+          Provider.set(
+            Provider.record("name" -> Provider.constant("Hello")),
+            Provider.record("name" -> Provider.constant("World"))
+          )
+      ))
+      engine.generate(template.get) mustEqual Success(Some(" - Hello - World"))
+    }
+
   }
 }

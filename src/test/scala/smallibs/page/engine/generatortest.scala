@@ -63,7 +63,6 @@ object EngineTest extends Specification {
       ) mustEqual Success(Some(" - Hello - World"))
     }
 
-
     "provides a result with a named alternative" in {
       val engine = Engine(
         Provider.set(

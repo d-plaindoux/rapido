@@ -40,7 +40,7 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def define: Parser[Template] =
-    ("@DEFINE" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]") ^^ {
+    ("@DEFINE" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]") <~ spaces ^^ {
       case n ~ v => Define(n, v)
     }
 

@@ -1,3 +1,9 @@
+@DEFINE::paramNames
+    [|@VAL::route[|@REP::params[|, @VAL::name|]|]|]
+
+@DEFINE::paramValues
+    [|@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|]|]
+
 import httplib as http
 import json
 
@@ -28,9 +34,9 @@ class BasicService:
 
 @REP::services[|
 class __@VAL::name(BasicService):
-    @VAL::route[|def __init__(self, url@REP::params[|, @VAL::name|]):
-        BasicService.__init__(self,url)
-        @VAL::path[|self.path = "@REP::values[|@OR[|@VAL::name|][|%s|]|]" % (@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|])|]
+    def __init__(self, url@USE::paramNames):
+        @VAL::route[|BasicService.__init__(self,url)
+        @VAL::path[|self.path = "@REP::values[|@OR[|@VAL::name|][|%s|]|]" % (@USE::paramValues)|]
         @REP(        )::params[|self.@VAL::name = @VAL::name
 |]|]
     @REP(    )::entries[|def @VAL::name(self,input=None, header={}):
@@ -41,7 +47,7 @@ class __@VAL::name(BasicService):
 
 |]
 def Service_@VAL::name(url):
-    return lambda @VAL::route[|@REP(,)::params[|@VAL::name|]|]: __@VAL::name(url@VAL::route[|@REP::params[|, @VAL::name|]|])
+    return lambda @VAL::route[|@REP(,)::params[|@VAL::name|]|]: __@VAL::name(url@USE::paramNames)
 |]
 #
 # Clients:@REP(,)::clients[| @VAL::name|]

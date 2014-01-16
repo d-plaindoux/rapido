@@ -56,9 +56,10 @@ object RapidoParser extends JavaTokenParsers {
 
   def serviceDefinition: Parser[Service] =
     (ident <~ ":") ~! (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ~
-      ("=" ~> restAction) ~ path.? ~ ("BODY" ~> "[" ~> ident <~ "]").? ^^ {
-      case name ~ in ~ out ~ err ~ action ~ path ~ body =>
-        Service(name, Action(action, path, body), ServiceType(in, out, err))
+      ("=" ~> restAction) ~ path.? ~
+      ("PARAMS" ~> "[" ~> ident <~ "]").? ~ ("BODY" ~> "[" ~> ident <~ "]").? ~ ("HEADER" ~> "[" ~> ident <~ "]").? ^^ {
+      case name ~ in ~ out ~ err ~ action ~ path ~ param ~ body ~ header =>
+        Service(name, Action(action, path, param, body, header), ServiceType(in, out, err))
     }
 
   def restAction: Parser[Operation] =
@@ -94,12 +95,18 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def attribute: Parser[(String, Type)] =
-    (ident <~ ":") ~ typeDefinition ^^ {
+    (ident <~ ":") ~! typeDefinition ^^ {
       case i ~ t => (i, t)
-    }
+    } |
+      ("\"" ~> regex(new Regex("[^\"]+")) <~ "\"" <~ ":") ~! typeDefinition ^^ {
+        case i ~ t => (i, t)
+      } |
+      ("'" ~> regex(new Regex("[^\']+")) <~ "'" <~ ":") ~! typeDefinition ^^ {
+        case i ~ t => (i, t)
+      }
 
   def record: Parser[Type] =
-    "{" ~> repsep(attribute, (";" | ",")) <~ "}" ^^ {
+    "{" ~> repsep(attribute, ";" | ",") <~ "}" ^^ {
       TypeObject
     }
 
@@ -130,4 +137,5 @@ object RapidoParser extends JavaTokenParsers {
       DynamicLevel
     }
 
+  protected override val whiteSpace = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+""".r
 }

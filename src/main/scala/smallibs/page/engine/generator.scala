@@ -7,76 +7,94 @@ import scala.util.Try
 import smallibs.page.DataProvider
 import smallibs.page.ast._
 
-class Engine(path: List[String], data: DataProvider) {
+class Engine(path: List[String], data: DataProvider, definitions: Map[String, Template]) {
+
+  type Definitions = Map[String, Template]
 
   def generate(template: Template): Try[Option[String]] =
-    template match {
-      case NoTemplate => Success(Some(""))
-      case Text(t) => Success(Some(t))
-      case Value(None, None) => Success(Some(data.toString))
-      case Value(None, Some(newTemplate)) => generate(newTemplate)
-      case Value(Some(name), value) => data get name match {
-        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData).generate(Value(None, value))
-      }
-      case Sequence(seq) => generate_list("", seq)
-      case Repetition(None, sep, content) => generate_repetition(sep, content.getOrElse(Value(None, None)))
-      case Repetition(Some(name), sep, content) => data get name match {
-        case None => Failure(new NoSuchElementException(data + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData).generate(Repetition(None, sep, content))
-      }
-      case Optional(None, None) => generate(Value(None, None))
-      case Optional(None, Some(template)) => Success(generate(template).getOrElse(None))
-      case Optional(Some(name), template) => data get name match {
-        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData).generate(Optional(None, template))
-      }
-      case Alternate(None, l) => generate_alternate(l)
-      case Alternate(Some(name), l) => data get name match {
-        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData).generate_alternate(l)
-      }
+    generateWithDefinitions(template) match {
+      case f@Failure(e) => Failure(e)
+      case Success((s, _)) => Success(s)
     }
 
-  def generate_list(result: String, l: List[Template]): Try[Option[String]] =
-    l match {
-      case Nil => Success(Some(result))
-      case e :: nl =>
-        generate(e) match {
-          case f@Failure(_) => f
-          case Success(s) => generate_list(result + s.getOrElse(""), nl)
+  def generateWithDefinitions(template: Template): Try[(Option[String], Definitions)] =
+    template match {
+      case NoTemplate => Success(Some(""), definitions)
+      case Text(t) => Success(Some(t), definitions)
+      case Value(None, None) => Success(Some(data.toString), definitions)
+      case Value(None, Some(newTemplate)) => generateWithDefinitions(newTemplate)
+      case Value(Some(name), value) => data get name match {
+        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
+        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions(Value(None, value))
+      }
+      case Sequence(seq) => generateWithDefinitions_list("", seq)
+      case Repetition(None, sep, content) => generateWithDefinitions_repetition(sep, content.getOrElse(Value(None, None)))
+      case Repetition(Some(name), sep, content) => data get name match {
+        case None => Failure(new NoSuchElementException(data + ": " + name))
+        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions(Repetition(None, sep, content))
+      }
+      case Optional(None, None) => generateWithDefinitions(Value(None, None))
+      case Optional(None, Some(template)) =>
+        generateWithDefinitions(template) match {
+          case f@Failure(_) => Success(None, definitions)
+          case success => success
+        }
+      case Optional(Some(name), template) => data get name match {
+        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
+        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions(Optional(None, template))
+      }
+      case Alternate(None, l) => generateWithDefinitions_alternate(l)
+      case Alternate(Some(name), l) => data get name match {
+        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
+        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions_alternate(l)
+      }
+      case Define(name, t) => Success(None, definitions ++ Map(name -> t))
+      case Use(name) =>
+        definitions get name match {
+          case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
+          case Some(t) => generateWithDefinitions(t)
         }
     }
 
-  def generate_repetition(sep: Option[String], template: Template): Try[Option[String]] = {
-    def generate_from_list(values: List[DataProvider]): List[String] =
+  def generateWithDefinitions_list(result: String, l: List[Template]): Try[(Option[String], Definitions)] =
+    l match {
+      case Nil => Success(Some(result), definitions)
+      case e :: nl =>
+        generateWithDefinitions(e) match {
+          case f@Failure(_) => f
+          case Success((s, d)) => new Engine(path, data, d).generateWithDefinitions_list(result + s.getOrElse(""), nl)
+        }
+    }
+
+  def generateWithDefinitions_repetition(sep: Option[String], template: Template): Try[(Option[String], Definitions)] = {
+    def generateWithDefinitions_from_list(values: List[DataProvider], definitions: Definitions): List[String] =
       values match {
         case Nil => Nil
         case data :: values =>
-          new Engine(path, data).generate(template) match {
-            case Success(None) => generate_from_list(values)
-            case Success(Some(e)) => e :: generate_from_list(values)
+          new Engine(path, data, definitions).generateWithDefinitions(template) match {
+            case Success((None, d)) => generateWithDefinitions_from_list(values, d)
+            case Success((Some(e), d)) => e :: generateWithDefinitions_from_list(values, d)
             case Failure(f) => throw f
           }
       }
 
     try {
-      Success(Some(generate_from_list(data.values).mkString(sep.getOrElse(""))))
+      Success(Some(generateWithDefinitions_from_list(data.values, definitions).mkString(sep.getOrElse(""))), definitions)
     } catch {
       case e: Throwable => Failure(e)
     }
   }
 
-  def generate_alternate(l: List[Template]): Try[Option[String]] =
+  def generateWithDefinitions_alternate(l: List[Template]): Try[(Option[String], Definitions)] =
     l match {
       case Nil => throw new IllegalAccessException
-      case e :: l => generate(e) match {
-        case Failure(_) => generate_alternate(l)
+      case e :: l => generateWithDefinitions(e) match {
+        case Failure(_) => generateWithDefinitions_alternate(l)
         case success => success
       }
     }
 }
 
 object Engine {
-  def apply(bean: DataProvider): Engine = new Engine(Nil, bean)
+  def apply(bean: DataProvider): Engine = new Engine(Nil, bean, Map())
 }
