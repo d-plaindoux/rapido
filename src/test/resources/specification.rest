@@ -1,6 +1,6 @@
-type Error = { code:Int; reason:String }
-type Address = { address:String? }
-type Place = Address with { name:String }
+type Error = { code:int; reason:string }
+type Address = { address:string? }
+type Place = Address with { name:string }
 type Places = Place*
 type Empty = {}
 

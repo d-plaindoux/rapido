@@ -1,0 +1,9 @@
+@DEFINE::Types
+[|@OR
+[|@VAL::bool[|bool|]|]
+[|@VAL::int[|int|]|]
+[|@VAL::string[|string|]|]
+[|@VAL::opt[|@USE::Types?|]|]
+[|@VAL::rep[|@USE::Types*|]|]
+[|@VAL::object[|{@REP(,)[|@VAL::name:@VAL::type[|@USE::Types|]|]}|]|]|]
+@REP(;)::types[|@VAL::name=@VAL::definition[|@USE::Types|]|]

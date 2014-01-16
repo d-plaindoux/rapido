@@ -8,7 +8,7 @@ type AuthToken = { 'X-Auth-Token' : String }
 
 service keystone {
     authenticate: Credential => Token or Error = GET BODY[Authentication]
-    endpoints: AuthToken => String* = GET[<X-Auth-Token>/endoints] HEADER[AuthToken]
+    endpoints: { tokenId : String } with AuthToken => String* = GET[<tokenId>/endoints] HEADER[AuthToken]
 }
 
 route keystone [v2.0/tokens]
