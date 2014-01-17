@@ -50,8 +50,12 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def value: Parser[Template] =
-    ("@VAL" ~> ("::" ~> ident).?) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? ^^ {
-      case s ~ v => Value(s, v)
+    ("@VAL" ~> ("::" ~> ident).*) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? ^^ {
+      case Nil ~ t => Value(None, t)
+      case List(e) ~ v => Value(Some(e), v)
+      case l ~ v => l.foldRight(Value(None, v)) {
+        (l, r) => Value(Some(l), Some(r))
+      }
     }
 
   private def repetition: Parser[Template] =

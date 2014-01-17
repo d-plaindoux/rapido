@@ -78,7 +78,7 @@ object Generation extends Specification {
 
     "provides route path" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.08").get
-      val expected = Success(Some("Error={name:int,name:string};Address={name:string?};Place={name:string?,name:string};Places={name:string?,name:string}*;Empty={}"))
+      val expected = Success(Some("Error={code:int,reason:string};Address={address:string?};Place={address:string?,name:string};Places={address:string?,name:string}*;Empty={}"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 

@@ -17,7 +17,7 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
       case Success((s, _)) => Success(s)
     }
 
-  def generateWithDefinitions(template: Template): Try[(Option[String], Definitions)] =
+  def generateWithDefinitions(template: Template): Try[(Option[String], Definitions)] = {
     template match {
       case NoTemplate => Success(Some(""), definitions)
       case Text(t) => Success(Some(t), definitions)
@@ -55,6 +55,7 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
           case Some(t) => generateWithDefinitions(t)
         }
     }
+  }
 
   def generateWithDefinitions_list(result: String, l: List[Template]): Try[(Option[String], Definitions)] =
     l match {

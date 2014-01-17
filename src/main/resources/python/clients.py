@@ -1,8 +1,22 @@
+@DEFINE::attributes
+    [|@OR
+    [|@VAL::object[|[@REP(,)[|'@VAL::name'|]|]]|]
+    [|None|]|]
+
 @DEFINE::paramNames
-    [|@VAL::route[|@REP::params[|, @VAL::name|]|]|]
+    [|@REP::params[|, @VAL::name|]|]
 
 @DEFINE::paramValues
     [|@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|]|]
+
+@DEFINE::rootParamNames
+    [|@VAL::route[|@USE::paramNames|]|]
+
+@DEFINE::pathAsString
+    [|"@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
+
+@DEFINE::pathVariables
+    [|[@REP(,)::values[|@OPT[|['@VAL::object'@REP::fields[|,'@VAL'|]]|]|]]|]
 
 import httplib as http
 import json
@@ -28,26 +42,37 @@ class BasicService:
         finally:
             connection.close()
 
+    def getPath(self, input, pattern, attributes):
+        return "TODO"
+
+    def getParameters(self, input, attributes):
+        return {}
+
+    def getObject(self, input, attributes):
+        return {}
+
 #
 # Services:@REP(,)::services[| @VAL::name|]
 #
 
 @REP::services[|
 class __@VAL::name(BasicService):
-    def __init__(self, url@USE::paramNames):
+    def __init__(self, url@USE::rootParamNames):
         @VAL::route[|BasicService.__init__(self,url)
-        @VAL::path[|self.path = "@REP::values[|@OR[|@VAL::name|][|%s|]|]" % (@USE::paramValues)|]
+        @VAL::path[|self.path = @USE::pathAsString % (@USE::paramValues)|]
         @REP(        )::params[|self.@VAL::name = @VAL::name
 |]|]
-    @REP(    )::entries[|def @VAL::name(self,input=None, header={}):
-        return self.httpRequest(self.path,
-                                operation="@VAL::operation",
-                                input=input,
-                                header=header)
+    @REP(    )::entries[|def @VAL::name(self, input={}):
+        result = self.httpRequest(self.path@OPT[| + @VAL::path[|self.getPath(input,@USE::pathAsString,@USE::pathVariables)|]|],
+                                  operation="@VAL::operation",
+                                  params=@OR[|@VAL::params[|getParameters(input,@USE::attributes)|])|][|None|],
+                                  body=@OR[|@VAL::body[|self.getObject(input,@USE::attributes)|]|][|None|],
+                                  header=@OR[|@VAL::header[|self.getObject(input,@USE::attributes)|]|][|{}|])
+        return @OR[|@VAL::result[|self.getObject(input,@USE::attributes)|]|][|result|]
 
 |]
 def Service_@VAL::name(url):
-    return lambda @VAL::route[|@REP(,)::params[|@VAL::name|]|]: __@VAL::name(url@USE::paramNames)
+    return lambda @VAL::route[|@REP(,)::params[|@VAL::name|]|]: __@VAL::name(url@USE::rootParamNames)
 |]
 #
 # Clients:@REP(,)::clients[| @VAL::name|]

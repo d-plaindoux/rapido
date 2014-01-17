@@ -57,9 +57,10 @@ object RapidoParser extends JavaTokenParsers {
   def serviceDefinition: Parser[Service] =
     (ident <~ ":") ~! (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ~
       ("=" ~> restAction) ~ path.? ~
-      ("PARAMS" ~> "[" ~> typeDefinition <~ "]").? ~ ("BODY" ~> "[" ~> typeDefinition <~ "]").? ~ ("HEADER" ~> "[" ~> typeDefinition <~ "]").? ^^ {
-      case name ~ in ~ out ~ err ~ action ~ path ~ param ~ body ~ header =>
-        Service(name, Action(action, path, param, body, header), ServiceType(in, out, err))
+      ("PARAMS" ~> "[" ~> typeDefinition <~ "]").? ~ ("BODY" ~> "[" ~> typeDefinition <~ "]").? ~
+      ("HEADER" ~> "[" ~> typeDefinition <~ "]").? ~ ("RETURN" ~> "[" ~> typeDefinition <~ "]").? ^^ {
+      case name ~ in ~ out ~ err ~ action ~ path ~ param ~ body ~ header ~ result =>
+        Service(name, Action(action, path, param, body, header, result), ServiceType(in, out, err))
     }
 
   def restAction: Parser[Operation] =
@@ -107,7 +108,7 @@ object RapidoParser extends JavaTokenParsers {
 
   def record: Parser[Type] =
     "{" ~> repsep(attribute, ";" | ",") <~ "}" ^^ {
-      TypeObject
+      l => TypeObject(l.toMap)
     }
 
   def atomic: Parser[Type] =

@@ -21,6 +21,11 @@ object PageSpec extends Specification {
       parsed.get mustEqual Value(Some("name"), None)
     }
 
+    "provides an two level ident" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@VAL::name::id")
+      parsed.get mustEqual Value(Some("name"), Some(Value(Some("id"), Some(Value(None, None)))))
+    }
+
     "provides a value ~ value" in {
       val parsed = PageParser.parseAll(PageParser.template, "@VAL::name@VAL::value")
       parsed.get mustEqual Sequence(List(Value(Some("name"), None), Value(Some("value"), None)))

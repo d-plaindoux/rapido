@@ -1,14 +1,14 @@
-type Credential = { username:String, password:String, tenantName: String? }
-type Authentication = {auth: {passwordCredentials: {username: String, password: String}}, tenantName: String?}
-type Token = {access: {token: {issued_at: String, expires: String, id: String}}}
-type Access = {access: Token }
-type Error = {error: { code:Int, title: String, message: String}}
+type Authentication = {auth:{passwordCredentials: {username:string, password:string}}, tenantName:string?}
+type Token = {access:{token: {issued_at:string, expires:string, id:string}}}
+type Access = {access:Token }
+type Error = {error:{ code:int, title:string, message:string}}
 
-type AuthToken = { 'X-Auth-Token' : String }
+type AuthToken = { 'X-Auth-Token':string }
+type Endpoints = { endpoints:{ name:string}* }
 
 service keystone {
-    authenticate: Credential => Token or Error = GET BODY[Authentication]
-    endpoints: { tokenId : String } with AuthToken => String* = GET[<tokenId>/endoints] HEADER[AuthToken]
+    authenticate: Authentication => Token or Error = GET BODY[Authentication]
+    endpoints: { tokenId:string } with AuthToken => Endpoints = GET[<tokenId>/endpoints] HEADER[AuthToken]
 }
 
 route keystone [v2.0/tokens]

@@ -176,7 +176,8 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
       case ("opt", TypeOptional(t)) => Some(new TypeProvider(t, types))
       case ("rep", TypeMultiple(t)) => Some(new TypeProvider(t, types))
       case ("object", TypeObject(values)) =>
-        Some(Provider.set(for ((n, t) <- values) yield new TypeAttributeProvider(n, t, types)))
+        val attributes = for ((n, t) <- values) yield new TypeAttributeProvider(n, t, types)
+        Some(Provider.set(attributes.toList))
       case ("object", TypeComposed(l, r)) =>
         (deref(l), deref(r)) match {
           case (Some(TypeObject(l)), Some(TypeObject(r))) => new TypeProvider(TypeObject(l ++ r), types).get(name)
@@ -188,12 +189,12 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
     }
 }
 
-class TypeAttributeProvider(name: String, aType: Type, types: Map[String, Type]) extends DataProvider with AbstractProvider {
+class TypeAttributeProvider(aName: String, aType: Type, types: Map[String, Type]) extends DataProvider with AbstractProvider {
   val keys = List("name", "type")
 
   def get(name: String): Option[DataProvider] =
     name match {
-      case "name" => Some(Provider.constant(name))
+      case "name" => Some(Provider.constant(aName))
       case "type" => Some(new TypeProvider(aType, types))
       case _ => None
     }
@@ -211,6 +212,7 @@ class EntryProvider(entry: Service, types: Map[String, Type]) extends DataProvid
       case "params" => for (b <- entry.action.params) yield TypeProvider(b, types)
       case "body" => for (b <- entry.action.body) yield TypeProvider(b, types)
       case "header" => for (b <- entry.action.header) yield TypeProvider(b, types)
+      case "return" => for (b <- entry.action.result) yield TypeProvider(b, types)
       case _ => None
     }
 }

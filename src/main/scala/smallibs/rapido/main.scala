@@ -51,6 +51,8 @@ object GenAPI {
         case Nil => map
         case "--lang" :: value :: tail =>
           nextOption(map ++ Map('lang -> value), tail)
+        case "--model" :: value :: tail =>
+          nextOption(map ++ Map('model -> value), tail)
         case "--api" :: value :: tail =>
           nextOption(map ++ Map('api -> value), tail)
         case "--out" :: value :: tail =>
@@ -63,34 +65,41 @@ object GenAPI {
     nextOption(Map(), args.toList)
   }
 
-  def rapido(spec: String, lang: String): String = {
+  def rapido(spec: String, lang: Option[String], model: Option[String]): String = {
     val specificationURL: URL = new File(spec).toURI.toURL
     val specification = RapidoParser.parseAll(RapidoParser.specifications, Resources getContent specificationURL)
     if (!specification.successful) {
       throw new Exception(specification.toString)
     }
 
-    val languageURL = (Resources getURL s"/${lang}/clients.py") getOrElse {
-      throw new Exception(s"unsupported language ${lang}")
-    }
-    val language = PageParser.parseAll(PageParser.template, Resources getContent languageURL)
-    if (!language.successful) {
-      throw new Exception(language.toString)
+    val templateURL = (lang, model) match {
+      case (Some(lang), _) => (Resources getURL s"/$lang/clients.py") getOrElse {
+        throw new Exception(s"unsupported language $lang")
+      }
+      case (_, Some(model)) => new File(model).toURI.toURL
+      case _ => throw new Exception("missing lang or model")
     }
 
-    Engine(RapidoProvider.entities(specification.get)).generate(language.get).get.get
+    val template = PageParser.parseAll(PageParser.template, Resources getContent templateURL)
+    if (!template.successful) {
+      throw new Exception(template.toString)
+    }
+
+    Engine(RapidoProvider.entities(specification.get)).generate(template.get).get.get
   }
 
   def main(args: Array[String]) = {
     try {
       val options = parserOptions(args)
-      val generatedAPI = rapido((options get 'api).get, (options get 'lang).get)
+      val generatedAPI = rapido((options get 'api).get, options get 'lang, options get 'model)
       options get 'out match {
         case None => print(generatedAPI)
         case Some(name) => Resources saveContent(name, generatedAPI)
       }
     } catch {
-      case e: Throwable => println(e.getMessage)
+      case e: Throwable =>
+        println(e.getMessage)
+        e.printStackTrace
     }
   }
 }

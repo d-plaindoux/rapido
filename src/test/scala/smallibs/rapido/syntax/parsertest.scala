@@ -28,33 +28,33 @@ object RapidoSpec extends Specification {
 
     "provides an empty data object type" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{}")
-      parsed.get mustEqual TypeObject(Nil)
+      parsed.get mustEqual TypeObject(Map())
     }
 
     "provides a data object type with one attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ valid : bool }")
-      parsed.get mustEqual TypeObject(List("valid" -> TypeBoolean))
+      parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
     }
 
     "provides a data object type with one quoted attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ 'valid' : bool }")
-      parsed.get mustEqual TypeObject(List("valid" -> TypeBoolean))
+      parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
     }
 
     "provides a data object type with one string quoted attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ \"valid\" : bool }")
-      parsed.get mustEqual TypeObject(List("valid" -> TypeBoolean))
+      parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
     }
 
     "provides a data object type with two attributes" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "{ valid : bool ; content : {} }")
-      val expected: TypeObject = TypeObject(List("valid" -> TypeBoolean, "content" -> TypeObject(Nil)))
+      val expected: TypeObject = TypeObject(Map("valid" -> TypeBoolean, "content" -> TypeObject(Map())))
       parsed.get mustEqual expected
     }
 
     "provides an empty data object type" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "{}")
-      parsed.get mustEqual TypeObject(Nil)
+      parsed.get mustEqual TypeObject(Map())
     }
 
     "provides a number optional type" in {
@@ -78,12 +78,12 @@ object RapidoSpec extends Specification {
     }
     "provides a type composition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "Action with {} ")
-      parsed.get mustEqual TypeComposed(TypeIdentifier("Action"), TypeObject(Nil))
+      parsed.get mustEqual TypeComposed(TypeIdentifier("Action"), TypeObject(Map()))
     }
 
     "provides a type composition with three components" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "Listener with Action with {}")
-      parsed.get mustEqual TypeComposed(TypeIdentifier("Listener"), TypeComposed(TypeIdentifier("Action"), TypeObject(Nil)))
+      parsed.get mustEqual TypeComposed(TypeIdentifier("Listener"), TypeComposed(TypeIdentifier("Action"), TypeObject(Map())))
     }
 
   }
@@ -109,42 +109,47 @@ object RapidoSpec extends Specification {
 
     "provides a services with one definition with no parameter but no error" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* = GET")
-      parsed.get mustEqual Service("list", Action(GET, None, None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
+      parsed.get mustEqual Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
     }
 
     "provides a services with one definition with a parameter but no error" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : Param => Action* = GET")
-      parsed.get mustEqual Service("list", Action(GET, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeMultiple(TypeIdentifier("Action")), None))
+      parsed.get mustEqual Service("list", Action(GET, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeMultiple(TypeIdentifier("Action")), None))
     }
 
     "provides a services with one definition with no parameter but an error" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* or Error = GET")
-      parsed.get mustEqual Service("list", Action(GET, None, None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), Some(TypeIdentifier("Error"))))
+      parsed.get mustEqual Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), Some(TypeIdentifier("Error"))))
     }
 
     "provides a services with one definition with no parameter but an error" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : Param => Action* or Error = GET")
-      parsed.get mustEqual Service("list", Action(GET, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeMultiple(TypeIdentifier("Action")), Some(TypeIdentifier("Error"))))
+      parsed.get mustEqual Service("list", Action(GET, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeMultiple(TypeIdentifier("Action")), Some(TypeIdentifier("Error"))))
     }
 
     "provides a services with one definition with extended url for the action" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* = GET[list]")
-      parsed.get mustEqual Service("list", Action(GET, Some(Path(List(StaticLevel("list")))), None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
+      parsed.get mustEqual Service("list", Action(GET, Some(Path(List(StaticLevel("list")))), None, None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
     }
 
     "provides a services with one definition with extended url for the action with parameters" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* = GET PARAMS[Object]")
-      parsed.get mustEqual Service("list", Action(GET, None, Some(TypeIdentifier("Object")), None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
+      parsed.get mustEqual Service("list", Action(GET, None, Some(TypeIdentifier("Object")), None, None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
     }
 
     "provides a services with one definition with extended url for the action with body" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* = GET BODY[Object]")
-      parsed.get mustEqual Service("list", Action(GET, None, None, Some(TypeIdentifier("Object")), None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
+      parsed.get mustEqual Service("list", Action(GET, None, None, Some(TypeIdentifier("Object")), None, None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
     }
 
     "provides a services with one definition with extended url for the action with header" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* = GET HEADER[Object]")
-      parsed.get mustEqual Service("list", Action(GET, None, None, None, Some(TypeIdentifier("Object"))), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
+      parsed.get mustEqual Service("list", Action(GET, None, None, None, Some(TypeIdentifier("Object")), None), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
+    }
+
+    "provides a services with one definition with extended url for the action with return" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.serviceDefinition, "list : => Action* = GET RETURN[Object]")
+      parsed.get mustEqual Service("list", Action(GET, None, None, None, None, Some(TypeIdentifier("Object"))), ServiceType(None, TypeMultiple(TypeIdentifier("Action")), None))
     }
   }
 
@@ -215,14 +220,14 @@ object RapidoSpec extends Specification {
 
     "provides a type definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeSpecification, "type Action = { performed : bool }")
-      parsed.get mustEqual TypeEntity("Action", TypeObject(List("performed" -> TypeBoolean)))
+      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" -> TypeBoolean)))
     }
 
     "provides a service definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.serviceSpecification, "service Test { list : => Action = GET add : Param => Action = POST }")
       parsed.get mustEqual ServiceEntity("Test",
-        List(Service("list", Action(GET, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
-          Service("add", Action(POST, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
+        List(Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
+          Service("add", Action(POST, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
     }
 
     "provides a static route definition" in {
@@ -244,14 +249,14 @@ object RapidoSpec extends Specification {
 
     "provides a type definition specification" in {
       val parsed = RapidoParser.parseAll(RapidoParser.specification, "type Action = { performed : bool }")
-      parsed.get mustEqual TypeEntity("Action", TypeObject(List("performed" -> TypeBoolean)))
+      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" -> TypeBoolean)))
     }
 
     "provides a service definition specification" in {
       val parsed = RapidoParser.parseAll(RapidoParser.specification, "service Test { list : => Action = GET add : Param => Action = POST }")
       parsed.get mustEqual ServiceEntity("Test",
-        List(Service("list", Action(GET, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
-          Service("add", Action(POST, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
+        List(Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
+          Service("add", Action(POST, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
     }
 
     "provides a static route definition specification" in {
