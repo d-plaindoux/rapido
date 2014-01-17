@@ -1,7 +1,7 @@
 rAPIdo
 ======
 
-A rest API design tool 
+A rest (and may be more) API design tool
 
 ## Introduction
 
@@ -24,12 +24,12 @@ type Empty = {}
 
 service places {
 	list:         => Place* or Error = GET
-	create: Place => Place or Error  = POST
+	create: Place => Place or Error  = POST BODY[Place]
 }
 
 service place {
    	get:            => Place or Error = GET
-   	update: Address => Empty or Error = PUT
+   	update: Address => Empty or Error = PUT BODY[Address]
    	delete:         => Empty or Error = DELETE
 }
 

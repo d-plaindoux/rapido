@@ -46,10 +46,12 @@ class BasicService:
         return "TODO"
 
     def getParameters(self, input, attributes):
-        return {}
+        return '&'.join([ key+"="+str(input[key]) for key in attributes if input[key] ]
 
     def getObject(self, input, attributes):
-        return {}
+        result = {}
+        [ result[key] = input[key] for key in attributes if input[key] ]
+        return result
 
 #
 # Services:@REP(,)::services[| @VAL::name|]
@@ -63,7 +65,7 @@ class __@VAL::name(BasicService):
         @REP(        )::params[|self.@VAL::name = @VAL::name
 |]|]
     @REP(    )::entries[|def @VAL::name(self, input={}):
-        result = self.httpRequest(self.path@OPT[| + @VAL::path[|self.getPath(input,@USE::pathAsString,@USE::pathVariables)|]|],
+        result = self.httpRequest(self.path@OPT[| + '?' + @VAL::path[|self.getPath(input,@USE::pathAsString,@USE::pathVariables)|]|],
                                   operation="@VAL::operation",
                                   params=@OR[|@VAL::params[|getParameters(input,@USE::attributes)|])|][|None|],
                                   body=@OR[|@VAL::body[|self.getObject(input,@USE::attributes)|]|][|None|],
