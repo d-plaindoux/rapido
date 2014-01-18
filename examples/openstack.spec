@@ -9,8 +9,8 @@ type Users = { users: { name: string }* }
 
 service keystone {
     authenticate: Authentication => Token or Error = POST[tokens] BODY[Authentication]
-    endpoints: Token with AuthToken => Endpoints   = GET[tokens/<access.token.id>/endpoints] HEADER[AuthToken]
-    user: {name:string} with AuthToken => Users   = GET[users?<name>] HEADER[AuthToken]
+    endpoints: Token with AuthToken => Endpoints or Error = GET[tokens/<access.token.id>/endpoints] HEADER[AuthToken]
+    tenants: AuthToken => Tenants or Error = GET[tenants] HEADER[AuthToken]
 }
 
 route keystone [/v2.0]
