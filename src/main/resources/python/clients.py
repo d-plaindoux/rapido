@@ -37,14 +37,15 @@ class BasicService:
 
     def httpRequest(self,
                     path,
-                    operation=None,
-                    params="",
+                    operation,
                     body={},
                     header={},
                     implicit_header={'Content-type':'application/json'}):
-        complete_header = dict(implicit_header.items() + header.items())
         connection = http.HTTPConnection(self.url)
-        connection.request(operation, path + params, json.dumps(body), complete_header)
+
+        complete_header = dict(implicit_header.items() + header.items())
+
+        connection.request(operation, path, json.dumps(body), complete_header)
         try:
             response = connection.getresponse()
             data = response.read()
@@ -52,24 +53,24 @@ class BasicService:
         finally:
             connection.close()
 
-    def getPath(self, input, pattern, attributes):
-        return pattern % tuple([ self._getValue(input,attribute) for attribute in attributes ])
+    def getPath(self, parameters, pattern, attributes):
+        return pattern % tuple([ self._getValue(parameters,attribute) for attribute in attributes ])
 
-    def getParameters(self, input, attributes):
-        return '&'.join([ key+"="+str(input[key]) for key in attributes if input[key] ])
+    def getParameters(self, parameters, attributes):
+        return '&'.join([ key+"="+str(parameters[key]) for key in attributes if parameters[key] ])
 
-    def getObject(self, input, attributes):
-        return dict([ (key,input[key]) for key in attributes if input[key] ])
+    def getObject(self, parameters, attributes):
+        return dict([ (key,parameters[key]) for key in attributes if parameters[key] ])
 
     #
     # Private behaviors
     #
 
-    def _getValue(self, input, attributes):
+    def _getValue(self, parameters, attributes):
         if attributes is None or not attributes:
-            return input
+            return parameters
 
-        return self._getValue(input[attributes[0]],attributes[1:])
+        return self._getValue(parameters[attributes[0]],attributes[1:])
 
 #
 # Services:@REP(,)::services[| @VAL::name|]
@@ -91,13 +92,12 @@ class __@VAL::name(BasicService):
     # Public behaviors
     #
 
-    @REP(    )::entries[|def @VAL::name(self, input={}):
-        result = self.httpRequest(self.path@OPT[| + '?' + @VAL::path[|self.getPath(input,@USE::pathAsString,@USE::pathVariables)|]|],
+    @REP(    )::entries[|def @VAL::name(self, parameters={}):
+        result = self.httpRequest(path=self.path@OPT[| + '/' + @VAL::path[|self.getPath(parameters, @USE::pathAsString, @USE::pathVariables)|]|],
                                   operation="@VAL::operation",
-                                  params=@OR[|@VAL::params[|getParameters(input,@USE::attributes)|])|][|""|],
-                                  body=@OR[|@VAL::body[|self.getObject(input,@USE::attributes)|]|][|None|],
-                                  header=@OR[|@VAL::header[|self.getObject(input,@USE::attributes)|]|][|{}|])
-        return @OR[|@VAL::result[|self.getObject(input,@USE::attributes)|]|][|result|]
+                                  body=@OR[|@VAL::body[|self.getObject(parameters, @USE::attributes)|]|][|{}|],
+                                  header=@OR[|@VAL::header[|self.getObject(parameters, @USE::attributes)|]|][|{}|])
+        return @OR[|@VAL::result[|self.getObject(parameters,@USE::attributes)|]|][|result|]
 
 |]
 #

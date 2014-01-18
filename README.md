@@ -8,7 +8,7 @@ A rest (and may be more) API design tool
 The *rAPIdo* project proposes a specific declarative language dedicated to client side
 rest service specification. Such specification describes:
 - the resource path
-- the method i.e. `GET`, `POST`, `PUT` and `DELETE`
+- the method i.e. `GET`, `HEAD` `POST`, `PUT` and `DELETE`
 - the input type
 - the output type
 

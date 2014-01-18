@@ -64,11 +64,13 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def restAction: Parser[Operation] =
-    ("GET" | "POST" | "PUT" | "DELETE") ^^ {
+    ("GET" | "POST" | "PUT" | "DELETE" | ident) ^^ {
       case "GET" => GET
+      case "HEAD" => HEAD
       case "POST" => POST
       case "PUT" => PUT
       case "DELETE" => DELETE
+      case name => UserDefine(name)
     }
 
   class Terminal(s: String) {
