@@ -11,6 +11,6 @@ service keystone {
     endpoints: { tokenId:string } with AuthToken => Endpoints = GET[<tokenId>/endpoints] HEADER[AuthToken]
 }
 
-route keystone [v2.0/tokens]
+route keystone [/v2.0/tokens]
 
 client openStackRest provides keystone

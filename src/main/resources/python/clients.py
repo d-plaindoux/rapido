@@ -38,12 +38,13 @@ class BasicService:
     def httpRequest(self,
                     path,
                     operation=None,
-                    input=None,
+                    params="",
+                    body={},
                     header={},
                     implicit_header={'Content-type':'application/json'}):
         complete_header = dict(implicit_header.items() + header.items())
         connection = http.HTTPConnection(self.url)
-        connection.request(operation, path, json.dumps(input), complete_header)
+        connection.request(operation, path + params, json.dumps(body), complete_header)
         try:
             response = connection.getresponse()
             data = response.read()
@@ -93,7 +94,7 @@ class __@VAL::name(BasicService):
     @REP(    )::entries[|def @VAL::name(self, input={}):
         result = self.httpRequest(self.path@OPT[| + '?' + @VAL::path[|self.getPath(input,@USE::pathAsString,@USE::pathVariables)|]|],
                                   operation="@VAL::operation",
-                                  params=@OR[|@VAL::params[|getParameters(input,@USE::attributes)|])|][|None|],
+                                  params=@OR[|@VAL::params[|getParameters(input,@USE::attributes)|])|][|""|],
                                   body=@OR[|@VAL::body[|self.getObject(input,@USE::attributes)|]|][|None|],
                                   header=@OR[|@VAL::header[|self.getObject(input,@USE::attributes)|]|][|{}|])
         return @OR[|@VAL::result[|self.getObject(input,@USE::attributes)|]|][|result|]
