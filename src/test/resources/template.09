@@ -1,0 +1,18 @@
+@DEFINE::IsAtomicType
+    [|@OR
+    [|@VAL::bool[||]|]
+    [|@VAL::int[||]|]
+    [|@VAL::string[||]|]
+    [|@VAL::opt[|@USE::IsAtomicType|]|]|]
+
+@DEFINE::VariableTypes
+    [|@OR
+    [|@VAL::opt[|@USE::VariableTypes|]|]
+    [|@VAL::rep[|@USE::VariableTypes|]|]
+    [|@VAL::object[|@REP(,)
+        [|@OR
+        [|@VAL::type[|@USE::IsAtomicType|]@VAL::name|]
+        [|@VAL::type[|@USE::VariableTypes|]|]|]|]|]
+    [||]|]
+
+@REP(;)::types[|@VAL::name(@VAL::definition[|@USE::VariableTypes)|] |]

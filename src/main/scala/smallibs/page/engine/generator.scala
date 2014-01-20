@@ -19,40 +19,66 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
 
   def generateWithDefinitions(template: Template): Try[(Option[String], Definitions)] = {
     template match {
-      case NoTemplate => Success(Some(""), definitions)
-      case Text(t) => Success(Some(t), definitions)
-      case Value(None, None) => Success(Some(data.toString), definitions)
-      case Value(None, Some(newTemplate)) => generateWithDefinitions(newTemplate)
+      case NoTemplate =>
+        Success(Some(""), definitions)
+      case Text(t) =>
+        Success(Some(t), definitions)
+      case Value(None, None) =>
+        Success(Some(data.toString), definitions)
+      case Value(None, Some(newTemplate)) =>
+        generateWithDefinitions(newTemplate)
       case Value(Some(name), value) => data get name match {
-        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions(Value(None, value))
+        case None =>
+          Failure(new NoSuchElementException(path.reverse + ": " + name))
+        case Some(newData) =>
+          new Engine(name :: path, newData, definitions).generateWithDefinitions(Value(None, value))
       }
       case Sequence(seq) => generateWithDefinitions_list("", seq)
-      case Repetition(None, sep, content) => generateWithDefinitions_repetition(sep, content.getOrElse(Value(None, None)))
+      case Repetition(None, sep, content) =>
+        generateWithDefinitions_repetition(sep, content.getOrElse(Value(None, None)))
       case Repetition(Some(name), sep, content) => data get name match {
-        case None => Failure(new NoSuchElementException(data + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions(Repetition(None, sep, content))
+        case None =>
+          Failure(new NoSuchElementException(data + ": " + name))
+        case Some(newData) =>
+          new Engine(name :: path, newData, definitions).generateWithDefinitions(Repetition(None, sep, content))
       }
-      case Optional(None, None) => generateWithDefinitions(Value(None, None))
+      case Optional(None, None) =>
+        generateWithDefinitions(Value(None, None))
       case Optional(None, Some(template)) =>
         generateWithDefinitions(template) match {
-          case f@Failure(_) => Success(None, definitions)
-          case success => success
+          case f@Failure(_) =>
+            Success(None, definitions)
+          case success =>
+            success
         }
       case Optional(Some(name), template) => data get name match {
-        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions(Optional(None, template))
+        case None =>
+          Failure(new NoSuchElementException(path.reverse + ": " + name))
+        case Some(newData) =>
+          new Engine(name :: path, newData, definitions).generateWithDefinitions(Optional(None, template))
       }
       case Alternate(None, l) => generateWithDefinitions_alternate(l)
       case Alternate(Some(name), l) => data get name match {
-        case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-        case Some(newData) => new Engine(name :: path, newData, definitions).generateWithDefinitions_alternate(l)
+        case None =>
+          Failure(new NoSuchElementException(path.reverse + ": " + name))
+        case Some(newData) =>
+          new Engine(name :: path, newData, definitions).generateWithDefinitions_alternate(l)
       }
-      case Define(name, t) => Success(None, definitions ++ Map(name -> t))
+      case Define(name, t) =>
+        Success(None, definitions ++ Map(name -> t))
+      case Set(name, t) =>
+        generateWithDefinitions(t) map {
+          case (None, _) =>
+            (None, definitions)
+          case (Some(e), _) =>
+            (None, definitions ++ Map(name -> Text(e)))
+        }
       case Use(name) =>
         definitions get name match {
-          case None => Failure(new NoSuchElementException(path.reverse + ": " + name))
-          case Some(t) => generateWithDefinitions(t)
+          case None =>
+            Failure(new NoSuchElementException(path.reverse + ": " + name))
+          case Some(t) =>
+            generateWithDefinitions(t)
         }
     }
   }
@@ -62,8 +88,10 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
       case Nil => Success(Some(result), definitions)
       case e :: nl =>
         generateWithDefinitions(e) match {
-          case f@Failure(_) => f
-          case Success((s, d)) => new Engine(path, data, d).generateWithDefinitions_list(result + s.getOrElse(""), nl)
+          case f@Failure(_) =>
+            f
+          case Success((s, d)) =>
+            new Engine(path, data, d).generateWithDefinitions_list(result + s.getOrElse(""), nl)
         }
     }
 
@@ -73,9 +101,12 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
         case Nil => Nil
         case data :: values =>
           new Engine(path, data, definitions).generateWithDefinitions(template) match {
-            case Success((None, d)) => generateWithDefinitions_from_list(values, d)
-            case Success((Some(e), d)) => e :: generateWithDefinitions_from_list(values, d)
-            case Failure(f) => throw f
+            case Success((None, d)) =>
+              generateWithDefinitions_from_list(values, d)
+            case Success((Some(e), d)) =>
+              e :: generateWithDefinitions_from_list(values, d)
+            case Failure(f) =>
+              throw f
           }
       }
 
@@ -88,9 +119,11 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
 
   def generateWithDefinitions_alternate(l: List[Template]): Try[(Option[String], Definitions)] =
     l match {
-      case Nil => throw new IllegalAccessException
+      case Nil =>
+        Failure(new IllegalAccessException(path.reverse.toString))
       case e :: l => generateWithDefinitions(e) match {
-        case Failure(_) => generateWithDefinitions_alternate(l)
+        case Failure(f) =>
+          generateWithDefinitions_alternate(l)
         case success => success
       }
     }

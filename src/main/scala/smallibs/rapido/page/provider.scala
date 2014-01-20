@@ -195,6 +195,7 @@ class TypeAttributeProvider(aName: String, aType: Type, types: Map[String, Type]
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(aName))
+      case "nameAsIdent" => Some(Provider.constant(aName.replace('-', '_')))
       case "type" => Some(new TypeProvider(aType, types))
       case _ => None
     }

@@ -76,12 +76,17 @@ object Generation extends Specification {
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
-    "provides route path" in {
+    "provides route path with parametes" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.08").get
       val expected = Success(Some("Error={code:int,reason:string};Address={address:string?};Place={address:string?,name:string};Places={address:string?,name:string}*;Empty={}"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
+    "provides type atoms" in {
+      val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.09").get
+      val expected = Success(Some("Error(code,reason) ;Address(address) ;Place(address,name) ;Places(address,name) ;Empty() "))
+      Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
+    }
   }
 
   "Python Generator" should {
