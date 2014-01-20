@@ -33,22 +33,52 @@ object RapidoSpec extends Specification {
 
     "provides a data object type with one attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
+      parsed.get mustEqual TypeObject(Map("valid" ->(None, TypeBoolean)))
     }
 
     "provides a data object type with one quoted attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ 'valid' : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
+      parsed.get mustEqual TypeObject(Map("valid" ->(None, TypeBoolean)))
     }
 
     "provides a data object type with one string quoted attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ \"valid\" : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" -> TypeBoolean))
+      parsed.get mustEqual TypeObject(Map("valid" ->(None, TypeBoolean)))
+    }
+
+    "provides a data object type with one attribute and a get" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @get valid : bool }")
+      parsed.get mustEqual TypeObject(Map("valid" ->(Some(GetAccess(None)), TypeBoolean)))
+    }
+
+    "provides a data object type with one attribute and a named get" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @get(Valid) valid : bool }")
+      parsed.get mustEqual TypeObject(Map("valid" ->(Some(GetAccess(Some("Valid"))), TypeBoolean)))
+    }
+
+    "provides a data object type with one attribute and a set" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @set valid : bool }")
+      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetAccess(None)), TypeBoolean)))
+    }
+
+    "provides a data object type with one attribute and a named set" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @set(Valid) valid : bool }")
+      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetAccess(Some("Valid"))), TypeBoolean)))
+    }
+
+    "provides a data object type with one attribute and a set,get" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @{set,get} valid : bool }")
+      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetGetAccess(None)), TypeBoolean)))
+    }
+
+    "provides a data object type with one attribute and a named set,get" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @{get,set}(Valid) valid : bool }")
+      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetGetAccess(Some("Valid"))), TypeBoolean)))
     }
 
     "provides a data object type with two attributes" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "{ valid : bool ; content : {} }")
-      val expected: TypeObject = TypeObject(Map("valid" -> TypeBoolean, "content" -> TypeObject(Map())))
+      val expected: TypeObject = TypeObject(Map("valid" ->(None, TypeBoolean), "content" ->(None, TypeObject(Map()))))
       parsed.get mustEqual expected
     }
 
@@ -91,17 +121,17 @@ object RapidoSpec extends Specification {
   "Parser dedicated to attributes" should {
     "provides a quoted attribute name" in {
       val parsed = RapidoParser.parseAll(RapidoParser.attribute, "an_int:Int")
-      parsed.get mustEqual("an_int", TypeIdentifier("Int"))
+      parsed.get mustEqual("an_int", (None, TypeIdentifier("Int")))
     }
 
     "provides a simple attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.attribute, "'X-Auth-Token':Int")
-      parsed.get mustEqual("X-Auth-Token", TypeIdentifier("Int"))
+      parsed.get mustEqual("X-Auth-Token", (None, TypeIdentifier("Int")))
     }
 
     "provides a string-quoted attribute name" in {
       val parsed = RapidoParser.parseAll(RapidoParser.attribute, "\"X-Auth-Token\":Int")
-      parsed.get mustEqual("X-Auth-Token", TypeIdentifier("Int"))
+      parsed.get mustEqual("X-Auth-Token", (None, TypeIdentifier("Int")))
     }
   }
 
@@ -220,7 +250,7 @@ object RapidoSpec extends Specification {
 
     "provides a type definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeSpecification, "type Action = { performed : bool }")
-      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" -> TypeBoolean)))
+      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" ->(None, TypeBoolean))))
     }
 
     "provides a service definition" in {
@@ -249,7 +279,7 @@ object RapidoSpec extends Specification {
 
     "provides a type definition specification" in {
       val parsed = RapidoParser.parseAll(RapidoParser.specification, "type Action = { performed : bool }")
-      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" -> TypeBoolean)))
+      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" ->(None, TypeBoolean))))
     }
 
     "provides a service definition specification" in {

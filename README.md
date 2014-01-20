@@ -17,24 +17,21 @@ and produces an output as a result. Such design gives a language independent for
 which can be generated to chosen targeted languages.
 
 ```
-type Error = { code:Int, reason:String }
-type Address = { address:String? }
-type Place = Address with { name:String }
+type Error = { @get code:Int, @get reason:String }
+type Address = { @{get,set} address:String? }
+type Place = Address with { @{get,set} name:String }
 type Empty = {}
 
-service places {
+service places [places] {
 	list:         => Place* or Error = GET
 	create: Place => Place or Error  = POST BODY[Place]
 }
 
-service place {
+service place(Place) [places/<name>] {
    	get:            => Place or Error = GET
    	update: Address => Empty or Error = PUT BODY[Address]
    	delete:         => Empty or Error = DELETE
 }
-
-route places         [places]
-route place(p:Place) [places/<p.name>]
 
 client placesRest provides places, place
 ```

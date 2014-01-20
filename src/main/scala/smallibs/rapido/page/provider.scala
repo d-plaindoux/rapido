@@ -176,7 +176,7 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
       case ("opt", TypeOptional(t)) => Some(new TypeProvider(t, types))
       case ("rep", TypeMultiple(t)) => Some(new TypeProvider(t, types))
       case ("object", TypeObject(values)) =>
-        val attributes = for ((n, t) <- values) yield new TypeAttributeProvider(n, t, types)
+        val attributes = for ((n, (a, t)) <- values) yield new TypeAttributeProvider(n, a, t, types)
         Some(Provider.set(attributes.toList))
       case ("object", TypeComposed(l, r)) =>
         (deref(l), deref(r)) match {
@@ -184,18 +184,29 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
           case _ => None
         }
       case (_, TypeIdentifier(_)) =>
-        deref(aType) flatMap (t => new TypeProvider(t, types).get(name))
+        deref(aType) flatMap (new TypeProvider(_, types).get(name))
       case _ => None
     }
 }
 
-class TypeAttributeProvider(aName: String, aType: Type, types: Map[String, Type]) extends DataProvider with AbstractProvider {
+class TypeAttributeProvider(aName: String, access: Option[Access], aType: Type, types: Map[String, Type]) extends DataProvider with AbstractProvider {
   val keys = List("name", "type")
 
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(aName))
-      case "nameAsIdent" => Some(Provider.constant(aName.replace('-', '_')))
+      case "get" => access flatMap {
+        case GetAccess(n) => Some(Provider.constant(n.getOrElse(aName)))
+        case _ => None
+      }
+      case "set" => access flatMap {
+        case SetAccess(n) => Some(Provider.constant(n.getOrElse(aName)))
+        case _ => None
+      }
+      case "set_get" => access flatMap {
+        case SetGetAccess(n) => Some(Provider.constant(n.getOrElse(aName)))
+        case _ => None
+      }
       case "type" => Some(new TypeProvider(aType, types))
       case _ => None
     }

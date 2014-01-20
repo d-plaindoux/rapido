@@ -33,7 +33,10 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
         case Some(newData) =>
           new Engine(name :: path, newData, definitions).generateWithDefinitions(Value(None, value))
       }
-      case Sequence(seq) => generateWithDefinitions_list("", seq)
+      case Sequence(seq) =>
+        generateWithDefinitions_list("", seq) map {
+          case (r, _) => (r, definitions)
+        }
       case Repetition(None, sep, content) =>
         generateWithDefinitions_repetition(sep, content.getOrElse(Value(None, None)))
       case Repetition(Some(name), sep, content) => data get name match {
@@ -64,14 +67,13 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
         case Some(newData) =>
           new Engine(name :: path, newData, definitions).generateWithDefinitions_alternate(l)
       }
-      case Define(name, t) =>
+      case Macro(name, t) =>
         Success(None, definitions ++ Map(name -> t))
-      case Set(name, t) =>
+      case Define(name, t) =>
         generateWithDefinitions(t) map {
           case (None, _) =>
             (None, definitions)
-          case (Some(e), _) =>
-            (None, definitions ++ Map(name -> Text(e)))
+          case (Some(e), _) => (None, definitions ++ Map(name -> Text(e)))
         }
       case Use(name) =>
         definitions get name match {

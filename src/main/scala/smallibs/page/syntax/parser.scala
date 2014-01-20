@@ -27,7 +27,7 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def commonTemplate: Parser[Template] =
-    define | set | use | value | repetition | alternate | optional
+    macroDefinition | define | use | value | repetition | alternate | optional
 
   private def text: Parser[Template] =
     regex(new Regex("[^@]+")) ^^ {
@@ -39,14 +39,14 @@ object PageParser extends JavaTokenParsers {
       Text
     }
 
+  private def macroDefinition: Parser[Template] =
+    ("@MACRO" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]") <~ spaces ^^ {
+      case n ~ v => Macro(n, v)
+    }
+
   private def define: Parser[Template] =
     ("@DEFINE" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]") <~ spaces ^^ {
       case n ~ v => Define(n, v)
-    }
-
-  private def set: Parser[Template] =
-    ("@SET" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]") <~ spaces ^^ {
-      case n ~ v => Set(n, v)
     }
 
   private def use: Parser[Template] =

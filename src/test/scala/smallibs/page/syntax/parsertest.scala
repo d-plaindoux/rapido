@@ -112,8 +112,8 @@ object PageSpec extends Specification {
     }
 
     "provides an empty define" in {
-      val parsed = PageParser.parseAll(PageParser.template, "@DEFINE::type[||]")
-      parsed.get mustEqual Define("type", NoTemplate)
+      val parsed = PageParser.parseAll(PageParser.template, "@MACRO::type[||]")
+      parsed.get mustEqual Macro("type", NoTemplate)
     }
 
   }

@@ -8,9 +8,9 @@ trait Template
 
 case class Value(name: Option[String], content: Option[Template]) extends Template
 
-case class Define(name: String, content: Template) extends Template
+case class Macro(name: String, content: Template) extends Template
 
-case class Set(name: String, content: Template) extends Template
+case class Define(name: String, content: Template) extends Template
 
 case class Use(name: String) extends Template
 

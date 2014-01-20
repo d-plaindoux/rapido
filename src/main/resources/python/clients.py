@@ -1,31 +1,31 @@
-@DEFINE::Attributes
+@MACRO::Attributes
     [|@OR
     [|@VAL::object[|[@REP(,)[|'@VAL::name'|]|]]|]
     [|None|]|]
 
-@DEFINE::ParameterNames
+@MACRO::ParameterNames
     [|@REP::params[|, @VAL::name|]|]
 
-@DEFINE::ParameterValues
+@MACRO::ParameterValues
     [|@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|['@VAL']|]|]|]|]
 
-@DEFINE::RootParameterNames
+@MACRO::RootParameterNames
     [|@VAL::route[|@USE::ParameterNames|]|]
 
-@DEFINE::PathAsString
+@MACRO::PathAsString
     [|"/@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
-@DEFINE::PathVariables
+@MACRO::PathVariables
     [|[@REP(,)::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]]|]
 
-@DEFINE::IsAtomicType
+@MACRO::IsAtomicType
     [|@OR
     [|@VAL::bool[||]|]
     [|@VAL::int[||]|]
     [|@VAL::string[||]|]
     [|@VAL::opt[|@USE::IsAtomicType|]|]|]
 
-@DEFINE::UnsetVariables
+@MACRO::UnsetVariables
     [|@OPT
     [|@VAL::object[|@REP
         [|@OR
@@ -34,21 +34,30 @@
         [|@VAL::type[|@USE::UnsetVariables|]|]
         [||]|]|]|]|]
 
-@DEFINE::SetVariables
+@MACRO::SetVariables
     [|@OPT
     [|@VAL::object[|@REP
         [|@OR
         [|@VAL::type[|@USE::IsAtomicType|]
             self.data['@VAL::name'] = data@USE::VarPath['@VAL::name']|]
-        [|@SET::VarPath[|@OPT[|@USE::VarPath|]['@VAL::name']|]@VAL::type[|@USE::SetVariables|]|]
+        [|@DEFINE::VarPath[|@OPT[|@USE::VarPath|]['@VAL::name']|]@VAL::type[|@USE::SetVariables|]|]
         [||]|]|]|]|]
 
-@DEFINE::VariableGetterSetter
+@MACRO::VariableGetterSetter
     [|@OPT
     [|@VAL::object[|@REP
         [|@OR
         [|@VAL::type[|@USE::IsAtomicType|]
-    def @VAL::nameAsIdent(self, value=None):
+    def @VAL::get(self):
+        return self.data['@VAL::name']
+|]
+        [|@VAL::type[|@USE::IsAtomicType|]
+    def @VAL::set(self, value):
+        self.data['@VAL::name'] = value
+        return self
+|]
+        [|@VAL::type[|@USE::IsAtomicType|]
+    def @VAL::set_get(self, value=None):
         if value is None:
             return self.data['@VAL::name']
         else:
@@ -58,7 +67,7 @@
         [|@VAL::type[|@USE::VariableGetterSetter|]|]
         [||]|]|]|]|]
 
-@DEFINE::Types
+@MACRO::Types
     [|@OR
     [|@VAL::bool[|True|]|]
     [|@VAL::int[|0|]|]

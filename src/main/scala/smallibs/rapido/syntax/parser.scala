@@ -22,8 +22,9 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def serviceSpecification: Parser[Entity] =
-    ("service" ~> ident <~ "{") ~! (serviceDefinition.* <~ "}") ^^ {
-      case n ~ l => ServiceEntity(n, l)
+    ("service" ~> ident) ~ ("(" ~> repsep(typeDefinition, ",") <~ ")").? ~! path.? ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
+      case n ~ None ~ r ~ l => ServiceEntity(n, l)
+      case n ~ Some(p) ~ r ~ l => ServiceEntity(n, l)
     }
 
   def routeSpecification: Parser[Entity] =
@@ -97,16 +98,23 @@ object RapidoParser extends JavaTokenParsers {
       TypeIdentifier
     }
 
-  def attribute: Parser[(String, Type)] =
-    (ident <~ ":") ~! typeDefinition ^^ {
-      case i ~ t => (i, t)
-    } |
-      ("\"" ~> regex(new Regex("[^\"]+")) <~ "\"" <~ ":") ~! typeDefinition ^^ {
-        case i ~ t => (i, t)
-      } |
-      ("'" ~> regex(new Regex("[^\']+")) <~ "'" <~ ":") ~! typeDefinition ^^ {
-        case i ~ t => (i, t)
-      }
+  def attributeName: Parser[String] =
+    ident | ("\"" ~> regex(new Regex("[^\"]+")) <~ "\"") | ("'" ~> regex(new Regex("[^\']+")) <~ "'")
+
+  def getterSetter: Parser[Option[String] => Access] =
+    "@get" ^^ {
+      _ => GetAccess
+    } | "@set" ^^ {
+      _ => SetAccess
+    } | ("@" ~ "{" ~ (("set" ~ "," ~ "get") | ("get" ~ "," ~ "set")) ~ "}") ^^ {
+      _ => SetGetAccess
+    }
+
+  def attribute: Parser[(String, (Option[Access], Type))] =
+    ((getterSetter ~ ("(" ~> ident <~ ")").?).? ~ attributeName <~ ":") ~! typeDefinition ^^ {
+      case None ~ i ~ t => (i, (None, t))
+      case Some(g ~ n) ~ i ~ t => (i, (Some(g(n)), t))
+    }
 
   def record: Parser[Type] =
     "{" ~> repsep(attribute, ";" | ",") <~ "}" ^^ {
