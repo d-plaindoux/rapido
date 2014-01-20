@@ -14,7 +14,7 @@ rest service specification. Such specification describes:
 
 Each service can be viewed as a function applied to a triplet (path,method,input)
 and produces an output as a result. Such design gives a language independent formalism
-wich can be generated to multiple targeted languages. 
+which can be generated to chosen targeted languages.
 
 ```
 type Error = { code:Int, reason:String }
