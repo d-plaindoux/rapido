@@ -18,66 +18,41 @@
 @MACRO::PathVariables
     [|[@REP(,)::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]]|]
 
-@MACRO::IsAtomicType
+@MACRO::PushVar[|@DEFINE::VarPath[|@OPT[|@USE::VarPath|]['@VAL::name']|]|]
+
+@MACRO::GenerateGetterSetter
     [|@OR
-    [|@VAL::bool[||]|]
-    [|@VAL::int[||]|]
-    [|@VAL::string[||]|]
-    [|@VAL::opt[|@USE::IsAtomicType|]|]|]
-
-@MACRO::UnsetVariables
-    [|@OPT
-    [|@VAL::object[|@REP
-        [|@OR
-        [|@VAL::type[|@USE::IsAtomicType|]
-            self.data['@VAL::name'] = None|]
-        [|@VAL::type[|@USE::UnsetVariables|]|]
-        [||]|]|]|]|]
-
-@MACRO::SetVariables
-    [|@OPT
-    [|@VAL::object[|@REP
-        [|@OR
-        [|@VAL::type[|@USE::IsAtomicType|]
-            self.data['@VAL::name'] = data@USE::VarPath['@VAL::name']|]
-        [|@DEFINE::VarPath[|@OPT[|@USE::VarPath|]['@VAL::name']|]@VAL::type[|@USE::SetVariables|]|]
-        [||]|]|]|]|]
+    [|
+    def @VAL::get(self):
+        return self.data@USE::VarPath
+|]
+    [|
+    def @VAL::set(self, value):
+        self.data@USE::VarPath = value
+        return self
+|]
+    [|
+    def @VAL::set_get(self, value=None):
+        if value is None:
+            return self.data@USE::VarPath
+        else:
+            self.data@USE::VarPath = value
+            return self
+|]
+    [||]|]
 
 @MACRO::VariableGetterSetter
     [|@OPT
-    [|@VAL::object[|@REP
-        [|@OR
-        [|@VAL::type[|@USE::IsAtomicType|]
-    def @VAL::get(self):
-        return self.data['@VAL::name']
-|]
-        [|@VAL::type[|@USE::IsAtomicType|]
-    def @VAL::set(self, value):
-        self.data['@VAL::name'] = value
-        return self
-|]
-        [|@VAL::type[|@USE::IsAtomicType|]
-    def @VAL::set_get(self, value=None):
-        if value is None:
-            return self.data['@VAL::name']
-        else:
-            self.data['@VAL::name'] = value
-            return self
-|]
-        [|@VAL::type[|@USE::VariableGetterSetter|]|]
-        [||]|]|]|]|]
+    [|@VAL::object[|@REP[|@USE::PushVar@USE::GenerateGetterSetter@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
 
 @MACRO::Types
     [|@OR
     [|@VAL::bool[|True|]|]
     [|@VAL::int[|0|]|]
     [|@VAL::string[|""|]|]
-    [|@VAL::opt[|self.opt(@USE::Types)|]|]
-    [|@VAL::rep[|self.rep(@USE::Types)|]|]
-    [|@VAL::object[|{@REP(, )
-        [|@OR
-        [|@VAL::type[|@USE::IsAtomicType|]'@VAL::name': self.data['@VAL::name']|]
-        [|'@VAL::name': @VAL::type[|@USE::Types|]|]|]}|]|]|]
+    [|@VAL::opt[|None|]|]
+    [|@VAL::rep[|[]|]|]
+    [|@VAL::object[|{@REP(, )[|'@VAL::name': @VAL::type[|@USE::Types|]|]|]}|]|]
 
 import httplib as http
 import json
@@ -136,7 +111,7 @@ class BasicService:
 
         for d in datas:
             if isinstance(d, Type):
-                data = dict(data.items() + d.to_external().items())
+                data = dict(data.items() + d.to_dict().items())
             else:
                 data = dict(data.items() + d.items())
 
@@ -160,13 +135,10 @@ class BasicService:
 class Type:
 
     def __init__(self):
-        pass
+        self.data = None
 
-    def opt(self, t):
-        return t
-
-    def rep(self, t):
-        return t
+    def to_dict(self):
+        return self.data
 
 @REP::types[|
 class @VAL::name(Type):
@@ -175,15 +147,10 @@ class @VAL::name(Type):
         Type.__init__(self)
 
         if not data:
-            self.data = dict()
-            @VAL::definition[|@USE::UnsetVariables|]
+            self.data = @VAL::definition[|@USE::Types|]
         else:
             self.data = data
-            @VAL::definition[|@USE::SetVariables|]
     @VAL::definition[|@USE::VariableGetterSetter|]
-    def to_external(self):
-        return @VAL::definition[|@USE::Types|]
-
 |]
 
 #
