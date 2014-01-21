@@ -36,13 +36,11 @@ type Error = {}
 type Empty = {}
 type Any = {}*
 
-service timelines {
+service timelines [statuses] {
     mentions_timeline: MentionsTimeline => Any or Error = GET[mentions_timeline.json] PARAMS[MentionsTimeline]
     user_timeline: UserTimeline => Any or Error = GET[user_timeline.json] PARAMS[UserTimeline]
     home_timeline: HomeTimeline => Any or Error = GET[home_timeline.json] PARAMS[HomeTimeline]
     retweets_of_me: RetweetsOfMe => Any or Error = GET[retweets_of_me.json] PARAMS[RetweetsOfMe]
 }
-
-route timelines [statuses]
 
 client twitterRest provides timelines

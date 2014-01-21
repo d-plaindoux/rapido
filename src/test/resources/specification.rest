@@ -4,19 +4,16 @@ type Place = Address with { name:string }
 type Places = Place*
 type Empty = {}
 
-service places {
+service places [/places] {
 	list:   => Places = GET
     create: Place => Place or Error = POST
 }
 
-service place {
+service place(Place) [/places/<name>] {
    	get: => Place or Error = GET
    	update: Address => Place or Error = PUT
    	delete: => Empty or Error = DELETE
 }
-
-route place(p:Place) [/places/<p.name>]
-route places         [/places]
 
 client placesRest1 provides places
 client placesRest2 provides places, place

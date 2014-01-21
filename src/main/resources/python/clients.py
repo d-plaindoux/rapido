@@ -89,9 +89,9 @@ class BasicService:
     # Constructor
     #
 
-    def __init__(self, url, path):
+    def __init__(self, url):
         self.url = url
-        self.path = path
+        self.path = None
 
     #
     # Public behaviors
@@ -198,8 +198,9 @@ class __@VAL::name(BasicService):
     #
 
     def __init__(self, url@USE::RootParameterNames):
-        @VAL::route[|BasicService.__init__(self, url, @VAL::path[|@USE::PathAsString % (@USE::ParameterValues)|])
-        self.implicit_data = self.merge_data([@REP(, )::params[|@VAL::name|]])|]
+        @VAL::route[|BasicService.__init__(self, url)
+        self.implicit_data = self.merge_data([@REP(, )::params[|@VAL::name|]])
+        self.path = @VAL::path[|self.get_path(self.implicit_data, @USE::PathAsString, @USE::PathVariables)|]|]
 
     #
     # Public behaviors

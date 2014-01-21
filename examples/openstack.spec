@@ -44,7 +44,7 @@ type Tenants = {
     }*
 }
 
-service keystone [v2.0/tokens]{
+service keystone [v2.0/tokens] {
     authenticate: Authentication => Token or Error = POST BODY[Authentication]
  }
 
@@ -52,8 +52,5 @@ service keystoneClient(Token, AuthToken) [v2.0] {
     endpoints: => Endpoints or Error = GET[tokens/<access.token.id>/endpoints] HEADER[AuthToken]
     tenants: => Tenants or Error = GET[tenants] HEADER[AuthToken]
  }
-
-route keystone [v2.0/tokens]
-route keystoneClient(token: Token, authToken: AuthToken) [v2.0]
 
 client openStackRest provides keystone, keystoneClient

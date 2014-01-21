@@ -254,22 +254,10 @@ object RapidoSpec extends Specification {
     }
 
     "provides a service definition" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.serviceSpecification, "service Test { list : => Action = GET add : Param => Action = POST }")
-      parsed.get mustEqual ServiceEntity("Test",
+      val parsed = RapidoParser.parseAll(RapidoParser.serviceSpecification, "service Test [places] { list : => Action = GET add : Param => Action = POST }")
+      parsed.get mustEqual ServiceEntity("Test", Route("Test", Nil, Path(List(StaticLevel("places")))),
         List(Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
           Service("add", Action(POST, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
-    }
-
-    "provides a static route definition" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.routeSpecification, "route places [places]")
-      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places"))))
-    }
-
-    "provides a dynamic route definition" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.routeSpecification, "route places(p:Place) [places/<p.name>]")
-      parsed.get mustEqual RouteEntity("places",
-        List(("p", TypeIdentifier("Place"))),
-        Path(List(StaticLevel("places/"), DynamicLevel(List("p", "name")))))
     }
 
     "provides a client definition" in {
@@ -283,15 +271,10 @@ object RapidoSpec extends Specification {
     }
 
     "provides a service definition specification" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.specification, "service Test { list : => Action = GET add : Param => Action = POST }")
-      parsed.get mustEqual ServiceEntity("Test",
+      val parsed = RapidoParser.parseAll(RapidoParser.specification, "service Test [places] { list : => Action = GET add : Param => Action = POST }")
+      parsed.get mustEqual ServiceEntity("Test", Route("Test", Nil, Path(List(StaticLevel("places")))),
         List(Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
           Service("add", Action(POST, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
-    }
-
-    "provides a static route definition specification" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.specification, "route places [places]")
-      parsed.get mustEqual RouteEntity("places", Nil, Path(List(StaticLevel("places"))))
     }
 
     "provides a client definition specification" in {

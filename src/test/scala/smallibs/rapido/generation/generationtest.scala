@@ -48,7 +48,7 @@ object Generation extends Specification {
 
     "provides route names" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.03").get
-      val expected = Success(Some("place,places,"))
+      val expected = Success(Some("places,place,"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
@@ -66,13 +66,13 @@ object Generation extends Specification {
 
     "provides route names and parameters name" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.06").get
-      val expected = Success(Some("place(p,),places(),"))
+      val expected = Success(Some("places(),place(p_0,),"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
     "provides route path" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.07").get
-      val expected = Success(Some("\"/places/%s\" % (p.name),\"/places\" % ()"))
+      val expected = Success(Some("\"/places\" % (),\"/places/%s\" % (name)"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 

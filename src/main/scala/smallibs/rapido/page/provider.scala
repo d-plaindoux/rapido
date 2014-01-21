@@ -28,26 +28,17 @@ class EntitiesProvider(elements: List[Entity]) extends DataProvider with Abstrac
 
     name match {
       case "services" =>
-        def routeByName(name: String): DataProvider = {
-          val routes = for (e <- elements if e.isInstanceOf[RouteEntity]) yield e.asInstanceOf[RouteEntity]
-          routes find (_.name == name) match {
-            case None => throw new NoSuchElementException(name)
-            case Some(route) => new RouteProvider(route, types)
-          }
-        }
-
         Some(Provider.set(
           for (e <- elements if e.isInstanceOf[ServiceEntity])
           yield {
             val service = e.asInstanceOf[ServiceEntity]
-            val route = routeByName(service.name)
-            new ServiceProvider(service, route, types)
+            new ServiceProvider(service, new RouteProvider(service.route, types), types)
           })
         )
       case "routes" =>
         Some(Provider.set(
-          for (e <- elements if e.isInstanceOf[RouteEntity])
-          yield new RouteProvider(e.asInstanceOf[RouteEntity], types))
+          for (e <- elements if e.isInstanceOf[ServiceEntity])
+          yield new RouteProvider(e.asInstanceOf[ServiceEntity].route, types))
         )
       case "clients" =>
         Some(Provider.set(
@@ -76,13 +67,15 @@ class ServiceProvider(service: ServiceEntity, route: DataProvider, types: Map[St
     }
 }
 
-class RouteProvider(route: RouteEntity, types: Map[String, Type]) extends DataProvider with AbstractProvider {
+class RouteProvider(route: Route, types: Map[String, Type]) extends DataProvider with AbstractProvider {
   val keys = List("name", "params", "path")
 
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(route.name))
-      case "params" => Some(Provider.set(for (e <- route.params) yield new ParamProvider(e, types)))
+      case "params" =>
+        val params = route.params.foldLeft[(Int, List[(Int, Type)])](0, Nil)((i, t) => (i._1 + 1, i._2 ++ List((i._1, t))))
+        Some(Provider.set(for ((i, e) <- params._2) yield new ParamProvider((f"p_$i%d", e), types)))
       case "path" => Some(new PathProvider(route.path))
       case _ => None
     }

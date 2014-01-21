@@ -37,11 +37,11 @@ class Service_places(BasicService):
 
 
 class Service_place(BasicService):
-    def __init__(self, url, p):
+    def __init__(self, url, p_0):
         BasicService.__init__(self)
         self.url = url
-        self.path = "/places/%s" % (p.name)
-        self.p = p
+        self.path = "/places/%s" % (name)
+        self.p_0 = p_0
 
     def get(self,input=None, header=None):
         self.httpRequest(operation="GET",

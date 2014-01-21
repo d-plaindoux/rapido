@@ -14,7 +14,7 @@ object RapidoParser extends JavaTokenParsers {
     specification.*
 
   def specification: Parser[Entity] =
-    typeSpecification | serviceSpecification | routeSpecification | clientSpecification
+    typeSpecification | serviceSpecification | clientSpecification
 
   def typeSpecification: Parser[Entity] =
     ("type" ~> ident <~ "=") ~! typeDefinition ^^ {
@@ -22,15 +22,9 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def serviceSpecification: Parser[Entity] =
-    ("service" ~> ident) ~ ("(" ~> repsep(typeDefinition, ",") <~ ")").? ~! path.? ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
-      case n ~ None ~ r ~ l => ServiceEntity(n, l)
-      case n ~ Some(p) ~ r ~ l => ServiceEntity(n, l)
-    }
-
-  def routeSpecification: Parser[Entity] =
-    ("route" ~> ident) ~! ("(" ~> repsep(routeParameter, ",") <~ ")").? ~ path ^^ {
-      case name ~ None ~ path => RouteEntity(name, Nil, path)
-      case name ~ Some(params) ~ path => RouteEntity(name, params, path)
+    ("service" ~> ident) ~ ("(" ~> repsep(typeDefinition, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
+      case n ~ None ~ r ~ l => ServiceEntity(n, Route(n, Nil, r), l)
+      case n ~ Some(p) ~ r ~ l => ServiceEntity(n, Route(n, p, r), l)
     }
 
   def clientSpecification: Parser[Entity] =
