@@ -1,6 +1,6 @@
 @MACRO::Attributes
     [|@OR
-    [|@VAL::object[|[@REP(,)[|'@VAL::name'|]|]]|]
+    [|@VAL::object[|[@REP(, )[|'@VAL::name'|]|]]|]
     [|None|]|]
 
 @MACRO::ParameterNames
@@ -45,6 +45,17 @@
     [|@OPT
     [|@VAL::object[|@REP[|@USE::PushVar@USE::GenerateGetterSetter@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
 
+
+@MACRO::SingleVariableAsParameter
+    [|@OR
+    [|, @VAL::set=None|]
+    [|, @VAL::set_get=None|]
+    [||]|]
+
+@MACRO::VariablesAsParameter
+    [|@OPT
+    [|@VAL::object[|@REP[|@USE::SingleVariableAsParameter@VAL::type[|@USE::VariablesAsParameter|]|]|]|]|]
+
 @MACRO::Types
     [|@OR
     [|@VAL::bool[|True|]|]
@@ -52,7 +63,7 @@
     [|@VAL::string[|""|]|]
     [|@VAL::opt[|None|]|]
     [|@VAL::rep[|[]|]|]
-    [|@VAL::object[|{@REP(, )[|'@VAL::name': @VAL::type[|@USE::Types|]|]|]}|]|]
+    [|@VAL::object[|{@REP(, )[|'@VAL::name': @OR[|@VAL::set|][|@VAL::set_get|][|@VAL::type[|@USE::Types|]|]|]}|]|]|]
 
 import httplib as http
 import json
@@ -143,7 +154,7 @@ class Type:
 @REP::types[|
 class @VAL::name(Type):
 
-    def __init__(self, data=None):
+    def __init__(self, data=None@VAL::definition[|@USE::VariablesAsParameter|]):
         Type.__init__(self)
 
         if not data:
@@ -188,10 +199,11 @@ class __@VAL::name(BasicService):
 
         return @OR[|@VAL::result[|self.get_object(data,@USE::Attributes)|]|][|result|]
 
-|]
+|]|]
 #
 # Service factory
 #
+@REP::services[|
 
 def @VAL::name(url):
     return lambda@VAL::route[|@REP(,)::params[| @VAL::name|]|]: __@VAL::name(url@USE::RootParameterNames)

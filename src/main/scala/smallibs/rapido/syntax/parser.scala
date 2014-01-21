@@ -49,12 +49,13 @@ object RapidoParser extends JavaTokenParsers {
       }
     }
 
+  private def directive(name: String): Parser[Type] =
+    name ~> "[" ~> typeDefinition <~ "]"
+
   def serviceDefinition: Parser[Service] =
-    (ident <~ ":") ~! (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ~
-      ("=" ~> restAction) ~ path.? ~
-      ("PARAMS" ~> "[" ~> typeDefinition <~ "]").? ~ ("BODY" ~> "[" ~> typeDefinition <~ "]").? ~
-      ("HEADER" ~> "[" ~> typeDefinition <~ "]").? ~ ("RETURN" ~> "[" ~> typeDefinition <~ "]").? ^^ {
-      case name ~ in ~ out ~ err ~ action ~ path ~ param ~ body ~ header ~ result =>
+    (ident <~ ":") ~! (typeDefinition.? <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ~ ("=" ~> restAction) ~
+      path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ~ directive("RETURN").? ^^ {
+      case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body ~ result =>
         Service(name, Action(action, path, param, body, header, result), ServiceType(in, out, err))
     }
 

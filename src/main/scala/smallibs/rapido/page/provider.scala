@@ -157,27 +157,26 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
 
   def deref(t: Type): Option[Type] =
     t match {
-      case TypeIdentifier(n) => (types get n) flatMap deref
+      case TypeIdentifier(n) =>
+        (types get n) flatMap deref
+      case TypeComposed(l, r) =>
+        (deref(l), deref(r)) match {
+          case (Some(TypeObject(l)), Some(TypeObject(r))) => Some(TypeObject(l ++ r))
+          case _ => None
+        }
       case _ => Some(t)
     }
 
   def get(name: String): Option[DataProvider] =
-    (name, aType) match {
-      case ("bool", TypeBoolean) => Some(Provider.constant("bool"))
-      case ("int", TypeNumber) => Some(Provider.constant("int"))
-      case ("string", TypeString) => Some(Provider.constant("string"))
-      case ("opt", TypeOptional(t)) => Some(new TypeProvider(t, types))
-      case ("rep", TypeMultiple(t)) => Some(new TypeProvider(t, types))
-      case ("object", TypeObject(values)) =>
+    (name, deref(aType)) match {
+      case ("bool", Some(TypeBoolean)) => Some(Provider.constant("bool"))
+      case ("int", Some(TypeNumber)) => Some(Provider.constant("int"))
+      case ("string", Some(TypeString)) => Some(Provider.constant("string"))
+      case ("opt", Some(TypeOptional(t))) => Some(new TypeProvider(t, types))
+      case ("rep", Some(TypeMultiple(t))) => Some(new TypeProvider(t, types))
+      case ("object", Some(TypeObject(values))) =>
         val attributes = for ((n, (a, t)) <- values) yield new TypeAttributeProvider(n, a, t, types)
         Some(Provider.set(attributes.toList))
-      case ("object", TypeComposed(l, r)) =>
-        (deref(l), deref(r)) match {
-          case (Some(TypeObject(l)), Some(TypeObject(r))) => new TypeProvider(TypeObject(l ++ r), types).get(name)
-          case _ => None
-        }
-      case (_, TypeIdentifier(_)) =>
-        deref(aType) flatMap (new TypeProvider(_, types).get(name))
       case _ => None
     }
 }
