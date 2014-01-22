@@ -2,6 +2,31 @@
 // Source https://dev.twitter.com/docs/api/1.1
 //
 
+type Error = {}
+type Empty = {}
+type Any = {}*
+
+//------------------------------------------------------------------------------------------
+// OAuth2 service
+//------------------------------------------------------------------------------------------
+
+type Token = {
+    @get(type)  token_type: string,
+    @get(token) access_token": string
+}
+
+type Credentials = {
+    Authorization: string = [<type> <token>]
+}
+
+service OAuth2 [oauth2/token] {
+    authenticate: Token => Token or Error = POST HEADER[Credentials]
+}
+
+//------------------------------------------------------------------------------------------
+// Timeline service
+//------------------------------------------------------------------------------------------
+
 type Timeline = {
     count: int,
     since_id: string,
@@ -32,11 +57,7 @@ type RetweetsOfMe = Timeline with {
     include_user_entities: bool
 }
 
-type Error = {}
-type Empty = {}
-type Any = {}*
-
-service timelines [statuses] {
+service timelines(Token) [1.1/statuses] {
     mentions_timeline: MentionsTimeline => Any or Error = GET[mentions_timeline.json] PARAMS[MentionsTimeline]
     user_timeline: UserTimeline => Any or Error = GET[user_timeline.json] PARAMS[UserTimeline]
     home_timeline: HomeTimeline => Any or Error = GET[home_timeline.json] PARAMS[HomeTimeline]

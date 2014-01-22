@@ -1,3 +1,21 @@
+/*
+ * Copyright (C)2014 D. Plaindoux.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation; either version 2, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package smallibs.rapido.syntax
 
 import org.specs2.mutable._
@@ -33,52 +51,52 @@ object RapidoSpec extends Specification {
 
     "provides a data object type with one attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(None, TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(None, TypeBoolean)))
     }
 
     "provides a data object type with one quoted attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ 'valid' : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(None, TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(None, TypeBoolean)))
     }
 
     "provides a data object type with one string quoted attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ \"valid\" : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(None, TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(None, TypeBoolean)))
     }
 
     "provides a data object type with one attribute and a get" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @get valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(Some(GetAccess(None)), TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(Some(GetAccess(None)), TypeBoolean)))
     }
 
     "provides a data object type with one attribute and a named get" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @get(Valid) valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(Some(GetAccess(Some("Valid"))), TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(Some(GetAccess(Some("Valid"))), TypeBoolean)))
     }
 
     "provides a data object type with one attribute and a set" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @set valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetAccess(None)), TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(Some(SetAccess(None)), TypeBoolean)))
     }
 
     "provides a data object type with one attribute and a named set" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @set(Valid) valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetAccess(Some("Valid"))), TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(Some(SetAccess(Some("Valid"))), TypeBoolean)))
     }
 
     "provides a data object type with one attribute and a set,get" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @{set,get} valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetGetAccess(None)), TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(Some(SetGetAccess(None)), TypeBoolean)))
     }
 
     "provides a data object type with one attribute and a named set,get" in {
       val parsed = RapidoParser.parseAll(RapidoParser.extensible, "{ @{get,set}(Valid) valid : bool }")
-      parsed.get mustEqual TypeObject(Map("valid" ->(Some(SetGetAccess(Some("Valid"))), TypeBoolean)))
+      parsed.get mustEqual TypeObject(Map("valid" -> ConcreteTypeAttribute(Some(SetGetAccess(Some("Valid"))), TypeBoolean)))
     }
 
     "provides a data object type with two attributes" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "{ valid : bool ; content : {} }")
-      val expected: TypeObject = TypeObject(Map("valid" ->(None, TypeBoolean), "content" ->(None, TypeObject(Map()))))
+      val expected: TypeObject = TypeObject(Map("valid" -> ConcreteTypeAttribute(None, TypeBoolean), "content" -> ConcreteTypeAttribute(None, TypeObject(Map()))))
       parsed.get mustEqual expected
     }
 
@@ -121,17 +139,23 @@ object RapidoSpec extends Specification {
   "Parser dedicated to attributes" should {
     "provides a quoted attribute name" in {
       val parsed = RapidoParser.parseAll(RapidoParser.attribute, "an_int:Int")
-      parsed.get mustEqual("an_int", (None, TypeIdentifier("Int")))
+      parsed.get mustEqual("an_int", ConcreteTypeAttribute(None, TypeIdentifier("Int")))
     }
 
     "provides a simple attribute" in {
       val parsed = RapidoParser.parseAll(RapidoParser.attribute, "'X-Auth-Token':Int")
-      parsed.get mustEqual("X-Auth-Token", (None, TypeIdentifier("Int")))
+      parsed.get mustEqual("X-Auth-Token", ConcreteTypeAttribute(None, TypeIdentifier("Int")))
     }
 
     "provides a string-quoted attribute name" in {
       val parsed = RapidoParser.parseAll(RapidoParser.attribute, "\"X-Auth-Token\":Int")
-      parsed.get mustEqual("X-Auth-Token", (None, TypeIdentifier("Int")))
+      parsed.get mustEqual("X-Auth-Token", ConcreteTypeAttribute(None, TypeIdentifier("Int")))
+    }
+
+    "provides a virtual attribute name" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.virtual, "virtual \"X-Auth-Token\" = [a]")
+      print(parsed)
+      parsed.get mustEqual("X-Auth-Token", VirtualTypeAttribute(Path(List(StaticLevel("a")))))
     }
   }
 
@@ -250,7 +274,7 @@ object RapidoSpec extends Specification {
 
     "provides a type definition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeSpecification, "type Action = { performed : bool }")
-      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" ->(None, TypeBoolean))))
+      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" -> ConcreteTypeAttribute(None, TypeBoolean))))
     }
 
     "provides a service definition" in {
@@ -267,12 +291,19 @@ object RapidoSpec extends Specification {
 
     "provides a type definition specification" in {
       val parsed = RapidoParser.parseAll(RapidoParser.specification, "type Action = { performed : bool }")
-      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" ->(None, TypeBoolean))))
+      parsed.get mustEqual TypeEntity("Action", TypeObject(Map("performed" -> ConcreteTypeAttribute(None, TypeBoolean))))
     }
 
     "provides a service definition specification" in {
       val parsed = RapidoParser.parseAll(RapidoParser.specification, "service Test [places] { list : => Action = GET add : Param => Action = POST }")
       parsed.get mustEqual ServiceEntity("Test", Route("Test", Nil, Path(List(StaticLevel("places")))),
+        List(Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
+          Service("add", Action(POST, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
+    }
+
+    "provides a service definition specification with parameters" in {
+      val parsed = RapidoParser.parseAll(RapidoParser.specification, "service Test(A,B) [places] { list : => Action = GET add : Param => Action = POST }")
+      parsed.get mustEqual ServiceEntity("Test", Route("Test", List(TypeIdentifier("A"), TypeIdentifier("B")), Path(List(StaticLevel("places")))),
         List(Service("list", Action(GET, None, None, None, None, None), ServiceType(None, TypeIdentifier("Action"), None)),
           Service("add", Action(POST, None, None, None, None, None), ServiceType(Some(TypeIdentifier("Param")), TypeIdentifier("Action"), None))))
     }

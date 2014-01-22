@@ -1,7 +1,7 @@
 @MACRO::Attributes
     [|@OR
-    [|@VAL::object[|[@REP(, )[|'@VAL::name'|]|]]|]
-    [|None|]|]
+    [|@VAL::object[|[@REP(, )::attributes[|'@VAL::name'|]]|]|]
+    [|[]|]|]
 
 @MACRO::ParameterNames
     [|@REP::params[|, @VAL::name|]|]
@@ -15,36 +15,39 @@
 @MACRO::PathAsString
     [|"/@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
-@MACRO::PathVariables
-    [|[@REP(,)::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]]|]
+@MACRO::PathVariable
+    [|@REP(,)::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]|]
 
-@MACRO::PushVar[|@DEFINE::VarPath[|@OPT[|@USE::VarPath|]['@VAL::name']|]|]
+@MACRO::PathVariables
+    [|[@USE::PathVariable]|]
+
+@MACRO::PushAccessVar[|@DEFINE::AccessVar[|@OPT[|@USE::AccessVar|]['@VAL::name']|]|]
+@MACRO::PushArrayVar[|@DEFINE::ArrayVar[|@OPT[|@USE::ArrayVar, |]'@VAL::name'|]|]
 
 @MACRO::GenerateGetterSetter
     [|@OR
     [|
     def @VAL::get(self):
-        return self.data@USE::VarPath
+        return self.data@USE::AccessVar
 |]
     [|
     def @VAL::set(self, value):
-        self.data@USE::VarPath = value
+        self.data@USE::AccessVar = value
         return self
 |]
     [|
     def @VAL::set_get(self, value=None):
         if value is None:
-            return self.data@USE::VarPath
+            return self.data@USE::AccessVar
         else:
-            self.data@USE::VarPath = value
+            self.data@USE::AccessVar = value
             return self
 |]
     [||]|]
 
 @MACRO::VariableGetterSetter
     [|@OPT
-    [|@VAL::object[|@REP[|@USE::PushVar@USE::GenerateGetterSetter@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
-
+    [|@VAL::object[|@REP::attributes[|@USE::PushAccessVar@USE::GenerateGetterSetter@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
 
 @MACRO::SingleVariableAsParameter
     [|@OR
@@ -54,7 +57,7 @@
 
 @MACRO::VariablesAsParameter
     [|@OPT
-    [|@VAL::object[|@REP[|@USE::SingleVariableAsParameter@VAL::type[|@USE::VariablesAsParameter|]|]|]|]|]
+    [|@VAL::object[|@REP::attributes[|@USE::SingleVariableAsParameter@VAL::type[|@USE::VariablesAsParameter|]|]|]|]|]
 
 @MACRO::Types
     [|@OR
@@ -63,7 +66,18 @@
     [|@VAL::string[|""|]|]
     [|@VAL::opt[|None|]|]
     [|@VAL::rep[|[]|]|]
-    [|@VAL::object[|{@REP(, )[|'@VAL::name': @OR[|@VAL::set|][|@VAL::set_get|][|@VAL::type[|@USE::Types|]|]|]}|]|]|]
+    [|@VAL::object[|{@REP(, )::attributes[|'@VAL::name': @OR[|@VAL::set|][|@VAL::set_get|][|@VAL::type[|@USE::Types|]|]|]}|]|]|]
+
+@MACRO::VirtualType
+    [|@OR
+    [|@VAL::opt[|@USE::VirtualType|]|]
+    [|@VAL::rep[|@USE::VirtualType|]|]
+    [|@VAL::object[|@REP::attributes
+        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP(        )::virtual
+        [|self.set_value(self.data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
+|]|]|]
+    [||]|]
+
 
 import httplib as http
 import json
@@ -98,10 +112,16 @@ class BasicService:
         complete_header = dict(implicit_header.items() + header.items())
 
         connection.request(operation, self.path + path, json.dumps(body), complete_header)
+        # TODO - Improve this code fragment
         try:
             response = connection.getresponse()
             data = response.read()
-            return json.loads(data)
+            try:
+                return json.loads(data)
+            except Exception, e:
+                return response
+        except Exception, e:
+            return e
         finally:
             connection.close()
 
@@ -132,11 +152,11 @@ class BasicService:
     # Private behaviors
     #
 
-    def __get_value(self, data, Attributes):
-        if Attributes is None or not Attributes:
+    def __get_value(self, data, attributes):
+        if attributes is None or not attributes:
             return data
         else:
-            return self.__get_value(data[Attributes[0]], Attributes[1:])
+            return self.__get_value(data[attributes[0]], attributes[1:])
 
 #
 # Types:@REP(,)::types[| @VAL::name|]
@@ -148,10 +168,19 @@ class Type:
     def __init__(self):
         self.data = None
 
-    def to_dict(self):
-        return self.data
+    def __get_value(self, data, attributes):
+        if attributes is None or not attributes:
+            return data
+        else:
+            return self.__get_value(data[attributes[0]], attributes[1:])
 
+    def set_value(self, data, path, virtual, attributes):
+        if path is None or not path:
+            data[virtual] = self.__get_value(data, attributes)
+        else:
+            self.set_value(data[path[0]], path[1:], virtual, attributes)
 @REP::types[|
+
 class @VAL::name(Type):
 
     def __init__(self, data=None@VAL::definition[|@USE::VariablesAsParameter|]):
@@ -162,6 +191,9 @@ class @VAL::name(Type):
         else:
             self.data = data
     @VAL::definition[|@USE::VariableGetterSetter|]
+    def to_dict(self):
+        @VAL::definition[|@USE::VirtualType|]
+        return self.data
 |]
 
 #

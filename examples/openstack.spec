@@ -13,9 +13,15 @@ type Token = {
         token: {
             issued_at: string,
             expires: string,
-            @get id: string
+            id: string
         }
-    }
+    },
+
+    virtual 'X-Auth-Token' = [<access.token.id>]
+}
+
+type AuthToken = {
+    'X-Auth-Token': string
 }
 
 type Error = {
@@ -24,10 +30,6 @@ type Error = {
         @get title: string,
         @get message: string
     }
-}
-
-type AuthToken = {
-    @{set,get}(token) 'X-Auth-Token': string
 }
 
 type Endpoints = {
@@ -48,7 +50,7 @@ service keystone [v2.0/tokens] {
     authenticate: Authentication => Token or Error = POST BODY[Authentication]
  }
 
-service keystoneClient(Token, AuthToken) [v2.0] {
+service keystoneClient(Token) [v2.0] {
     endpoints: => Endpoints or Error = GET[tokens/<access.token.id>/endpoints] HEADER[AuthToken]
     tenants: => Tenants or Error = GET[tenants] HEADER[AuthToken]
  }

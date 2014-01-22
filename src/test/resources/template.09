@@ -9,7 +9,7 @@
     [|@OR
     [|@VAL::opt[|@USE::VariableTypes|]|]
     [|@VAL::rep[|@USE::VariableTypes|]|]
-    [|@VAL::object[|@REP(,)
+    [|@VAL::object[|@REP(,)::attributes
         [|@OR
         [|@VAL::type[|@USE::IsAtomicType|]@VAL::name|]
         [|@VAL::type[|@USE::VariableTypes|]|]|]|]|]

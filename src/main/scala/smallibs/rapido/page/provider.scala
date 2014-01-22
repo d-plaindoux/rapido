@@ -1,3 +1,21 @@
+/*
+ * Copyright (C)2014 D. Plaindoux.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation; either version 2, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package smallibs.rapido.page
 
 import scala.Some
@@ -174,8 +192,23 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
       case ("string", Some(TypeString)) => Some(Provider.constant("string"))
       case ("opt", Some(TypeOptional(t))) => Some(new TypeProvider(t, types))
       case ("rep", Some(TypeMultiple(t))) => Some(new TypeProvider(t, types))
-      case ("object", Some(TypeObject(values))) =>
-        val attributes = for ((n, (a, t)) <- values) yield new TypeAttributeProvider(n, a, t, types)
+      case ("object", Some(TypeObject(values))) => Some(new TypeObjectProvider(values, types))
+      case _ => None
+    }
+}
+
+case class TypeObjectProvider(definitions: Map[String, TypeAttribute], types: Map[String, Type]) extends DataProvider with AbstractProvider {
+  val keys = List("attributes", "virtual")
+
+  def get(name: String): Option[DataProvider] =
+    name match {
+      case "attributes" =>
+        val concrete = for ((n, t) <- definitions if t.isInstanceOf[ConcreteTypeAttribute]) yield (n, t)
+        val attributes = for ((n, ConcreteTypeAttribute(a, t)) <- concrete) yield new TypeAttributeProvider(n, a, t, types)
+        Some(Provider.set(attributes.toList))
+      case "virtual" =>
+        val virtual = for ((n, t) <- definitions if t.isInstanceOf[VirtualTypeAttribute]) yield (n, t)
+        val attributes = for ((n, VirtualTypeAttribute(p)) <- virtual) yield new TypeVirtualAttributeProvider(n, p)
         Some(Provider.set(attributes.toList))
       case _ => None
     }
@@ -200,6 +233,17 @@ class TypeAttributeProvider(aName: String, access: Option[Access], aType: Type, 
         case _ => None
       }
       case "type" => Some(new TypeProvider(aType, types))
+      case _ => None
+    }
+}
+
+class TypeVirtualAttributeProvider(aName: String, path: Path) extends DataProvider with AbstractProvider {
+  val keys = List("name", "values")
+
+  def get(name: String): Option[DataProvider] =
+    name match {
+      case "name" => Some(Provider.constant(aName))
+      case "values" => new PathProvider(path) get "values"
       case _ => None
     }
 }
