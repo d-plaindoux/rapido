@@ -1,28 +1,6 @@
-type Authentication = {
-    auth: {
-        passwordCredentials: {
-            @set username: string,
-            @set password: string
-        },
-        @set tenantName: string?
-    }
-}
-
-type Token = {
-    access: {
-        token: {
-            issued_at: string,
-            expires: string,
-            id: string
-        }
-    },
-
-    virtual 'X-Auth-Token' = [<access.token.id>]
-}
-
-type AuthToken = {
-    'X-Auth-Token': string
-}
+//---------------------------------------------------------------------------------
+// Open stack API
+//---------------------------------------------------------------------------------
 
 type Error = {
     error: {
@@ -32,27 +10,48 @@ type Error = {
     }
 }
 
+//---------------------------------------------------------------------------------
+// Token service
+//---------------------------------------------------------------------------------
+
+type Authentication = {
+    auth: {
+        passwordCredentials: { @set username: string, @set password: string },
+        @set tenantName: string?
+    }
+}
+
+type Token = {
+    access: {
+        token: { issued_at: string, expires: string, @get id: string }
+    },
+
+    virtual 'X-Auth-Token' = [<access.token.id>]
+}
+
+type AuthToken = {
+    'X-Auth-Token': string
+}
+
+type Belongs = {
+    @set(value) belongsTo: string?
+}
+
+type TokenId = {
+    @set(value) tokenId: string
+}
+
 type Endpoints = {
-    @get endpoints: {
-        name: string,
-        adminURL: string
-    }*
+    @get endpoints: { name: string, adminURL: string  }*
 }
 
-type Tenants = {
-    @get tenants: {
-        name: string,
-        id: string
-    }*
-}
-
-service keystone [v2.0/tokens] {
+service tokens [v2.0/tokens] {
     authenticate: Authentication => Token or Error = POST BODY[Authentication]
- }
+    validate: TokenId, Belongs => Token or Error = GET[<tokenId>?<belongsTo>]
+    validateOnly: TokenId, Belongs => {} or Error = HEAD[<tokenId>?<belongsTo>]
+    endpoints: Token, TokenId => Endpoints or Error = GET[<tokenId>/endpoints] HEADER[AuthToken]
+}
 
-service keystoneClient(Token) [v2.0] {
-    endpoints: => Endpoints or Error = GET[tokens/<access.token.id>/endpoints] HEADER[AuthToken]
-    tenants: => Tenants or Error = GET[tenants] HEADER[AuthToken]
- }
+//---------------------------------------------------------------------------------
 
-client openStackRest provides keystone, keystoneClient
+client openStackRest provides tokens

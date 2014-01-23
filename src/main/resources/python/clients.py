@@ -1,5 +1,5 @@
-from @OPT[|@ARG::package.|]types import *
-from @OPT[|@ARG::package.|]services import *
+from @OPT[|@USE::package.|]types import *
+from @OPT[|@USE::package.|]services import *
 
 #
 # Clients:@REP(,)::clients[| @VAL::name|]

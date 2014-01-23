@@ -11,12 +11,13 @@ type Any = {}*
 //------------------------------------------------------------------------------------------
 
 type Token = {
-    @get(type)  token_type: string,
-    @get(token) access_token": string
+    token_type: string,
+    access_token": string
+    virtual Authorization = [<type> <token>]
 }
 
 type Credentials = {
-    Authorization: string = [<type> <token>]
+    Authorization: String
 }
 
 service OAuth2 [oauth2/token] {
@@ -58,10 +59,10 @@ type RetweetsOfMe = Timeline with {
 }
 
 service timelines(Token) [1.1/statuses] {
-    mentions_timeline: MentionsTimeline => Any or Error = GET[mentions_timeline.json] PARAMS[MentionsTimeline]
-    user_timeline: UserTimeline => Any or Error = GET[user_timeline.json] PARAMS[UserTimeline]
-    home_timeline: HomeTimeline => Any or Error = GET[home_timeline.json] PARAMS[HomeTimeline]
-    retweets_of_me: RetweetsOfMe => Any or Error = GET[retweets_of_me.json] PARAMS[RetweetsOfMe]
+    mentions_timeline: MentionsTimeline => Any or Error = GET[mentions_timeline.json] PARAMS[MentionsTimeline] HEADER[Credentials]
+    user_timeline: UserTimeline => Any or Error = GET[user_timeline.json] PARAMS[UserTimeline] HEADER[Credentials]
+    home_timeline: HomeTimeline => Any or Error = GET[home_timeline.json] PARAMS[HomeTimeline] HEADER[Credentials]
+    retweets_of_me: RetweetsOfMe => Any or Error = GET[retweets_of_me.json] PARAMS[RetweetsOfMe] HEADER[Credentials]
 }
 
 client twitterRest provides timelines

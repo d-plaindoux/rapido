@@ -1,13 +1,19 @@
-[
-    "clients.py",
-    {
-        "services": [
-            "__init__.py",
-            "services.py"
-        ],
-        "types": [
-            "__init__.py",
-            "types.py"
-        ]
-    }
-]
+{
+    "arguments": [
+        "package",
+        "name"
+    ],
+    "files": [
+        "clients.py",
+        {
+            "services": [
+                "__init__.py",
+                "services.py"
+            ],
+            "types": [
+                "__init__.py",
+                "types.py"
+            ]
+        }
+    ]
+}

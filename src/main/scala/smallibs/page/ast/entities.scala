@@ -18,11 +18,11 @@
 
 package smallibs.page.ast
 
-trait Template
+//
+// Template definitions
+//
 
-//
-// Models
-//
+trait Template
 
 case class Value(name: Option[String], content: Option[Template]) extends Template
 

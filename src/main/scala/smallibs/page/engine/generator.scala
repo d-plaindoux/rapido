@@ -150,5 +150,9 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
 }
 
 object Engine {
-  def apply(bean: DataProvider): Engine = new Engine(Nil, bean, Map())
+  def apply(bean: DataProvider): Engine = apply(bean, Map())
+
+  def apply(bean: DataProvider, args: Map[String, String]): Engine = {
+    new Engine(Nil, bean, for ((n, v) <- args) yield (n, Text(v)))
+  }
 }
