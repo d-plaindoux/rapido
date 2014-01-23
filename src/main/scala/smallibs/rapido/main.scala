@@ -25,6 +25,8 @@ import smallibs.rapido.syntax.RapidoParser
 import smallibs.page.syntax.PageParser
 import smallibs.page.engine.Engine
 import smallibs.rapido.page.RapidoProvider
+import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
+import smallibs.page.DataProvider
 
 object GenAPI {
 
@@ -69,12 +71,12 @@ object GenAPI {
         case Nil => map
         case "--lang" :: value :: tail =>
           nextOption(map ++ Map('lang -> value), tail)
-        case "--model" :: value :: tail =>
-          nextOption(map ++ Map('model -> value), tail)
         case "--api" :: value :: tail =>
           nextOption(map ++ Map('api -> value), tail)
         case "--out" :: value :: tail =>
           nextOption(map ++ Map('out -> value), tail)
+        case "--" :: _ =>
+          map
         case option :: tail => println("Unknown option " + option)
           sys.exit(1)
       }
@@ -83,41 +85,71 @@ object GenAPI {
     nextOption(Map(), args.toList)
   }
 
-  def rapido(spec: String, lang: Option[String], model: Option[String]): String = {
-    val specificationURL: URL = new File(spec).toURI.toURL
-    val specification = RapidoParser.parseAll(RapidoParser.specifications, Resources getContent specificationURL)
+  def generateAll(provider: DataProvider, outputDirectory: File, inputDirectory: File, files: Any): List[(File, String)] =
+    files match {
+      case file: String =>
+        val templateURL = (Resources getURL s"$inputDirectory/$file") getOrElse {
+          throw new Exception(s"File $file not found $inputDirectory")
+        }
+        val template = PageParser.parseAll(PageParser.template, Resources getContent templateURL)
+        if (!template.successful) {
+          throw new Exception(template.toString)
+        }
+        List((new File(outputDirectory, file), Engine(provider).generate(template.get).get.get))
+      case JSONArray(l) =>
+        l.foldRight[List[(File, String)]](Nil) {
+          (e, l) => l ++ generateAll(provider, outputDirectory, inputDirectory, e)
+        }
+      case JSONObject(l) =>
+        l.foldRight[List[(File, String)]](Nil) {
+          (e, l) => l ++ generateAll(provider, new File(outputDirectory, e._1), new File(inputDirectory, e._1), e._2)
+        }
+      case _ => Nil
+    }
+
+  def rapido(spec: String, lang: String): List[(File, String)] = {
+    val specificationContent = Resources getContent new File(spec).toURI.toURL
+    val specification = RapidoParser.parseAll(RapidoParser.specifications, specificationContent)
     if (!specification.successful) {
       throw new Exception(specification.toString)
     }
 
-    val templateURL = (lang, model) match {
-      case (Some(lang), _) => (Resources getURL s"/$lang/clients.py") getOrElse {
-        throw new Exception(s"unsupported language $lang")
-      }
-      case (_, Some(model)) => new File(model).toURI.toURL
-      case _ => throw new Exception("missing lang or model")
+    val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
+      throw new Exception(s"File files.rdo for $lang is not available")
     }
 
-    val template = PageParser.parseAll(PageParser.template, Resources getContent templateURL)
-    if (!template.successful) {
-      throw new Exception(template.toString)
+    val description = JSON parseRaw (Resources getContent filesURL) getOrElse {
+      throw new Exception(s"File files.rdo for $lang is not using JSON formalism")
     }
 
-    Engine(RapidoProvider.entities(specification.get)).generate(template.get).get.get
+    generateAll(RapidoProvider.entities(specification.get), new File("."), new File(s"/$lang"), description)
   }
 
   def main(args: Array[String]) = {
     try {
       val options = parserOptions(args)
-      val generatedAPI = rapido((options get 'api).get, options get 'lang, options get 'model)
-      options get 'out match {
-        case None => print(generatedAPI)
-        case Some(name) => Resources saveContent(name, generatedAPI)
+      val output = options get 'out match {
+        case None => {
+          (entry: (File, String)) =>
+            println("--- File " + entry._1 + " ----")
+            println(entry._2)
+        }
+        case Some(name) => {
+          (entry: (File, String)) =>
+            val file = new File(new File(name), entry._1.getPath) // :(
+            println("[generate] File " + file)
+            file.getParentFile.mkdirs()
+            Resources saveContent(file.getPath, entry._2)
+        }
       }
+
+      rapido((options get 'api).get, (options get 'lang).getOrElse {
+        throw new Exception("option --lang must be specified")
+      }).foreach(output)
     } catch {
       case e: Throwable =>
         println(e.getMessage)
-        e.printStackTrace
     }
   }
 }
+

@@ -270,7 +270,9 @@ class ServiceTypeProvider(serviceType: ServiceType, types: Map[String, Type]) ex
 
   def get(name: String): Option[DataProvider] =
     name match {
-      case "input" => for (t <- serviceType.input) yield TypeProvider(t, types)
+      case "inputs" =>
+        val params = serviceType.inputs.foldLeft[(Int, List[(Int, Type)])](0, Nil)((i, t) => (i._1 + 1, i._2 ++ List((i._1, t))))
+        Some(Provider.set(for ((i, e) <- params._2) yield new ParamProvider((f"p_$i%d", e), types)))
       case "output" => Some(TypeProvider(serviceType.output, types))
       case "error" => for (t <- serviceType.error) yield TypeProvider(t, types)
       case _ => None

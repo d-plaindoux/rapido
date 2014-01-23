@@ -41,7 +41,7 @@ like Scala, Java, Javascript, Python etc.
 
 ## More resources ...
 
-More information are available in the wiki.
+More information are available in the wiki
 
 ## License
 
