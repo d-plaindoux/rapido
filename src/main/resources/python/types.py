@@ -75,30 +75,13 @@
 @[|------------------------------------------------------------------------------------------
     Main for types generation
    ------------------------------------------------------------------------------------------|]
+"""
+Types:@REP(, )::types[|@VAL::name|]
+"""
 
-#
-# Types:@REP(, )::types[|@VAL::name|]
-#
+from @OPT[|@USE::package.|]core.types import Type
 
-
-class Type:
-
-    def __init__(self):
-        self.data = None
-
-    def __get_value(self, data, attributes):
-        if attributes is None or not attributes:
-            return data
-        else:
-            return self.__get_value(data[attributes[0]], attributes[1:])
-
-    def set_value(self, data, path, virtual, attributes):
-        if path is None or not path:
-            data[virtual] = self.__get_value(data, attributes)
-        else:
-            self.set_value(data[path[0]], path[1:], virtual, attributes)
 @REP::types[|
-
 class @VAL::name(Type):
 
     def __init__(self, data=None@VAL::definition[|@USE::VariablesAsParameter|]):
@@ -112,4 +95,5 @@ class @VAL::name(Type):
     def to_dict(self):
         @VAL::definition[|@USE::VirtualType|]
         return self.data
+
 |]

@@ -4,16 +4,12 @@
         "name"
     ],
     "files": [
+        "__init__.py",
         "clients.py",
-        {
-            "services": [
-                "__init__.py",
-                "services.py"
-            ],
-            "types": [
-                "__init__.py",
-                "types.py"
-            ]
-        }
+        "services.py",
+        "types.py",
+        "core/__init__.py",
+        "core/services.py",
+        "core/types.py"
     ]
 }

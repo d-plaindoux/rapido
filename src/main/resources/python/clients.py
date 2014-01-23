@@ -1,5 +1,8 @@
-from @OPT[|@USE::package.|]types import *
-from @OPT[|@USE::package.|]services import *
+"""
+Clients providing main entry for the REST API.
+"""
+
+from @OPT[|@USE::package|] import services
 
 #
 # Clients:@REP(,)::clients[| @VAL::name|]
@@ -8,5 +11,5 @@ from @OPT[|@USE::package.|]services import *
 @REP::clients[|
 class @VAL::name:
     def __init__(self, url):
-        @REP(        )::provides[|self.@VAL = @VAL(url)
+        @REP(        )::provides[|self.@VAL = services.@VAL(url)
 |]|]
