@@ -66,7 +66,7 @@
     [|@VAL::rep[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
         [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP(        )::virtual
-        [|data.setValue(List(@OPT[|@USE::ArrayVar,|]"@VAL::name"), @USE::PathVariable)|]|]|]
+        [|setVirtualValue(List(@OPT[|@USE::ArrayVar,|]"@VAL::name"), @USE::PathVariable)|]|]|]
     [||]|]
 
 @[|------------------------------------------------------------------------------------------

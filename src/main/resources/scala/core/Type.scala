@@ -22,13 +22,11 @@ import scala.util.Try
 
 class Type(data: JSon) {
 
-  protected def get_value(path: List[String]): Try[JSon] =
-    data getValue path
-
-  protected def set_virtual_value(path: List[String], attributes: List[String]): Try[JSon] = {
+  protected def setVirtualValue(path: List[String], attributes: List[String]): Try[JSon] = {
     (data getValue attributes) flatMap {
       value => data setValue(path, value)
     }
   }
+  
 }
 

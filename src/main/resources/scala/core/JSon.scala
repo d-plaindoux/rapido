@@ -45,12 +45,6 @@ trait JSon {
       case ((key :: path), _) => ObjectData(Map(key -> null)) setValue(path, result)
     }
 
-
-  def setValue(path: List[String], attributes: List[String]): Try[JSon] =
-    (p getValue attributes) flatMap {
-      (value) => p setValue(path, value)
-    }
-
   def toRaw: Any =
     p match {
       case StringData(s) => s
