@@ -1,15 +1,14 @@
 {
     "arguments": [
-        "package",
-        "name"
+        "package"
     ],
     "files": [
-        "__init__.py",
-        "clients.py",
-        "services.py",
-        "types.py",
-        "core/__init__.py",
-        "core/services.py",
-        "core/types.py"
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]__init__.py",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]clients.py",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]services.py",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]types.py",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/__init__.py",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/services.py",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/types.py"
     ]
 }

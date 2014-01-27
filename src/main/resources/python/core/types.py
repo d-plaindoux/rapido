@@ -13,8 +13,6 @@ class Type:
         else:
             return self.__get_value(data[attributes[0]], attributes[1:])
 
-    def set_value(self, data, path, virtual, attributes):
-        if path is None or not path:
-            data[virtual] = self.__get_value(data, attributes)
-        else:
-            self.set_value(data[path[0]], path[1:], virtual, attributes)
+    def virtual_value(self, data, path, virtual, attributes):
+        subData = self.__get_value(data, path)
+        subData[virtual] = self.__get_value(data, attributes)

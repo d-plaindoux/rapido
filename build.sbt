@@ -1,3 +1,5 @@
+artifact := Artifact("smallibs.rapido")
+
 name := "rapido"
 
 version := "0.1.0"

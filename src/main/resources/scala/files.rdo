@@ -2,5 +2,14 @@
     "arguments": [
         "package"
     ],
-    "files": []
+    "files": [
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/JSon.scala",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/BasicService.scala",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/Type.scala",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]types.scala"
+    ],
+    "pending": [
+         "clients.scala",
+         "services.scala"
+    ]
 }

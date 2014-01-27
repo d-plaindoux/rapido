@@ -23,6 +23,7 @@ class BasicService:
     #
 
     def http_request(self, path, operation, body=None, header=None, implicit_header=None):
+        # TODO - HTTPSConnection can also be used ...
         connection = http.HTTPConnection(self.url)
 
         if not header:

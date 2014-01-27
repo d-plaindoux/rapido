@@ -30,7 +30,7 @@ type Token = {
 }
 
 type AuthToken = {
-    'X-Auth-Token': string
+    @{get,set}(token) 'X-Auth-Token': string
 }
 
 type Belongs = {

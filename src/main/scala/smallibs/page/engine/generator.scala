@@ -25,6 +25,7 @@ import scala.util.Try
 import smallibs.page.DataProvider
 import smallibs.page.ast._
 
+
 class Engine(path: List[String], data: DataProvider, definitions: Map[String, Template]) {
 
   type Definitions = Map[String, Template]

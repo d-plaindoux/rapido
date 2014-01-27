@@ -1,6 +1,6 @@
 """
 The following package provides facilities for REST services.
-Theses services are synthesized by the following exhaustive
+These services are synthesized by the following exhaustive
 list:
 @REP::services[|  - @VAL::name
 |]

@@ -24,7 +24,7 @@ import smallibs.page.syntax.PageParser
 import smallibs.page.engine.Engine
 import smallibs.rapido.page.RapidoProvider
 import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
-import smallibs.page.DataProvider
+import smallibs.page.{Provider, DataProvider}
 import smallibs.rapido.utils.{Options, Resources}
 
 object GenAPI {
@@ -33,24 +33,25 @@ object GenAPI {
     Usage: rapido --lang [python|scala] --api filename [--out filename] [-- <name>=<value>*]
               """
 
-  def generateAll(arguments: Map[String, String], provider: DataProvider, outputDirectory: File, inputDirectory: File, files: Any): List[(File, String)] =
+  def generateAll(arguments: Map[String, String], provider: DataProvider, outputDirectory: String => File, inputDirectory: String => File, files: Any): List[(File, String)] =
     files match {
       case file: String =>
-        val templateURL = (Resources getURL s"$inputDirectory/$file") getOrElse {
-          throw new Exception(s"File $file not found $inputDirectory")
+        val fileName = inputDirectory(file).getPath
+        val templateURL = (Resources getURL fileName) getOrElse {
+          throw new Exception(s"File $fileName not found")
         }
         val template = PageParser.parseAll(PageParser.template, Resources getContent templateURL)
         if (!template.successful) {
           throw new Exception(template.toString)
         }
-        List((new File(outputDirectory, file), Engine(provider, arguments).generate(template.get).get.get))
+        List((outputDirectory(file), Engine(provider, arguments).generate(template.get).get.get))
       case JSONArray(l) =>
         l.foldRight[List[(File, String)]](Nil) {
           (e, l) => l ++ generateAll(arguments, provider, outputDirectory, inputDirectory, e)
         }
       case JSONObject(l) =>
         l.foldRight[List[(File, String)]](Nil) {
-          (e, l) => l ++ generateAll(arguments, provider, new File(outputDirectory, e._1), new File(inputDirectory, e._1), e._2)
+          (e, l) => l ++ generateAll(arguments, provider, outputDirectory, inputDirectory, e._2)
         }
       case _ => Nil
     }
@@ -91,10 +92,25 @@ object GenAPI {
       throw new Exception("JSON must provides files i.e. { files: [ ... ], ... } ")
     }
 
-    val packageName = arguments get "package" getOrElse (".") replace('.', '/')
+    // TODO - Clean this ugly code
+    val outputNameGenerator = arguments get "package" match {
+      case Some(packageName) => (input: String) => {
+        val template = PageParser.parseAll(PageParser.template, input).get
+        new File(Engine(Provider.empty, Map("package" -> packageName)).generate(template).get.get)
+      }
+      case None => (input: String) => new File(input)
+    }
 
-    generateAll(arguments, RapidoProvider.entities(specification.get), new File(packageName), new File(s"/$lang"), files)
+    val inputNameGenerator = (input: String) => {
+      val template = PageParser.parseAll(PageParser.template, input).get
+      new File(Engine(Provider.empty, Map("lang" -> lang)).generate(template).get.get)
+    }
+
+    generateAll(arguments, RapidoProvider.entities(specification.get), outputNameGenerator, inputNameGenerator, files)
   }
+
+  def checkArguments(required: List[String], provided: List[String]): List[String] =
+    for (r <- required if !(provided contains r)) yield r
 
   def main(args: Array[String]) = {
     try {
@@ -119,6 +135,7 @@ object GenAPI {
       }).foreach(output)
     } catch {
       case e: Throwable =>
+        e.printStackTrace
         println(e.getMessage)
     }
   }
