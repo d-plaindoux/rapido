@@ -15,16 +15,16 @@
     [|@OR
     [|
   def @VAL::get: Try[JSon] =
-    data getValue List(@USE::AccessVar)
+    getValue(List(@USE::AccessVar))
 |][|
   def @VAL::set(value:JSon): @USE::this =
-    @USE::this(data setValue(List(@USE::AccessVar),value))
+    @USE::this(setValue(List(@USE::AccessVar),value))
 |][|
   def @VAL::set_get: Try[JSon] =
     data getValue List(@USE::AccessVar)
 
   def @VAL::set_get(value:JSon): @USE::this =
-    @USE::this(data setValue(List(@USE::AccessVar),value))
+    @USE::this(setValue(List(@USE::AccessVar),value))
 |][||]|]
 
 @MACRO::VariableGetterSetter

@@ -16,17 +16,23 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package @OPT[|@USE::package.|] core
+package @OPT[|@USE::package.|]core
 
 import scala.util.Try
 
 class Type(data: JSon) {
 
+  protected def getValue(path: List[String]): Try[JSon] =
+    data getValue path
+
+  protected def setValue(path: List[String], value: JSon): Try[JSon] =
+    data setValue(path, value)
+
   protected def setVirtualValue(path: List[String], attributes: List[String]): Try[JSon] = {
-    (data getValue attributes) flatMap {
-      value => data setValue(path, value)
+    getValue(attributes) flatMap {
+      value => setValue(path, value)
     }
   }
-  
+
 }
 
