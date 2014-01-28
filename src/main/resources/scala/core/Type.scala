@@ -18,7 +18,6 @@
 
 package @OPT[|@USE::package.|]core
 
-import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
@@ -32,9 +31,7 @@ class Type(data: JSon) {
 
   private def getVirtualValue(pattern: String, attributes: List[List[String]]): Try[String] = {
     (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
-      case (Success(e), Success(l)) => Success(e :: l)
-      case (Failure(e), _) => Failure(e)
-      case (_, f@Failure(e)) => f
+      (te, tl) => for (l <- tl; e <- te) yield e :: l
     } map {
       pattern.format(_)
     }

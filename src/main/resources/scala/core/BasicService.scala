@@ -18,7 +18,6 @@
 
 package @OPT[|@USE::package.|]core
 
-import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
@@ -30,18 +29,16 @@ trait BasicService {
   // Public behaviors
   //
 
-  def httpRequest(servicePath: String, operation: String, body: Option[Any], header: Option[Any]): Try[JSon] =
+  def httpRequest(servicePath: String, operation: String, body: Option[JSon], header: Option[JSon]): Try[JSon] =
     ???
 
   def getPath(data: JSon, pattern: String, attributes: List[List[String]]): Try[String] = {
     (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
-        case (Success(e), Success(l)) => Success(e :: l)
-        case (Failure(e), _) => Failure(e)
-        case (_, f@Failure(e)) => f
-      } map {
-        pattern.format(_)
-      }
+      (te, tl) => for (l <- tl; e <- te) yield e :: l
+    } map {
+      pattern.format(_)
     }
+  }
 
   def getValue(data: JSon, path: List[String]): Try[JSon] = {
     data getValue path
@@ -49,7 +46,6 @@ trait BasicService {
 
   def mergeData(data: List[JSon]): Try[JSon] =
     data.foldRight[Try[JSon]](Success(ObjectData(Map()))) {
-      case (e, Success(m)) => e ++ m
-      case (_, f@Failure(_)) => f
+      (e, m) => m flatMap (e ++ _)
     }
 }

@@ -20,7 +20,7 @@ package @OPT[|@USE::package.|]core
 
 import scala.util.{Failure, Success, Try}
 
-trait JSon {
+sealed trait JSon {
   p: JSon =>
 
   def getValue(path: List[String]): Try[JSon] =
@@ -31,7 +31,7 @@ trait JSon {
           case None => Failure(new Exception(s"Field $key not found"))
           case Some(data) => data getValue path
         }
-      case (_, _) => Failure(new Exception("Type mismatch: waiting for an object"))
+      case _ => Failure(new Exception("Type mismatch: waiting for an object"))
     }
 
   def setValue(path: List[String], result: JSon): Try[JSon] =
@@ -59,7 +59,7 @@ trait JSon {
   // TODO -- Improve extension mechanism - function property?
     (p, data) match {
       case (ObjectData(m1), ObjectData(m2)) => Success(ObjectData(m1 ++ m2))
-      case _ => Failure(new Exception)
+      case _ => Failure(new Exception("Type mismatch: waiting for an object"))
     }
 }
 
@@ -84,19 +84,16 @@ object JSon {
       case null => Success(NullData)
       case a: List[_] =>
         (for (e <- a) yield JSon(e)).foldRight[Try[List[JSon]]](Success(Nil)) {
-          case (Success(a), Success(l)) => Success(a :: l)
-          case (Failure(e), _) => Failure(new Exception("Not a JSon well formed formula", e))
-          case (_, f@Failure(_)) => f
+          (te, tl) => for (e <- te; l <- tl) yield e :: l
         } map {
           e => ArrayData(e)
         }
       case m: Map[_, _] =>
         (for ((k, v) <- m) yield (k.toString, JSon(v))).foldRight[Try[Map[String, JSon]]](Success(Map())) {
-          case ((v, Success(k)), Success(m)) => Success(m ++ Map(v -> k))
-          case ((_, Failure(e)), _) => Failure(new Exception("Not a JSon well formed formula for $v", e))
-          case (_, f@Failure(_)) => f
+          (tc, tm) => for (c <- tc._2; m <- tm) yield m ++ Map(tc._1 -> c)
         } map {
           e => ObjectData(e)
         }
+      case _ => Failure(new Exception("Not a JSon well formed formula"))
     }
 }
