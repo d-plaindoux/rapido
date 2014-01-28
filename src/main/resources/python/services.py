@@ -56,7 +56,7 @@ class __@VAL::name(BasicService):
         data = self.merge_data([self.implicit_data@VAL::signature::inputs[|@REP[|, @VAL::name|]|]])
 
         result = self.http_request(
-            path=""@OPT[| + @VAL::path[|self.get_path(data, @USE::PathAsString, @USE::PathVariables)|]|],
+            path=@OR[|@VAL::path[|self.get_path(data, @USE::PathAsString, @USE::PathVariables)|]|][|""|],
             operation="@VAL::operation",
             body=@OR[|@VAL::body[|self.get_object(data, @USE::Attributes)|]|][|{}|],
             header=@OR[|@VAL::header[|self.get_object(data, @USE::Attributes)|]|][|{}|]

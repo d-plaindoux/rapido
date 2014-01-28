@@ -93,6 +93,7 @@ class @VAL::name(Type):
             self.data = data
     @VAL::definition[|@USE::VariableGetterSetter|]
     def to_dict(self):
+        # Review this code / Wrong generation
         @VAL::definition[|@USE::VirtualType|]
         return self.data
 

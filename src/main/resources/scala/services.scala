@@ -4,7 +4,7 @@
 
 @MACRO::Attributes
     [|@OR
-    [|@VAL::object[|[@REP(, )::attributes[|'@VAL::name'|]]|]|]
+    [|@VAL::object[|List(@REP(, )::attributes[|"@VAL::name"|])|]|]
     [|[]|]|]
 
 @[|------------------------------------------------------------------------------------------
@@ -22,54 +22,49 @@
     [|"/@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
 @MACRO::PathVariable
-    [|@REP(, )::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]|]
+    [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
 
 @MACRO::PathVariables
-    [|[@USE::PathVariable]|]
+    [|List(@USE::PathVariable)|]
 
 @[|------------------------------------------------------------------------------------------
     Main for services generation
    ------------------------------------------------------------------------------------------|]
-"""
-Services:@REP(, )::services[|@VAL::name|]
-"""
+//
+// Services:@REP(, )::services[|@VAL::name|]
+//
 
-from @OPT[|@USE::package.|]core.services import BasicService
+@OPT[|package @USE::package|]
 
+import scala.util.{Try, Success}
+
+import @OPT[|@USE::package.|]core.BasicService
+import @OPT[|@USE::package.|]core.JSon
+
+@REP::services[|class @VAL::name[|@VALService|](override val url:String, parameters:JSon*) extends BasicService {
+
+  val path: String = @VAL::route::path[|getPath(mergeData(parameters.toList).get, @USE::PathAsString, @USE::PathVariables).get|]
+
+    //
+    // Public behaviors
+    //
+
+    @REP(    )::entries[|def @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::name: JSon|])|]: Try[JSon] = {
+      (for (data <- mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ parameters.toList);
+            path <- @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|])
+       yield httpRequest(path, "@VAL::operation", @OR[|@VAL::body[|Some(getValue(data, @USE::Attributes).get)|]|][|None|],@OR[|@VAL::header[|Some(getValue(data, @USE::Attributes).get)|]|][|None|])) flatMap {
+        result => @OR[|@VAL::result[|getValue(data, @USE::Attributes)|]|][|result|]
+      }
+    }
+
+|]
+}
+|]
+//
+// Service factories
+//
 @REP::services[|
-class Service@VAL::name(BasicService):
-
-    #
-    # Constructor
-    #
-
-    def __init__(self, url@VAL::route[|@USE::ParameterNames|]):
-        @VAL::route[|BasicService.__init__(self, url)
-        self.implicit_data = self.merge_data([@REP(, )::params[|@VAL::name|]])
-        self.path = @VAL::path[|self.get_path(self.implicit_data, @USE::PathAsString, @USE::PathVariables)|]|]
-
-    #
-    # Public behaviors
-    #
-
-    @REP(    )::entries[|def @VAL::name(self@VAL::signature::inputs[|@REP[|, @VAL::name|])|]:
-        data = self.merge_data([self.implicit_data@VAL::signature::inputs[|@REP[|, @VAL::name|]|]])
-
-        result = self.http_request(
-            path=""@OPT[| + @VAL::path[|self.get_path(data, @USE::PathAsString, @USE::PathVariables)|]|],
-            operation="@VAL::operation",
-            body=@OR[|@VAL::body[|self.get_object(data, @USE::Attributes)|]|][|{}|],
-            header=@OR[|@VAL::header[|self.get_object(data, @USE::Attributes)|]|][|{}|]
-        )
-
-        return @OR[|@VAL::result[|self.get_object(data,@USE::Attributes)|]|][|result|]
-
-|]|]
-#
-# Service factories
-#
-@REP::services[|
-
-def @VAL::name(url):
-    return lambda@VAL::route[|@REP(, )::params[| @VAL::name|]|]: Service@VAL::name(url@VAL::route[|@USE::ParameterNames|])
+object Service@VAL::name {
+   def apply(url:String@VAL::route[|@REP::params[|, @VAL::name: JSon|]|]): BasicService = new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|])
+}
 |]

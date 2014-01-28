@@ -18,6 +18,8 @@
 
 package @OPT[|@USE::package.|]core
 
+import scala.util.Failure
+import scala.util.Success
 import scala.util.Try
 
 class Type(data: JSon) {
@@ -28,9 +30,19 @@ class Type(data: JSon) {
   protected def setValue(path: List[String], value: JSon): Try[JSon] =
     data setValue(path, value)
 
-  protected def setVirtualValue(path: List[String], attributes: List[String]): Try[JSon] = {
-    getValue(attributes) flatMap {
-      value => setValue(path, value)
+  private def getVirtualValue(pattern: String, attributes: List[List[String]]): Try[String] = {
+    (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
+      case (Success(e), Success(l)) => Success(e :: l)
+      case (Failure(e), _) => Failure(e)
+      case (_, f@Failure(e)) => f
+    } map {
+      pattern.format(_)
+    }
+  }
+
+  protected def getVirtualData(path: List[String], pattern: String, attributes: List[List[String]]): Try[JSon] = {
+    getVirtualValue(pattern, attributes) flatMap {
+      value => setValue(path, StringData(value))
     }
   }
 
