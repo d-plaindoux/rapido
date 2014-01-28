@@ -24,56 +24,71 @@ sealed trait JSon {
   p: JSon =>
 
   def getValue(path: List[String]): Try[JSon] =
-    (path, this) match {
-      case (Nil, _) => Success(this)
-      case ((key :: path), ObjectData(map)) =>
+    Failure(new Exception("Type mismatch: waiting for an object"))
+
+  def setValue(path: List[String], result: JSon): Try[JSon] =
+    path match {
+      case Nil => Success(result)
+      case (key :: path) => ObjectData(Map(key -> null)) setValue(path, result)
+    }
+
+  def toRaw: Any;
+
+  def ++(data: JSon): Try[JSon] =
+    Failure(new Exception("Type mismatch: waiting for an object"))
+
+  def addToMap(data:ObjectData): Try[JSon] =
+    Failure(new Exception("Type mismatch: waiting for an object"))
+}
+
+case class StringData(s: String) extends JSon {
+  def toRaw: Any = s
+}
+
+case class BooleanData(s: Boolean) extends JSon {
+  def toRaw: Any = s
+}
+
+case class NumberData(s: Int) extends JSon {
+  def toRaw: Any = s
+}
+
+case object NullData extends JSon {
+  def toRaw: Any = null
+}
+
+case class ArrayData(l: List[JSon]) extends JSon {
+  def toRaw: Any = for (e <- l) yield e.toRaw
+}
+
+case class ObjectData(map: Map[String, JSon]) extends JSon {
+  def toRaw: Any = (for ((k, v) <- map) yield (k, v.toRaw)).toMap
+
+  override def getValue(path: List[String]): Try[JSon] =
+    path match {
+      case Nil => Success(this)
+      case (key :: path) =>
         map get key match {
           case None => Failure(new Exception(s"Field $key not found"))
           case Some(data) => data getValue path
         }
-      case _ => Failure(new Exception("Type mismatch: waiting for an object"))
     }
 
-  def setValue(path: List[String], result: JSon): Try[JSon] =
-    (path, this) match {
-      case (Nil, _) => Success(result)
-      case ((key :: path), ObjectData(map)) =>
-        map get key match {
-          case None => ObjectData(Map(key -> null)) setValue(path, result)
-          case Some(data) => data setValue(path, result)
+  override def setValue(path: List[String], result: JSon): Try[JSon] =
+    path match {
+      case (key :: path) if map contains key =>
+        ((map get key).get setValue (path,result)).map {
+          value => ObjectData(Map(key -> value) ++ map)
         }
-      case ((key :: path), _) => ObjectData(Map(key -> null)) setValue(path, result)
+      case _ => super.setValue(path, result)
     }
 
-  def toRaw: Any =
-    p match {
-      case StringData(s) => s
-      case BooleanData(s) => s
-      case NumberData(s) => s
-      case NullData => null
-      case ArrayData(l) => for (e <- l) yield e.toRaw
-      case ObjectData(m) => (for ((k, v) <- m) yield (k, v.toRaw)).toMap
-    }
+  override def ++(data: JSon): Try[JSon] =
+    data.addToMap(this)
 
-  def ++(data: JSon): Try[JSon] =
-  // TODO -- Improve extension mechanism - function property?
-    (p, data) match {
-      case (ObjectData(m1), ObjectData(m2)) => Success(ObjectData(m1 ++ m2))
-      case _ => Failure(new Exception("Type mismatch: waiting for an object"))
-    }
+  override def addToMap(data: ObjectData): Try[JSon] =
+    Success(ObjectData(data.map ++ map))
 }
-
-case class StringData(s: String) extends JSon
-
-case class BooleanData(s: Boolean) extends JSon
-
-case class NumberData(s: Int) extends JSon
-
-case object NullData extends JSon
-
-case class ArrayData(l: List[JSon]) extends JSon
-
-case class ObjectData(l: Map[String, JSon]) extends JSon
 
 object JSon {
   def apply(a: Any): Try[JSon] =
