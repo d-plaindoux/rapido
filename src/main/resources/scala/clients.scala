@@ -2,10 +2,9 @@
 // Clients providing main entry for the REST API.
 //
 
-import @OPT[|@USE::package.|]services
+@OPT[|package @USE::package|]
 
-@REP::clients[|
-class @VAL::name(url:String) {
-    @REP(    )::provides[|def @VAL = service.@VAL(url)|]
+@REP::clients[|class @VAL::name(url:String) {
+    @REP(    )::provides[|def @VAL = @VALService(url)|]
 }
 |]

@@ -64,7 +64,7 @@ import @OPT[|@USE::package.|]core.JSon
 // Service factories
 //
 @REP::services[|
-object Service@VAL::name {
-   def apply(url:String@VAL::route[|@REP::params[|, @VAL::name: JSon|]|]): BasicService = new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|])
+object @VAL::name[|@VALService|] {
+   def apply(url:String): (@VAL::route[|@REP(, )::params[|JSon|]|]) => BasicService = (@VAL::route[|@REP(, )::params[|@VAL::name: JSon|]|]) => new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|])
 }
 |]

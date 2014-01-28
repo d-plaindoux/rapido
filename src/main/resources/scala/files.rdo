@@ -6,10 +6,8 @@
         "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/JSon.scala",
         "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/BasicService.scala",
         "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/Type.scala",
+        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]clients.scala",
         "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]types.scala",
         "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]services.scala"
-    ],
-    "pending": [
-         "clients.scala"
     ]
 }

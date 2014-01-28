@@ -63,9 +63,7 @@ class @VAL::name(data:JSon) extends Type(data) {
   @VAL::definition[|@USE::VariableGetterSetter|]
   def toRaw: Try[Any] = {
     List[Try[JSon]](@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
-      case (Success(data1),Success(data2)) => data1 ++ data2
-      case (f@Failure(_),_) => f
-      case (_,f@Failure(_)) => f
+      (data1, data2) => data1 flatMap (d1 => data2 flatMap (d1 ++ _))
     } map {
       _.toRaw
     }
