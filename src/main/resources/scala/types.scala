@@ -61,11 +61,9 @@ import @OPT[|@USE::package.|]core.{JSon, Type}
 @REP::types[|@SET::this[|@VAL::name|]
 class @VAL::name(data:JSon) extends Type(data) {
   @VAL::definition[|@USE::VariableGetterSetter|]
-  def toRaw: Try[Any] = {
+  def toJson: Try[JSon] = {
     List[Try[JSon]](@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
-      (data1, data2) => data1 flatMap (d1 => data2 flatMap (d1 ++ _))
-    } map {
-      _.toRaw
+      (current, result) => result flatMap (value => result flatMap (_ ++ value))
     }
   }
 }

@@ -29,8 +29,9 @@ trait BasicService {
   // Public behaviors
   //
 
-  def httpRequest(servicePath: String, operation: String, body: Option[JSon], header: Option[JSon]): Try[JSon] =
+  def httpRequest(servicePath: String, operation: String, body: Option[JSon], header: Option[JSon]): Try[JSon] = {
     ???
+  }
 
   def getPath(data: JSon, pattern: String, attributes: List[List[String]]): Try[String] = {
     (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
