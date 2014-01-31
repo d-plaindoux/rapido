@@ -14,6 +14,12 @@
 @MACRO::ParameterNames
     [|@REP::params[|, @VAL::name|]|]
 
+@MACRO::ParametersTypes
+    [|@REP::params[|, @VAL::name: @VAL::type::name|]|]
+
+@MACRO::ParametersValues
+    [|List(@REP(, )::params[|@VAL::name|])|]
+
 @[|------------------------------------------------------------------------------------------
      Path transformed using string interpolation and Path variables
    ------------------------------------------------------------------------------------------|]
@@ -36,8 +42,8 @@
 
 @OPT[|package @USE::package|]
 
-import scala.util.{Try, Success}
 
+import scala.util.{Try, Success, Failure}
 import @OPT[|@USE::package.|]core.BasicService
 import @OPT[|@USE::package.|]core.JSon
 
@@ -45,26 +51,27 @@ import @OPT[|@USE::package.|]core.JSon
 //------------------------------------------------------------------------------------------
 // Service @VAL::name
 //------------------------------------------------------------------------------------------
+class @VAL::name[|@VALService|](override val url:String@VAL::route[|@USE::ParametersTypes|]) extends BasicService {
+  @SET::serviceParameters[|@VAL::route[|@USE::ParametersValues|]|]
 
-class @VAL::name[|@VALService|](override val url:String, parameters:JSon*) extends BasicService {
-
-  val path: String = @VAL::route::path[|getPath(mergeData(parameters.toList).get, @USE::PathAsString, @USE::PathVariables).get|]
+  val path: String = @VAL::route[|getPath(mergeData(@USE::serviceParameters).get, @VAL::path[|@USE::PathAsString, @USE::PathVariables)|].get|]
 
   //
   // Public behaviors
   //
   @REP(  )::entries[|
-  def @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::name: JSon|])|]: Try[JSon] = {
-    (for (data <- mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ parameters.toList);
+  def @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::name: @VAL::type::name|])|]: Try[@VAL::signature::output::name] = {
+    (for (data <- mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ @USE::serviceParameters);
           path <- @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|])
     yield httpRequest(path, "@VAL::operation", @OR[|@VAL::body[|Some(getValue(data, @USE::Attributes).get)|]|][|None|],@OR[|@VAL::header[|Some(getValue(data, @USE::Attributes).get)|]|][|None|])) flatMap {
-      result => @OR[|@VAL::result[|getValue(data, @USE::Attributes)|]|][|result|]
+      case Success(e) => Success(new @VAL::signature::output::name(e))
+      case Failure(f) => Failure(f)
     }
   }
 |]
 }
 
 object @VAL::name[|@VALService|] {
-  def apply(url:String): (@VAL::route[|@REP(, )::params[|JSon|]|]) => BasicService = (@VAL::route[|@REP(, )::params[|@VAL::name: JSon|]|]) => new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|])
+  def apply(url:String): (@VAL::route[|@REP(, )::params[|@VAL::type::name|]|]) => @VAL::name[|@VALService|] = (@VAL::route[|@REP(, )::params[|@VAL::name: @VAL::type::name|]|]) => new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|])
 }
 |]

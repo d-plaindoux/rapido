@@ -10,6 +10,10 @@ from @OPT[|@USE::package|] import services
 
 @REP::clients[|
 class @VAL::name:
+    class secured:
+        def __init__(self, url):
+            @REP(        )::provides[|self.@VAL = services.@VAL("https", url)
+|]
     def __init__(self, url):
-        @REP(        )::provides[|self.@VAL = services.@VAL(url)
+        @REP(        )::provides[|self.@VAL = services.@VAL("http", url)
 |]|]

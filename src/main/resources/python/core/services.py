@@ -14,7 +14,7 @@ class BasicService:
     # Constructor
     #
 
-    def __init__(self, url):
+    def __init__(self, proto, url):
         self.url = url
         self.path = None
 
@@ -23,8 +23,10 @@ class BasicService:
     #
 
     def http_request(self, path, operation, body=None, header=None, implicit_header=None):
-        # TODO - HTTPSConnection can also be used ...
-        connection = http.HTTPConnection(self.url)
+        if proto == "http":
+            connection = http.HTTPConnection(self.url)
+        else:
+            connection = http.HTTPSConnection(self.url)
 
         if not header:
             header = {}

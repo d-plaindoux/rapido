@@ -43,8 +43,8 @@ class __@VAL::name(BasicService):
     # Constructor
     #
 
-    def __init__(self, url@VAL::route[|@USE::ParameterNames|]):
-        @VAL::route[|BasicService.__init__(self, url)
+    def __init__(self, proto, url@VAL::route[|@USE::ParameterNames|]):
+        @VAL::route[|BasicService.__init__(self, proto, url)
         self.implicit_data = self.merge_data([@REP(, )::params[|@VAL::name|]])
         self.path = @VAL::path[|self.get_path(self.implicit_data, @USE::PathAsString, @USE::PathVariables)|]|]
 
@@ -70,6 +70,6 @@ class __@VAL::name(BasicService):
 #
 @REP::services[|
 
-def @VAL::name(url):
-    return lambda@VAL::route[|@REP(, )::params[| @VAL::name|]|]: __@VAL::name(url@VAL::route[|@USE::ParameterNames|])
+def @VAL::name(proto, url):
+    return lambda@VAL::route[|@REP(, )::params[| @VAL::name|]|]: __@VAL::name(proto, url@VAL::route[|@USE::ParameterNames|])
 |]

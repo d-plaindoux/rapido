@@ -10,10 +10,14 @@
 //------------------------------------------------------------------------------------------
 
 class @VAL::name(url:String) {
-    @REP(    )::provides[|def @VAL = @VALService(url)|]
+  @REP(  )::provides[|def @VAL = @VALService(url)|]
 }
 
 object @VAL::name {
-    def apply(url:String): @VAL::name = new @VAL::name(url)
+  object secured {
+    def apply(url:String): @VAL::name = new @VAL::name(s"https://$url")
+  }
+
+  def apply(url:String): @VAL::name = new @VAL::name(s"http://$url")
 }
 |]

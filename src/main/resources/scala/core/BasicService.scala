@@ -45,8 +45,8 @@ trait BasicService {
     data getValue path
   }
 
-  def mergeData(data: List[JSon]): Try[JSon] =
+  def mergeData(data: List[Type]): Try[JSon] =
     data.foldRight[Try[JSon]](Success(ObjectData(Map()))) {
-      (e, m) => m flatMap (e extend _)
+      (e, m) => m flatMap (e.toJson.get extend _)
     }
 }

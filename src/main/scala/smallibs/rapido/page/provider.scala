@@ -93,7 +93,7 @@ class RouteProvider(route: Route, types: Map[String, Type]) extends DataProvider
       case "name" => Some(Provider.constant(route.name))
       case "params" =>
         val params = route.params.foldLeft[(Int, List[(Int, Type)])](0, Nil)((i, t) => (i._1 + 1, i._2 ++ List((i._1, t))))
-        Some(Provider.set(for ((i, e) <- params._2) yield new ParamProvider((f"p_$i%d", e), types)))
+        Some(Provider.set(for ((i, e) <- params._2) yield new ParamProvider((f"sp_$i%d", e), types)))
       case "path" => Some(new PathProvider(route.path))
       case _ => None
     }
@@ -186,13 +186,14 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
     }
 
   def get(name: String): Option[DataProvider] =
-    (name, deref(aType)) match {
-      case ("bool", Some(TypeBoolean)) => Some(Provider.constant("bool"))
-      case ("int", Some(TypeNumber)) => Some(Provider.constant("int"))
-      case ("string", Some(TypeString)) => Some(Provider.constant("string"))
-      case ("opt", Some(TypeOptional(t))) => Some(new TypeProvider(t, types))
-      case ("rep", Some(TypeMultiple(t))) => Some(new TypeProvider(t, types))
-      case ("object", Some(TypeObject(values))) => Some(new TypeObjectProvider(values, types))
+    (name, aType, deref(aType)) match {
+      case ("name", TypeIdentifier(name), _) => Some(Provider.constant(name))
+      case ("bool", _, Some(TypeBoolean)) => Some(Provider.constant("bool"))
+      case ("int", _, Some(TypeNumber)) => Some(Provider.constant("int"))
+      case ("string", _, Some(TypeString)) => Some(Provider.constant("string"))
+      case ("opt", _, Some(TypeOptional(t))) => Some(new TypeProvider(t, types))
+      case ("rep", _, Some(TypeMultiple(t))) => Some(new TypeProvider(t, types))
+      case ("object", _, Some(TypeObject(values))) => Some(new TypeObjectProvider(values, types))
       case _ => None
     }
 }
@@ -272,7 +273,7 @@ class ServiceTypeProvider(serviceType: ServiceType, types: Map[String, Type]) ex
     name match {
       case "inputs" =>
         val params = serviceType.inputs.foldLeft[(Int, List[(Int, Type)])](0, Nil)((i, t) => (i._1 + 1, i._2 ++ List((i._1, t))))
-        Some(Provider.set(for ((i, e) <- params._2) yield new ParamProvider((f"p_$i%d", e), types)))
+        Some(Provider.set(for ((i, e) <- params._2) yield new ParamProvider((f"fp_$i%d", e), types)))
       case "output" => Some(TypeProvider(serviceType.output, types))
       case "error" => for (t <- serviceType.error) yield TypeProvider(t, types)
       case _ => None

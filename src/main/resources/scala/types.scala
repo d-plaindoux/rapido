@@ -21,13 +21,13 @@
     getValue(List(@USE::AccessVar))
 |][|
   def @VAL::set(value:JSon): @USE::this =
-    @USE::this(setValue(List(@USE::AccessVar),value))
+    new @USE::this(setValue(List(@USE::AccessVar),value).get)
 |][|
   def @VAL::set_get: Try[JSon] =
     data getValue List(@USE::AccessVar)
 
   def @VAL::set_get(value:JSon): @USE::this =
-    @USE::this(setValue(List(@USE::AccessVar),value))
+    new @USE::this(setValue(List(@USE::AccessVar),value).get)
 |][||]|]
 
 @MACRO::VariableGetterSetter
@@ -56,14 +56,15 @@
 @OPT[|package @USE::package|]
 
 import scala.util.{Failure, Success, Try}
-import @OPT[|@USE::package.|]core.{JSon, Type}
+import @OPT[|@USE::package.|]core.{JSon, ObjectData, Type}
 
 @REP::types[|@SET::this[|@VAL::name|]
 //------------------------------------------------------------------------------------------
 // Type @VAL::name
 //------------------------------------------------------------------------------------------
 
-class @VAL::name(data:JSon) extends Type(data) {
+class @VAL::name(in:JSon) extends Type {
+  val data = in
   @VAL::definition[|@USE::VariableGetterSetter|]
   def toJson: Try[JSon] = {
     List[Try[JSon]](@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
@@ -73,7 +74,7 @@ class @VAL::name(data:JSon) extends Type(data) {
 }
 
 object @VAL::name {
-  def apply(data:Any): @VAL::name = new @VAL::name(JSon(data).get)
+  def apply(): @VAL::name = new @VAL::name(ObjectData(Map()))
 }
 
 |]
