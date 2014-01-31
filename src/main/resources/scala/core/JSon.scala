@@ -16,7 +16,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package @OPT[|@USE::package.|]core
+package @OPT[|@USE::package.|] core
 
 import scala.util.{Failure, Success, Try}
 
@@ -24,24 +24,24 @@ sealed trait JSon {
   p: JSon =>
 
   def getValue(path: List[String]): Try[JSon] =
-    Failure(new Exception("Type mismatch: waiting for an object"))
+    path match {
+      case Nil => Success(this)
+      case _ => Failure(new Exception("Type mismatch: waiting for an object and not " + p))
+    }
 
   def setValue(path: List[String], result: JSon): Try[JSon] =
     path match {
       case Nil => Success(result)
-      case (key :: path) => ObjectData(Map(key -> null)) setValue(path, result)
+      case _ => Failure(new Exception("Type mismatch: waiting for an object and not " + p))
     }
 
-  def toRaw: Any;
+  def toRaw: Any
 
-  def ++(data: JSon): Try[JSon] =
-    Failure(new Exception("Type mismatch: waiting for an object"))
+  def extend(data: JSon): Try[JSon] =
+    Failure(new Exception("Type mismatch: waiting for an object and not " + p))
 
   def addToObjectData(data: ObjectData): Try[JSon] =
-    Failure(new Exception("Type mismatch: waiting for an object"))
-
-  def addToCompositeObjectData(data: CompositeObjectData): Try[JSon] =
-    Failure(new Exception("Type mismatch: waiting for an object"))
+    Failure(new Exception("Type mismatch: waiting for an object and not " + p))
 }
 
 case class StringData(s: String) extends JSon {
@@ -60,66 +60,41 @@ case object NullData extends JSon {
   def toRaw: Any = null
 }
 
-case class ArrayData(l: List[JSon]) extends JSon {
-  def toRaw: Any = for (e <- l) yield e.toRaw
+case class ArrayData(data: List[JSon]) extends JSon {
+  def toRaw: Any = for (e <- data) yield e.toRaw
 }
 
-case class ObjectData(map: Map[String, JSon]) extends JSon {
-  def toRaw: Any = (for ((k, v) <- map) yield (k, v.toRaw)).toMap
+case class ObjectData(data: Map[String, JSon]) extends JSon {
+  def toRaw: Any = (for ((k, v) <- data) yield (k, v.toRaw)).toMap
 
   override def getValue(path: List[String]): Try[JSon] =
     path match {
-      case Nil => Success(this)
       case (key :: path) =>
-        map get key match {
+        data get key match {
           case None => Failure(new Exception(s"Field $key not found"))
           case Some(data) => data getValue path
         }
+      case _ => super.getValue(path)
     }
 
   override def setValue(path: List[String], result: JSon): Try[JSon] =
     path match {
-      case (key :: path) if map contains key =>
-        ((map get key).get setValue(path, result)).map {
-          value => ObjectData(Map(key -> value) ++ map)
+      case (key :: path) if data contains key =>
+        ((data get key).get setValue(path, result)) map {
+          value => ObjectData(data ++ Map(key -> value))
         }
-      case _ => super.setValue(path, result)
+      case _ =>
+        Success(path.foldRight(result) {
+          (current,result) => ObjectData(Map(current -> result))
+        })
     }
 
-  override def ++(data: JSon): Try[JSon] =
+  override def extend(data: JSon): Try[JSon] =
     data.addToObjectData(this)
 
-  override def addToObjectData(data: ObjectData): Try[JSon] =
-    Success(CompositeObjectData(List(data, this)))
+  override def addToObjectData(objectData: ObjectData): Try[JSon] =
+    Success(ObjectData(data ++ objectData.data))
 
-  override def addToCompositeObjectData(data: CompositeObjectData): Try[JSon] =
-    Success(CompositeObjectData(data.composite ++ List(this)))
-}
-
-case class CompositeObjectData(composite: List[ObjectData]) extends JSon {
-  def toRaw: Any = ???
-
-  override def getValue(path: List[String]): Try[JSon] =
-    path match {
-      case Nil => Success(this)
-      case _ =>
-        composite.foldLeft[Try[JSon]](Failure(new Exception)) {
-          case (f@Failure(_), current) => current getValue path
-          case (s, _) => s
-        }
-    }
-
-  override def setValue(path: List[String], result: JSon): Try[JSon] =
-    super.setValue(path, result)
-
-  override def ++(data: JSon): Try[JSon] =
-    data.addToCompositeObjectData(this)
-
-  override def addToObjectData(data: ObjectData): Try[JSon] =
-    Success(CompositeObjectData(data :: composite))
-
-  override def addToCompositeObjectData(data: CompositeObjectData): Try[JSon] =
-    Success(CompositeObjectData(data.composite ++ composite))
 }
 
 object JSon {

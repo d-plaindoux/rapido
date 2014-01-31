@@ -47,6 +47,6 @@ trait BasicService {
 
   def mergeData(data: List[JSon]): Try[JSon] =
     data.foldRight[Try[JSon]](Success(ObjectData(Map()))) {
-      (e, m) => m flatMap (e ++ _)
+      (e, m) => m flatMap (e extend _)
     }
 }

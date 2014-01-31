@@ -59,11 +59,15 @@ import scala.util.{Failure, Success, Try}
 import @OPT[|@USE::package.|]core.{JSon, Type}
 
 @REP::types[|@SET::this[|@VAL::name|]
+//------------------------------------------------------------------------------------------
+// Type @VAL::name
+//------------------------------------------------------------------------------------------
+
 class @VAL::name(data:JSon) extends Type(data) {
   @VAL::definition[|@USE::VariableGetterSetter|]
   def toJson: Try[JSon] = {
     List[Try[JSon]](@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
-      (current, result) => result flatMap (value => result flatMap (_ ++ value))
+      (current, result) => result flatMap (value => result flatMap (_ extend value))
     }
   }
 }

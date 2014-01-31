@@ -73,4 +73,28 @@ object JSonSpec extends Specification {
       ObjectData(Map("a" -> BooleanData(true))).toRaw mustEqual Map("a" -> true)
     }
   }
+
+  "JSon get value" should {
+    "provide the object when path is empty" in {
+      (NullData getValue Nil).get mustEqual NullData
+    }
+
+    "provide en exception when path is not empty and data is not an object" in {
+      (NullData getValue List("a")).isFailure mustEqual true
+    }
+  }
+
+  "JSOn set value" should {
+    "replaces the current value when the path is empty" in {
+      (NullData setValue(Nil, StringData("a"))).get mustEqual StringData("a")
+    }
+
+    "replaces the current value when the path is not empty" in {
+      (ObjectData(Map("b" -> NullData)) setValue(List("b"), StringData("a"))).get mustEqual ObjectData(Map("b" -> StringData("a")))
+    }
+
+    "creates complex objects when the path is not empty" in {
+      (ObjectData(Map()) setValue(List("b","c"), StringData("a"))).get mustEqual ObjectData(Map("b" -> ObjectData(Map("c" -> StringData("a")))))
+    }
+  }
 }
