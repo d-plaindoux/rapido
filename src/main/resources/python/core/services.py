@@ -22,8 +22,8 @@ class BasicService:
     # Public behaviors
     #
 
-    def http_request(self, path, operation, body=None, header=None, implicit_header=None):
-        if proto == "http":
+    def http_request(self, protocol, path, operation, body=None, header=None, implicit_header=None):
+        if protocol == "http":
             connection = http.HTTPConnection(self.url)
         else:
             connection = http.HTTPSConnection(self.url)

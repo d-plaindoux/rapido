@@ -20,17 +20,18 @@ which can be generated to chosen targeted languages.
 type Error = { @get code:Int, @get reason:String }
 type Address = { @{get,set} address:String? }
 type Place = Address with { @{get,set} name:String }
-type Empty = {}
+type Places = { @get(values) places : Places* }
+type Nothing = {}
 
 service places [places] {
-	list:         => Place* or Error = GET
-	create: Place => Place or Error  = POST BODY[Place]
+	list:         => Places     = GET
+	create: Place => Place      = POST BODY[Place]
 }
 
 service place(Place) [places/<name>] {
-   	get:            => Place or Error = GET
-   	update: Address => Empty or Error = PUT BODY[Address]
-   	delete:         => Empty or Error = DELETE
+   	get:            => Place    = GET
+   	update: Address => Nothing  = PUT BODY[Address]
+   	delete:         => Nothing  = DELETE
 }
 
 client placesRest provides places, place

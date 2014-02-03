@@ -40,7 +40,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def serviceSpecification: Parser[Entity] =
-    ("service" ~> ident) ~ ("(" ~> repsep(typeDefinition, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
+    ("service" ~> ident) ~ ("(" ~> repsep(identified, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
       case n ~ None ~ r ~ l => ServiceEntity(n, Route(n, Nil, r), l)
       case n ~ Some(p) ~ r ~ l => ServiceEntity(n, Route(n, p, r), l)
     }
@@ -71,7 +71,7 @@ object RapidoParser extends JavaTokenParsers {
     name ~> "[" ~> typeDefinition <~ "]"
 
   def serviceDefinition: Parser[Service] =
-    (ident <~ ":") ~! (repsep(typeDefinition, ",") <~ "=>") ~ typeDefinition ~ ("or" ~> typeDefinition).? ~ ("=" ~> restAction) ~
+    (ident <~ ":") ~! (repsep(identified, ",") <~ "=>") ~ identified ~ ("or" ~> identified).? ~ ("=" ~> restAction) ~
       path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ~ directive("RETURN").? ^^ {
       case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body ~ result =>
         Service(name, Action(action, path, param, body, header, result), ServiceType(in, out, err))

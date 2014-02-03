@@ -48,10 +48,10 @@ type Endpoints = {
 type Empty = {}
 
 service tokens [v2.0/tokens] {
-    authenticate: Authentication => Token = POST BODY[Authentication]
-    validate: TokenId, Belongs => Token = GET[<tokenId>?<belongsTo>]
-    validateOnly: TokenId, Belongs => Empty = HEAD[<tokenId>?<belongsTo>]
-    endpoints: Token, TokenId => Endpoints = GET[<tokenId>/endpoints] HEADER[AuthToken]
+    authenticate: Authentication    => Token or Error       = POST BODY[Authentication]
+    validate    : TokenId, Belongs  => Token or Error       = GET[<tokenId>?<belongsTo>]
+    validateOnly: TokenId, Belongs  => Empty or Error       = HEAD[<tokenId>?<belongsTo>]
+    endpoints   : Token, TokenId    => Endpoints or Error   = GET[<tokenId>/endpoints] HEADER[AuthToken]
 }
 
 //---------------------------------------------------------------------------------

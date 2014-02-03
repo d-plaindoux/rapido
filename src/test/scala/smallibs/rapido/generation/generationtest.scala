@@ -84,7 +84,7 @@ object Generation extends Specification {
 
     "provides route names and parameters name" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.06").get
-      val expected = Success(Some("places(),place(p_0,),"))
+      val expected = Success(Some("places(),place(sp_0,),"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
@@ -96,7 +96,7 @@ object Generation extends Specification {
 
     "provides route path with parameters" in {
       val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.08").get
-      val expected = Success(Some("Error={code:int,reason:string};Address={address:string?};Place={address:string?,name:string};Places={address:string?,name:string}*;Empty={}"))
+      val expected = Success(Some("Error={code:int,reason:string};Address={address:string?};Place={address:string?,name:string};Places={places:{address:string?,name:string}*};Empty={}"))
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
 
@@ -106,18 +106,4 @@ object Generation extends Specification {
       Engine(RapidoProvider.entities(entities)).generate(template) mustEqual expected
     }
   }
-
-  "Python Generator" should {
-
-    "provides complete interface" in {
-      val template = PageParser.parseAll(PageParser.template, Resources getContent "/template.01.py").get
-      val expected = Resources getContent "/template.01.py.result"
-      val result = Engine(RapidoProvider.entities(entities)).generate(template).get.get
-      Resources saveContent("/tmp/expected", expected)
-      Resources saveContent("/tmp/result", result)
-      result mustEqual expected
-    }
-
-  }
-
 }
