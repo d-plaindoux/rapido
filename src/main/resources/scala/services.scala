@@ -63,9 +63,9 @@ class @VAL::name[|@VALService|](override val url: String@VAL::route[|@USE::Param
     (for (data <- mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ @USE::serviceParameters);
           path <- @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|]@OR
           [|@VAL::body[|;
-          body <- getValue(data, @USE::Attributes)|]|][||]@OR
+          body <- getValues(data, @USE::Attributes)|]|][||]@OR
           [|@VAL::header[|;
-          header <- getValue(data, @USE::Attributes)|]|][||])
+          header <- getValues(data, @USE::Attributes)|]|][||])
     yield httpRequest(path, "@VAL::operation", @OR[|@VAL::body[|Some(body)|]|][|None|] ,@OR[|@VAL::header[|Some(header)|]|][|None|])) flatMap {
       case Success(e) => Success(new @VAL::signature::output::name(e))
       case Failure(f) => Failure(f)

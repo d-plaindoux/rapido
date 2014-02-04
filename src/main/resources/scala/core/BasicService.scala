@@ -18,8 +18,11 @@
 
 package @OPT[|@USE::package.|]core
 
-import scala.util.Success
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
+import java.net.URI
+import javax.ws.rs.core.UriBuilder
+import com.sun.jersey.api.client.config.DefaultClientConfig
+import com.sun.jersey.api.client.{WebResource, Client}
 
 trait BasicService {
   val url: String
@@ -28,13 +31,39 @@ trait BasicService {
   //
   // Public behaviors
   //
+  def httpRequest(servicePath: String, operation: String, body: Option[Map[String, JSon]], header: Option[Map[String, JSon]]): Try[JSon] = {
+    val client: Client = Client.create(new DefaultClientConfig)
+    val uri: URI = UriBuilder.fromUri(url).build()
+    val inputData: String = ObjectData(body.getOrElse(Map())).toJSonString
+    try {
+      val builder: WebResource#Builder = client.
+        resource(uri).
+        path(path).
+        path(servicePath).
+        header("Content-Type", "application/json");
 
-  def httpRequest(servicePath: String, operation: String, body: Option[JSon], header: Option[JSon]): Try[JSon] = {
-    ???
+      val builder2 = header.getOrElse(Map()).foldRight(builder) {
+        (kv, b) => builder.header(kv._1, kv._2.toJSonString)
+      }
+
+      operation match {
+        case "POST" =>
+          JSon.fromString(builder2.post(classOf[String], inputData))
+        case "PUT" =>
+          JSon.fromString(builder2.put(classOf[String], inputData))
+        case "GET" =>
+          JSon.fromString(builder2.get(classOf[String]))
+        case "DELETE" =>
+          JSon.fromString(builder2.delete(classOf[String]))
+        case _ => throw new UnsupportedOperationException(operation)
+      }
+    } catch {
+      case e: Throwable => Failure(e)
+    }
   }
 
   def getPath(data: JSon, pattern: String, attributes: List[List[String]]): Try[String] = {
-    (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
+    (attributes map (data getValue _)).foldRight[Try[List[JSon]]](Success(Nil)) {
       (te, tl) => for (l <- tl; e <- te) yield e :: l
     } map {
       pattern.format(_: _*)
@@ -45,8 +74,14 @@ trait BasicService {
     data getValue path
   }
 
+  def getValues(data: JSon, path: List[String]): Try[Map[String, JSon]] =
+    path.foldRight[Try[Map[String, JSon]]](Success(Map[String, JSon]())) {
+      (current, tresult) =>
+        for (result <- tresult; value <- data getValue List(current)) yield result + (current -> value)
+    }
+
   def mergeData(data: List[Type]): Try[JSon] =
     data.foldRight[Try[JSon]](Success(ObjectData(Map()))) {
-      (e, m) => e.toJson flatMap (e => m map (e overrides _))
+      (te, tm) => for (e <- te.toJson; m <- tm) yield e overrides m
     }
 }

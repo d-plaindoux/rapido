@@ -19,6 +19,7 @@
 package @OPT[|@USE::package.|]core
 
 import scala.util.{Failure, Success, Try}
+import scala.util.parsing.json.JSON
 
 sealed trait JSon {
   p: JSon =>
@@ -36,6 +37,8 @@ sealed trait JSon {
 
   def toRaw: Any
 
+  def toJSonString: String
+
   def overrides(data: JSon): JSon = p
 
   def overridenByObjectData(data: ObjectData): JSon = data
@@ -43,22 +46,38 @@ sealed trait JSon {
 
 case class StringData(s: String) extends JSon {
   def toRaw: Any = s
+
+  override def toJSonString: String = "\"" + s + "\""
+
+  override def toString: String = s
 }
 
 case class BooleanData(s: Boolean) extends JSon {
   def toRaw: Any = s
+
+  override def toJSonString: String =
+    if (s) "true" else "false"
 }
 
 case class NumberData(s: Int) extends JSon {
   def toRaw: Any = s
+
+  override def toJSonString: String =
+    s.toString
 }
 
 case object NullData extends JSon {
   def toRaw: Any = null
+
+  override def toJSonString: String =
+    "null"
 }
 
 case class ArrayData(data: List[JSon]) extends JSon {
   def toRaw: Any = for (e <- data) yield e.toRaw
+
+  override def toJSonString: String =
+    (for (e <- data) yield e.toJSonString).mkString("[", ",", "]")
 }
 
 case class ObjectData(data: Map[String, JSon]) extends JSon {
@@ -86,6 +105,11 @@ case class ObjectData(data: Map[String, JSon]) extends JSon {
     ObjectData((r1 ++ r2).toMap)
   }
 
+  override def toJSonString: String = {
+    def toString(k: String, e: String) = "\"" + k + "\":" + e
+    (for ((k, e) <- data) yield toString(k, e.toJSonString)).mkString("{", ",", "}")
+  }
+
 }
 
 object JSon {
@@ -107,6 +131,12 @@ object JSon {
         } map {
           e => ObjectData(e)
         }
-      case _ => Failure(new Exception("Not a JSon well formed formula"))
+      case _ => Failure(new Exception(s"Not a JSon well formed formula $a"))
+    }
+
+  def fromString(value: String): Try[JSon] =
+    JSON parseFull value match {
+      case None => Failure(new Exception(s"Not a JSON data $value"))
+      case Some(value) => JSon(value)
     }
 }

@@ -20,14 +20,14 @@
   def @VAL::get: Try[JSon] =
     getValue(List(@USE::AccessVar))
 |][|
-  def @VAL::set(value: JSon): @USE::this =
-    new @USE::this(setValue(List(@USE::AccessVar), value))
+  def @VAL::set(value: Any): @USE::this =
+    new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
 |][|
   def @VAL::set_get: Try[JSon] =
     data getValue List(@USE::AccessVar)
 
-  def @VAL::set_get(value: JSon): @USE::this =
-    new @USE::this(setValue(List(@USE::AccessVar), value))
+  def @VAL::set_get(value: Any): @USE::this =
+    new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
 |][||]|]
 
 @MACRO::VariableGetterSetter

@@ -34,7 +34,7 @@ trait Type {
     (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
       (te, tl) => for (l <- tl; e <- te) yield e :: l
     } map {
-      pattern.format(_)
+      pattern.format(_: _*)
     }
   }
 
