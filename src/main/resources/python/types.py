@@ -53,7 +53,7 @@
     [|@VAL::int[|0|]|]
     [|@VAL::string[|""|]|]
     [|@VAL::opt[|None|]|]
-    [|@VAL::rep[|[]|]|]
+    [|@VAL::array[|[]|]|]
     [|@VAL::object[|{@REP(, )::attributes[|'@VAL::name': @OR[|@VAL::set|][|@VAL::set_get|][|@VAL::type[|@USE::Types|]|]|]}|]|]|]
 
 @[|------------------------------------------------------------------------------------------
@@ -65,10 +65,10 @@
 @MACRO::VirtualType
     [|@OR
     [|@VAL::opt[|@USE::VirtualType|]|]
-    [|@VAL::rep[|@USE::VirtualType|]|]
+    [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
-        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP(        )::virtual
-        [|self.set_value(self.data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
+        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual
+        [|        self.virtual_value(self.data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
 |]|]|]
     [||]|]
 
@@ -94,7 +94,7 @@ class @VAL::name(Type):
     @VAL::definition[|@USE::VariableGetterSetter|]
     def to_dict(self):
         # Review this code / Wrong generation
-        @VAL::definition[|@USE::VirtualType|]
+@VAL::definition[|@USE::VirtualType|]
         return self.data
 
 |]

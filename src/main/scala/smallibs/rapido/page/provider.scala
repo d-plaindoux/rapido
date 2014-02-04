@@ -171,7 +171,7 @@ class TypeDefinitionProvider(kind: TypeEntity, types: Map[String, Type]) extends
 }
 
 case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvider with AbstractProvider {
-  val keys = List("bool", "int", "string", "opt", "rep", "object")
+  val keys = List("bool", "int", "string", "opt", "array", "object")
 
   def deref(t: Type): Option[Type] =
     t match {
@@ -192,7 +192,7 @@ case class TypeProvider(aType: Type, types: Map[String, Type]) extends DataProvi
       case ("int", _, Some(TypeNumber)) => Some(Provider.constant("int"))
       case ("string", _, Some(TypeString)) => Some(Provider.constant("string"))
       case ("opt", _, Some(TypeOptional(t))) => Some(new TypeProvider(t, types))
-      case ("rep", _, Some(TypeMultiple(t))) => Some(new TypeProvider(t, types))
+      case ("array", _, Some(TypeMultiple(t))) => Some(new TypeProvider(t, types))
       case ("object", _, Some(TypeObject(values))) => Some(new TypeObjectProvider(values, types))
       case _ => None
     }

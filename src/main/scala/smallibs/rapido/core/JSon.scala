@@ -18,7 +18,6 @@
 
 package smallibs.rapido.core
 
-
 import scala.util.{Failure, Success, Try}
 
 sealed trait JSon {
@@ -30,19 +29,16 @@ sealed trait JSon {
       case _ => Failure(new Exception("Type mismatch: waiting for an object and not " + p))
     }
 
-  def setValue(path: List[String], result: JSon): Try[JSon] =
-    path match {
-      case Nil => Success(result)
-      case _ => Failure(new Exception("Type mismatch: waiting for an object and not " + p))
-    }
+  def setValue(path: List[String], result: JSon): JSon =
+    path.foldRight[JSon](result) {
+      (current, result) => ObjectData(Map(current -> result))
+    } overrides this
 
   def toRaw: Any
 
-  def extend(data: JSon): Try[JSon] =
-    Failure(new Exception("Type mismatch: waiting for an object and not " + p))
+  def overrides(data: JSon): JSon = p
 
-  def addToObjectData(data: ObjectData): Try[JSon] =
-    Failure(new Exception("Type mismatch: waiting for an object and not " + p))
+  def overridenByObjectData(data: ObjectData): JSon = data
 }
 
 case class StringData(s: String) extends JSon {
@@ -78,23 +74,17 @@ case class ObjectData(data: Map[String, JSon]) extends JSon {
       case _ => super.getValue(path)
     }
 
-  override def setValue(path: List[String], result: JSon): Try[JSon] =
-    path match {
-      case (key :: path) if data contains key =>
-        ((data get key).get setValue(path, result)) map {
-          value => ObjectData(data ++ Map(key -> value))
-        }
-      case _ =>
-        Success(path.foldRight(result) {
-          (current,result) => ObjectData(Map(current -> result))
-        })
-    }
+  override def overrides(data: JSon): JSon =
+    data.overridenByObjectData(this)
 
-  override def extend(data: JSon): Try[JSon] =
-    data.addToObjectData(this)
-
-  override def addToObjectData(objectData: ObjectData): Try[JSon] =
-    Success(ObjectData(data ++ objectData.data))
+  override def overridenByObjectData(objectData: ObjectData): JSon = {
+    val k1 = Set(objectData.data.keysIterator.toList: _*)
+    val k2 = Set(data.keysIterator.toList: _*)
+    val intersection = k1 & k2
+    val r1 = for (key <- intersection) yield key -> (objectData.data(key) overrides data(key))
+    val r2 = objectData.data.filterKeys(!intersection.contains(_)) ++ data.filterKeys(!intersection.contains(_))
+    ObjectData((r1 ++ r2).toMap)
+  }
 
 }
 

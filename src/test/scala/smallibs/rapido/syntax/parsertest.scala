@@ -110,20 +110,11 @@ object RapidoSpec extends Specification {
       parsed.get mustEqual TypeOptional(TypeNumber)
     }
 
-    "provides a number optional of multiple type" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "int*?")
-      parsed.get mustEqual TypeOptional(TypeMultiple(TypeNumber))
-    }
-
     "provides a number multiple type" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "int*")
       parsed.get mustEqual TypeMultiple(TypeNumber)
     }
 
-    "provides a number multiple of multiple type" in {
-      val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "int**")
-      parsed.get mustEqual TypeMultiple(TypeMultiple(TypeNumber))
-    }
     "provides a type composition" in {
       val parsed = RapidoParser.parseAll(RapidoParser.typeDefinition, "Action with {} ")
       parsed.get mustEqual TypeComposed(TypeIdentifier("Action"), TypeObject(Map()))

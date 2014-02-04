@@ -20,6 +20,7 @@ package smallibs.rapido.core
 
 import org.specs2.mutable._
 import scala.util.Success
+import smallibs.rapido.core
 
 object JSonSpec extends Specification {
   "JSon internalized" should {
@@ -86,15 +87,42 @@ object JSonSpec extends Specification {
 
   "JSOn set value" should {
     "replaces the current value when the path is empty" in {
-      (NullData setValue(Nil, StringData("a"))).get mustEqual StringData("a")
+      (NullData setValue(Nil, StringData("a"))) mustEqual StringData("a")
     }
 
     "replaces the current value when the path is not empty" in {
-      (ObjectData(Map("b" -> NullData)) setValue(List("b"), StringData("a"))).get mustEqual ObjectData(Map("b" -> StringData("a")))
+      (ObjectData(Map("b" -> NullData)) setValue(List("b"), StringData("a"))) mustEqual ObjectData(Map("b" -> StringData("a")))
     }
 
     "creates complex objects when the path is not empty" in {
-      (ObjectData(Map()) setValue(List("b","c"), StringData("a"))).get mustEqual ObjectData(Map("b" -> ObjectData(Map("c" -> StringData("a")))))
+      (ObjectData(Map()) setValue(List("b","c"), StringData("a"))) mustEqual ObjectData(Map("b" -> ObjectData(Map("c" -> StringData("a")))))
+    }
+  }
+
+  "JSOn overrides" should {
+    "replaces the current value by the new one" in {
+      (NullData overrides StringData("a")) mustEqual core.NullData
+    }
+
+    "replaces the current object data by the new one" in {
+      val data1: ObjectData = ObjectData(Map("a" -> NullData))
+      val data2: ObjectData = ObjectData(Map("a" -> StringData("a")))
+      val result: ObjectData = ObjectData(Map("a" -> NullData))
+      (data1 overrides data2) mustEqual result
+    }
+
+    "extends the current object data by the new one" in {
+      val data1: ObjectData = ObjectData(Map("a" -> NullData))
+      val data2: ObjectData = ObjectData(Map("b" -> StringData("a")))
+      val result: ObjectData = ObjectData(Map("a" -> NullData, "b" -> StringData("a")))
+      (data1 overrides data2) mustEqual result
+    }
+
+    "extends the inner current object data by the inner new one" in {
+      val data1: ObjectData = ObjectData(Map("i" -> ObjectData(Map("a" -> NullData))))
+      val data2: ObjectData = ObjectData(Map("i" -> ObjectData(Map("b" -> StringData("a")))))
+      val result: ObjectData = ObjectData(Map("a" -> NullData, "b" -> StringData("a")))
+      (data1 overrides data2) mustEqual ObjectData(Map("i" -> result))
     }
   }
 }

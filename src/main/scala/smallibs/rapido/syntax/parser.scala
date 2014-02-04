@@ -40,7 +40,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   def serviceSpecification: Parser[Entity] =
-    ("service" ~> ident) ~ ("(" ~> repsep(identified, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
+    ("service" ~> ident) ~ ("(" ~> repsep(mainTypeDefinition, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
       case n ~ None ~ r ~ l => ServiceEntity(n, Route(n, Nil, r), l)
       case n ~ Some(p) ~ r ~ l => ServiceEntity(n, Route(n, p, r), l)
     }
@@ -59,19 +59,25 @@ object RapidoParser extends JavaTokenParsers {
       case n ~ t => (n, t)
     }
 
+
+  def mainTypeDefinition: Parser[Type] =
+    identified ~ "*".? ^^ {
+      case t ~ None => t
+      case t ~ _    => TypeMultiple(t)
+    }
+
   def typeDefinition: Parser[Type] =
-    (atomic | extensible) ~ ("*" | "?").* ^^ {
-      case t ~ a => a.foldLeft(t) {
-        case (r, "*") => TypeMultiple(r)
-        case (r, "?") => TypeOptional(r)
-      }
+    (atomic | extensible) ~ ("*" | "?").? ^^ {
+      case t ~ None => t
+      case t ~ Some("*") => TypeMultiple(t)
+      case t ~ Some("?") => TypeOptional(t)
     }
 
   private def directive(name: String): Parser[Type] =
     name ~> "[" ~> typeDefinition <~ "]"
 
   def serviceDefinition: Parser[Service] =
-    (ident <~ ":") ~! (repsep(identified, ",") <~ "=>") ~ identified ~ ("or" ~> identified).? ~ ("=" ~> restAction) ~
+    (ident <~ ":") ~! (repsep(mainTypeDefinition, ",") <~ "=>") ~ mainTypeDefinition ~ ("or" ~> mainTypeDefinition).? ~ ("=" ~> restAction) ~
       path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ~ directive("RETURN").? ^^ {
       case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body ~ result =>
         Service(name, Action(action, path, param, body, header, result), ServiceType(in, out, err))

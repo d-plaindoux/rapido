@@ -7,6 +7,10 @@ from @OPT[|@USE::package.|]core import types
 import httplib as http
 import json
 
+class UnsupportedProtocol(Exception):
+    def __init__(self, protocol):
+        self.protocol = protocol
+
 
 class BasicService:
 
@@ -14,7 +18,15 @@ class BasicService:
     # Constructor
     #
 
-    def __init__(self, proto, url):
+    def __init__(self, protocol, url):
+        if self.protocol == "http":
+            self.connectionFactory = http.HTTPConnection
+        elif self.protocol == "https":
+            self.connectionFactory = http.HTTPSConnection
+        else:
+            raise UnsupportedProtocol(protocol)
+
+        self.protocol = protocol
         self.url = url
         self.path = None
 
@@ -22,11 +34,8 @@ class BasicService:
     # Public behaviors
     #
 
-    def http_request(self, protocol, path, operation, body=None, header=None, implicit_header=None):
-        if protocol == "http":
-            connection = http.HTTPConnection(self.url)
-        else:
-            connection = http.HTTPSConnection(self.url)
+    def http_request(self, path, operation, body=None, header=None, implicit_header=None):
+        connection = self.connectionFactory(self.url)
 
         if not header:
             header = {}

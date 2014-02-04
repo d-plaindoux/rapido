@@ -3,7 +3,7 @@
    ------------------------------------------------------------------------------------------|]
 
 @MACRO::PathAsString
-  [|"/@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
+  [|"@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
 @MACRO::PathVariable
     [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
@@ -12,7 +12,7 @@
     Attribute specified with GET, SET
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar,|]"@VAL::name"|]|]
+@MACRO::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar, |]"@VAL::name"|]|]
 
 @MACRO::GenerateGetterSetter
     [|@OR
@@ -20,14 +20,14 @@
   def @VAL::get: Try[JSon] =
     getValue(List(@USE::AccessVar))
 |][|
-  def @VAL::set(value:JSon): @USE::this =
-    new @USE::this(setValue(List(@USE::AccessVar),value).get)
+  def @VAL::set(value: JSon): @USE::this =
+    new @USE::this(setValue(List(@USE::AccessVar), value))
 |][|
   def @VAL::set_get: Try[JSon] =
     data getValue List(@USE::AccessVar)
 
-  def @VAL::set_get(value:JSon): @USE::this =
-    new @USE::this(setValue(List(@USE::AccessVar),value).get)
+  def @VAL::set_get(value: JSon): @USE::this =
+    new @USE::this(setValue(List(@USE::AccessVar), value))
 |][||]|]
 
 @MACRO::VariableGetterSetter
@@ -38,15 +38,16 @@
     Virtual variables
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushArrayVar[|@SET::ArrayVar[|@OPT[|@USE::ArrayVar, |]'@VAL::name'|]|]
+@MACRO::PushArrayVar[|@SET::ArrayVar[|@OPT[|@USE::ArrayVar, |]"@VAL::name"|]|]
 
 @MACRO::VirtualType
     [|@OR
     [|@VAL::opt[|@USE::VirtualType|]|]
-    [|@VAL::rep[|@USE::VirtualType|]|]
+    [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
-        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP(        )::virtual
-        [|getVirtualData(List(@OPT[|@USE::ArrayVar,|]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable))|]|]|]
+        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual
+      [| :+ setVirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable))
+      |]|]|]
     [||]|]
 
 @[|------------------------------------------------------------------------------------------
@@ -63,18 +64,20 @@ import @OPT[|@USE::package.|]core.{JSon, ObjectData, Type}
 // Type @VAL::name
 //------------------------------------------------------------------------------------------
 
-class @VAL::name(in:JSon) extends Type {
+class @VAL::name(in: JSon) extends Type {
   val data = in
   @VAL::definition[|@USE::VariableGetterSetter|]
   def toJson: Try[JSon] = {
-    List[Try[JSon]](@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
-      (current, result) => result flatMap (value => result flatMap (_ extend value))
+    (List[Try[JSon]]()@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
+      (current, result) => result flatMap (value => current map (_ overrides value))
     }
   }
 }
 
 object @VAL::name {
   def apply(): @VAL::name = new @VAL::name(ObjectData(Map()))
+
+  def fromData(data: JSon): @VAL::name = new @VAL::name(data)
 }
 
 |]

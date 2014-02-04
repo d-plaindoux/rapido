@@ -8,7 +8,7 @@
 @MACRO::VariableTypes
     [|@OR
     [|@VAL::opt[|@USE::VariableTypes|]|]
-    [|@VAL::rep[|@USE::VariableTypes|]|]
+    [|@VAL::array[|@USE::VariableTypes|]|]
     [|@VAL::object[|@REP(,)::attributes
         [|@OR
         [|@VAL::type[|@USE::IsAtomicType|]@VAL::name|]

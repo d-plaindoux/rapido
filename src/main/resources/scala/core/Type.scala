@@ -22,30 +22,26 @@ import scala.util.Success
 import scala.util.Try
 
 trait Type {
-    val data: JSon
+  val data: JSon
 
-    def toJson: Try[JSon]
+  def toJson: Try[JSon]
 
-    protected def getValue(path: List[String]): Try[JSon] =
-    data getValue path
+  protected def getValue(path: List[String]): Try[JSon] = data getValue path
 
-    protected def setValue(path: List[String], value: JSon): Try[JSon] =
-    data setValue(path, value)
+  protected def setValue(path: List[String], value: JSon): JSon = data setValue(path, value)
 
-    private def getVirtualValue(pattern: String, attributes: List[List[String]]): Try[String] = {
-      (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
-        (te, tl) => for (l <- tl; e <- te) yield e :: l
-      } map {
-        pattern.format(_)
-      }
+  private def getVirtualValue(pattern: String, attributes: List[List[String]]): Try[String] = {
+    (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
+      (te, tl) => for (l <- tl; e <- te) yield e :: l
+    } map {
+      pattern.format(_)
     }
+  }
 
-    protected def getVirtualData(path: List[String], pattern: String, attributes: List[List[String]]): Try[JSon] = {
-      getVirtualValue(pattern, attributes) flatMap {
-        value => setValue(path, StringData(value))
-      }
+  protected def setVirtualValue(path: List[String], pattern: String, attributes: List[List[String]]): Try[JSon] = {
+    getVirtualValue(pattern, attributes) map {
+      value => setValue(path, StringData(value))
     }
-
   }
 }
 

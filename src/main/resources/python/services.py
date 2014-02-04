@@ -34,17 +34,18 @@
 Services:@REP(, )::services[|@VAL::name|]
 """
 
-from @OPT[|@USE::package.|]core.services import BasicService
+from @OPT[|@USE::package.|]core import services
+@OPT[|from @USE::package |]import types
 
 @REP::services[|
-class __@VAL::name(BasicService):
+class __@VAL::name(services.BasicService):
 
     #
     # Constructor
     #
 
-    def __init__(self, proto, url@VAL::route[|@USE::ParameterNames|]):
-        @VAL::route[|BasicService.__init__(self, proto, url)
+    def __init__(self, protocol, url@VAL::route[|@USE::ParameterNames|]):
+        @VAL::route[|services.BasicService.__init__(self, protocol, url)
         self.implicit_data = self.merge_data([@REP(, )::params[|@VAL::name|]])
         self.path = @VAL::path[|self.get_path(self.implicit_data, @USE::PathAsString, @USE::PathVariables)|]|]
 
@@ -62,7 +63,7 @@ class __@VAL::name(BasicService):
             header=@OR[|@VAL::header[|self.get_object(data, @USE::Attributes)|]|][|{}|]
         )
 
-        return @OR[|@VAL::result[|self.get_object(data,@USE::Attributes)|]|][|result|]
+        return @VAL::signature::output[|types.@VAL::name(result)|]
 
 |]|]
 #

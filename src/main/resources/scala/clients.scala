@@ -10,7 +10,8 @@
 //------------------------------------------------------------------------------------------
 
 class @VAL::name(url:String) {
-  @REP(  )::provides[|def @VAL = @VALService(url)|]
+  @REP::provides[|def @VAL = @VALService(url)
+  |]
 }
 
 object @VAL::name {

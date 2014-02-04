@@ -4,7 +4,7 @@
 [|@VAL::int[|int|]|]
 [|@VAL::string[|string|]|]
 [|@VAL::opt[|@USE::Types?|]|]
-[|@VAL::rep[|@USE::Types*|]|]
+[|@VAL::array[|@USE::Types*|]|]
 [|@VAL::object[|{@REP(,)::attributes[|@VAL::name:@VAL::type[|@USE::Types|]|]}|]|]
 [|@VAL|]|]
 @REP(;)::types[|@VAL::name=@VAL::definition[|@USE::Types|]|]

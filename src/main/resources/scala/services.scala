@@ -25,7 +25,7 @@
    ------------------------------------------------------------------------------------------|]
 
 @MACRO::PathAsString
-    [|"/@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
+    [|"@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
 @MACRO::PathVariable
     [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
@@ -45,13 +45,12 @@
 
 import scala.util.{Try, Success, Failure}
 import @OPT[|@USE::package.|]core.BasicService
-import @OPT[|@USE::package.|]core.JSon
 
 @REP::services[|
 //------------------------------------------------------------------------------------------
 // Service @VAL::name
 //------------------------------------------------------------------------------------------
-class @VAL::name[|@VALService|](override val url:String@VAL::route[|@USE::ParametersTypes|]) extends BasicService {
+class @VAL::name[|@VALService|](override val url: String@VAL::route[|@USE::ParametersTypes|]) extends BasicService {
   @SET::serviceParameters[|@VAL::route[|@USE::ParametersValues|]|]
 
   val path: String = @VAL::route[|getPath(mergeData(@USE::serviceParameters).get, @VAL::path[|@USE::PathAsString, @USE::PathVariables)|].get|]
@@ -62,8 +61,12 @@ class @VAL::name[|@VALService|](override val url:String@VAL::route[|@USE::Parame
   @REP(  )::entries[|
   def @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::name: @VAL::type::name|])|]: Try[@VAL::signature::output::name] = {
     (for (data <- mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ @USE::serviceParameters);
-          path <- @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|])
-    yield httpRequest(path, "@VAL::operation", @OR[|@VAL::body[|Some(getValue(data, @USE::Attributes).get)|]|][|None|],@OR[|@VAL::header[|Some(getValue(data, @USE::Attributes).get)|]|][|None|])) flatMap {
+          path <- @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|]@OR
+          [|@VAL::body[|;
+          body <- getValue(data, @USE::Attributes)|]|][||]@OR
+          [|@VAL::header[|;
+          header <- getValue(data, @USE::Attributes)|]|][||])
+    yield httpRequest(path, "@VAL::operation", @OR[|@VAL::body[|Some(body)|]|][|None|] ,@OR[|@VAL::header[|Some(header)|]|][|None|])) flatMap {
       case Success(e) => Success(new @VAL::signature::output::name(e))
       case Failure(f) => Failure(f)
     }
