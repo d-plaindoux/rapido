@@ -1,3 +1,9 @@
+import AssemblyKeys._
+
+assemblySettings
+
+jarName in assembly := "rAPIdo.jar"
+
 artifact := Artifact("smallibs.rapido")
 
 name := "rapido"
