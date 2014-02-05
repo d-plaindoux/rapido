@@ -1,8 +1,8 @@
-import AssemblyKeys._
+import sbtassembly.Plugin.AssemblyKeys._
 
 assemblySettings
 
-jarName in assembly := "rAPIdo.jar"
+jarName in assembly := { s"${name.value}-${version.value}" }
 
 artifact := Artifact("smallibs.rapido")
 
