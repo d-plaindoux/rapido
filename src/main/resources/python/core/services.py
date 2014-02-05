@@ -1,9 +1,23 @@
-"""
-Core service
-"""
+#
+#  Copyright (C)2014 D. Plaindoux.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published
+#  by the Free Software Foundation; either version 2, or (at your option) any
+#  later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License
+#  along with this program; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+#
 
 from @OPT[|@USE::package.|]core import types
-
+from sets import Set
 import httplib as http
 import json
 
@@ -75,13 +89,24 @@ class BasicService:
 
     @staticmethod
     def merge_data(datas):
+        def deep_merge(data1, data2):
+            if type(data1) is not dict or type(data2) is not dict:
+                return data2
+            intersection = set(data1.keys()) & set(data2.keys())
+            data2Only = set(data2.keys()) - set(data1.keys())
+            for k in data2Only:
+                data1[k] = data2[k]
+            for k in intersection:
+                data1[k] = deep_merge(data1[k],data2[k])
+            return data1
+
         data = dict()
 
         for d in datas:
             if isinstance(d, types.Type):
-                data = dict(data.items() + d.to_dict().items())
+                data = deep_merge(data, d.to_dict())
             else:
-                data = dict(data.items() + d.items())
+                data = deep_merge(data, d)
 
         return data
 
