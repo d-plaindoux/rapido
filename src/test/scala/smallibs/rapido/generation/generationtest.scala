@@ -22,9 +22,9 @@ import org.specs2.mutable._
 import scala.io.Source
 import scala.util.Success
 import smallibs.page.engine.Engine
-import smallibs.page.syntax.PageParser
+import smallibs.page.lang.syntax.PageParser
 import smallibs.rapido.page.RapidoProvider
-import smallibs.rapido.syntax.RapidoParser
+import smallibs.rapido.lang.syntax.RapidoParser
 import java.io.{File, PrintWriter}
 
 object Resources {

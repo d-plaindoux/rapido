@@ -16,10 +16,10 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.rapido.syntax
+package smallibs.rapido.lang.syntax
 
 import org.specs2.mutable._
-import smallibs.rapido.ast._
+import smallibs.rapido.lang.ast._
 
 object RapidoSpec extends Specification {
   "Parser dedicated to Types" should {

@@ -16,7 +16,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.page.ast
+package smallibs.page.lang.ast
 
 //
 // Template definitions

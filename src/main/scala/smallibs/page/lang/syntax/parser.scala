@@ -16,11 +16,11 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.page.syntax
+package smallibs.page.lang.syntax
 
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.JavaTokenParsers
-import smallibs.page.ast._
+import smallibs.page.lang.ast._
 
 object PageParser extends JavaTokenParsers {
 

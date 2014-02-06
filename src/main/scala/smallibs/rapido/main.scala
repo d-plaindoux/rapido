@@ -19,8 +19,8 @@
 package smallibs.rapido
 
 import java.io.File
-import smallibs.rapido.syntax.RapidoParser
-import smallibs.page.syntax.PageParser
+import smallibs.rapido.lang.syntax.RapidoParser
+import smallibs.page.lang.syntax.PageParser
 import smallibs.page.engine.Engine
 import smallibs.rapido.page.RapidoProvider
 import scala.util.parsing.json.{JSONObject, JSONArray, JSON}

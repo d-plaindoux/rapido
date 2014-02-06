@@ -20,7 +20,7 @@ package smallibs.rapido.page
 
 import scala.Some
 import smallibs.page.{Provider, DataProvider}
-import smallibs.rapido.ast._
+import smallibs.rapido.lang.ast._
 
 trait AbstractProvider {
   self: DataProvider =>

@@ -16,36 +16,36 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.rapido.syntax
+package smallibs.rapido.lang.syntax
 
 import scala.util.matching.Regex
-import scala.util.parsing.combinator.JavaTokenParsers
-import smallibs.rapido.ast._
+import scala.util.parsing.combinator.{PackratParsers, JavaTokenParsers}
+import smallibs.rapido.lang.ast._
 
-object RapidoParser extends JavaTokenParsers {
+object RapidoParser extends JavaTokenParsers with PackratParsers {
 
   //
   // Public behaviors
   //
 
-  def specifications: Parser[List[Entity]] =
+  def specifications: PackratParser[List[Entity]] =
     specification.*
 
-  def specification: Parser[Entity] =
+  def specification: PackratParser[Entity] =
     typeSpecification | serviceSpecification | clientSpecification
 
-  def typeSpecification: Parser[Entity] =
+  def typeSpecification: PackratParser[Entity] =
     ("type" ~> ident <~ "=") ~! typeDefinition ^^ {
       case n ~ t => TypeEntity(n, t)
     }
 
-  def serviceSpecification: Parser[Entity] =
+  def serviceSpecification: PackratParser[Entity] =
     ("service" ~> ident) ~ ("(" ~> repsep(mainTypeDefinition, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
       case n ~ None ~ r ~ l => ServiceEntity(n, Route(n, Nil, r), l)
       case n ~ Some(p) ~ r ~ l => ServiceEntity(n, Route(n, p, r), l)
     }
 
-  def clientSpecification: Parser[Entity] =
+  def clientSpecification: PackratParser[Entity] =
     ("client" ~> ident) ~! ("provides" ~> repsep(ident, ",")) ^^ {
       case n ~ l => ClientEntity(n, l)
     }
@@ -54,36 +54,36 @@ object RapidoParser extends JavaTokenParsers {
   // Internal behaviors
   //
 
-  def routeParameter: Parser[(String, Type)] =
+  def routeParameter: PackratParser[(String, Type)] =
     (ident <~ ":") ~! typeDefinition ^^ {
       case n ~ t => (n, t)
     }
 
 
-  def mainTypeDefinition: Parser[Type] =
+  def mainTypeDefinition: PackratParser[Type] =
     identified ~ "*".? ^^ {
       case t ~ None => t
       case t ~ _    => TypeMultiple(t)
     }
 
-  def typeDefinition: Parser[Type] =
+  def typeDefinition: PackratParser[Type] =
     (atomic | extensible) ~ ("*" | "?").? ^^ {
       case t ~ None => t
       case t ~ Some("*") => TypeMultiple(t)
       case t ~ Some("?") => TypeOptional(t)
     }
 
-  private def directive(name: String): Parser[Type] =
+  private def directive(name: String): PackratParser[Type] =
     name ~> "[" ~> typeDefinition <~ "]"
 
-  def serviceDefinition: Parser[Service] =
+  def serviceDefinition: PackratParser[Service] =
     (ident <~ ":") ~! (repsep(mainTypeDefinition, ",") <~ "=>") ~ mainTypeDefinition ~ ("or" ~> mainTypeDefinition).? ~ ("=" ~> restAction) ~
       path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ~ directive("RETURN").? ^^ {
       case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body ~ result =>
         Service(name, Action(action, path, param, body, header, result), ServiceType(in, out, err))
     }
 
-  def restAction: Parser[Operation] =
+  def restAction: PackratParser[Operation] =
     ("GET" | "POST" | "PUT" | "DELETE" | ident) ^^ {
       case "GET" => GET
       case "HEAD" => HEAD
@@ -94,7 +94,7 @@ object RapidoParser extends JavaTokenParsers {
     }
 
   class Terminal(s: String) {
-    def produces(t: Type): Parser[Type] = s ^^ {
+    def produces(t: Type): PackratParser[Type] = s ^^ {
       _ => t
     }
   }
@@ -103,24 +103,24 @@ object RapidoParser extends JavaTokenParsers {
     def apply(s: String): Terminal = new Terminal(s)
   }
 
-  def number: Parser[Type] =
+  def number: PackratParser[Type] =
     Terminal("int") produces TypeNumber
 
-  def string: Parser[Type] =
+  def string: PackratParser[Type] =
     Terminal("string") produces TypeString
 
-  def boolean: Parser[Type] =
+  def boolean: PackratParser[Type] =
     Terminal("bool") produces TypeBoolean
 
-  def identified: Parser[Type] =
+  def identified: PackratParser[Type] =
     ident ^^ {
       TypeIdentifier
     }
 
-  def attributeName: Parser[String] =
+  def attributeName: PackratParser[String] =
     ident | ("\"" ~> regex(new Regex("[^\"]+")) <~ "\"") | ("'" ~> regex(new Regex("[^\']+")) <~ "'")
 
-  def getterSetter: Parser[Option[String] => Access] =
+  def getterSetter: PackratParser[Option[String] => Access] =
     "@get" ^^ {
       _ => GetAccess
     } | "@set" ^^ {
@@ -129,43 +129,43 @@ object RapidoParser extends JavaTokenParsers {
       _ => SetGetAccess
     }
 
-  def attribute: Parser[(String, TypeAttribute)] =
+  def attribute: PackratParser[(String, TypeAttribute)] =
     ((getterSetter ~ ("(" ~> ident <~ ")").?).? ~ attributeName <~ ":") ~! typeDefinition ^^ {
       case None ~ i ~ t => (i, ConcreteTypeAttribute(None, t))
       case Some(g ~ n) ~ i ~ t => (i, ConcreteTypeAttribute(Some(g(n)), t))
     }
 
-  def virtual: Parser[(String, VirtualTypeAttribute)] =
+  def virtual: PackratParser[(String, VirtualTypeAttribute)] =
     ("virtual" ~> attributeName) ~ ("=" ~> path) ^^ {
       case i ~ p => (i, VirtualTypeAttribute(p))
     }
 
-  def record: Parser[Type] =
+  def record: PackratParser[Type] =
     "{" ~> repsep(virtual | attribute, ";" | ",") <~ "}" ^^ {
       l => TypeObject(l.toMap)
     }
 
-  def atomic: Parser[Type] =
+  def atomic: PackratParser[Type] =
     number | string | boolean
 
-  def extensible: Parser[Type] =
+  def extensible: PackratParser[Type] =
     (record | identified) ~ ("with" ~> extensible).* ^^ {
       case t ~ l => l.foldLeft(t) {
         TypeComposed
       }
     }
 
-  def path: Parser[Path] =
+  def path: PackratParser[Path] =
     "[" ~> (variableEntry | staticEntry).+ <~ "]" ^^ {
       case l => Path(for (e <- l if e != StaticLevel("")) yield e)
     }
 
-  def staticEntry: Parser[PathEntry] =
+  def staticEntry: PackratParser[PathEntry] =
     regex(new Regex("[^<\\]]+")) ^^ {
       StaticLevel
     }
 
-  def variableEntry: Parser[PathEntry] =
+  def variableEntry: PackratParser[PathEntry] =
     "<" ~> repsep(regex(new Regex("[^.>]+")), ".") <~ ">" ^^ {
       DynamicLevel
     }

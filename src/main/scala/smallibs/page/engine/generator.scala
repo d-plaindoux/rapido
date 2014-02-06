@@ -23,7 +23,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import smallibs.page.DataProvider
-import smallibs.page.ast._
+import smallibs.page.lang.ast._
 
 
 class Engine(path: List[String], data: DataProvider, definitions: Map[String, Template]) {

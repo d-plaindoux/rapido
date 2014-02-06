@@ -16,7 +16,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.rapido.ast
+package smallibs.rapido.lang.ast
 
 case class Service(name: String, action: Action, signature: ServiceType)
 

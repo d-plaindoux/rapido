@@ -21,7 +21,7 @@ package smallibs.page.engine
 import org.specs2.mutable._
 import scala.util.Success
 import smallibs.page._
-import smallibs.page.ast._
+import smallibs.page.lang.ast._
 
 object EngineTest extends Specification {
   "Generator should" should {

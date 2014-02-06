@@ -84,13 +84,11 @@ from @OPT[|@USE::package.|]core.types import Type
 @REP::types[|
 class @VAL::name(Type):
 
-    def __init__(self, data=None@VAL::definition[|@USE::VariablesAsParameter|]):
+    def __init__(self, data=None):
         Type.__init__(self)
-
         if not data:
-            self.data = @VAL::definition[|@USE::Types|]
-        else:
-            self.data = data
+            data = dict()
+        self.data = data
     @VAL::definition[|@USE::VariableGetterSetter|]
     def to_dict(self):
         # Review this code / Wrong generation

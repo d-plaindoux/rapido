@@ -16,12 +16,20 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.rapido.ast
+package smallibs.rapido.lang.ast
 
-case class Path(values: List[PathEntry])
+sealed trait Operation
 
-trait PathEntry
+case object GET extends Operation
 
-case class StaticLevel(name: String) extends PathEntry
+case object HEAD extends Operation
 
-case class DynamicLevel(values: List[String]) extends PathEntry
+case object POST extends Operation
+
+case object PUT extends Operation
+
+case object DELETE extends Operation
+
+case class UserDefine(name: String) extends Operation {
+  override def toString: String = name
+}
