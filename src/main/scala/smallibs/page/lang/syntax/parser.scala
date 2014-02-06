@@ -31,7 +31,7 @@ object PageParser extends JavaTokenParsers {
   override def skipWhitespace: Boolean = false
 
   def template: Parser[Template] =
-    (text | commonTemplate | special).* ^^ {
+    positioned(text | commonTemplate | special).* ^^ {
       simplify
     }
 
@@ -40,7 +40,7 @@ object PageParser extends JavaTokenParsers {
   //
 
   private def innerTemplate: Parser[Template] =
-    (innerText | commonTemplate | innerSpecial).* ^^ {
+    positioned(innerText | commonTemplate | innerSpecial).* ^^ {
       simplify
     }
 

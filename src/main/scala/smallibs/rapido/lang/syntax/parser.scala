@@ -32,7 +32,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     specification.*
 
   def specification: PackratParser[Entity] =
-    typeSpecification | serviceSpecification | clientSpecification
+    positioned(typeSpecification | serviceSpecification | clientSpecification)
 
   def typeSpecification: PackratParser[Entity] =
     ("type" ~> ident <~ "=") ~! typeDefinition ^^ {
@@ -63,7 +63,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
   def mainTypeDefinition: PackratParser[Type] =
     identified ~ "*".? ^^ {
       case t ~ None => t
-      case t ~ _    => TypeMultiple(t)
+      case t ~ _ => TypeMultiple(t)
     }
 
   def typeDefinition: PackratParser[Type] =

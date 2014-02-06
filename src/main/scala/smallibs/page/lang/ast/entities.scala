@@ -18,11 +18,13 @@
 
 package smallibs.page.lang.ast
 
+import scala.util.parsing.input.Positional
+
 //
 // Template definitions
 //
 
-trait Template
+trait Template extends Positional
 
 case class Value(name: Option[String], content: Option[Template]) extends Template
 
