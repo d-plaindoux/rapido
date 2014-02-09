@@ -45,9 +45,8 @@
     [|@VAL::opt[|@USE::VirtualType|]|]
     [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
-        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual
-      [| :+ setVirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable))
-      |]|]|]
+        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual[| :+
+        VirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable)) |]|]|]
     [||]|]
 
 @[|------------------------------------------------------------------------------------------
@@ -57,21 +56,16 @@
 @OPT[|package @USE::package|]
 
 import scala.util.{Failure, Success, Try}
-import @OPT[|@USE::package.|]core.{JSon, ObjectData, Type}
+import @OPT[|@USE::package.|]core.{JSon, ObjectData, GenericType, VirtualValue}
 
 @REP::types[|@SET::this[|@VAL::name|]
 //------------------------------------------------------------------------------------------
 // Type @VAL::name
 //------------------------------------------------------------------------------------------
 
-class @VAL::name(in: JSon) extends Type {
-  val data = in
+class @VAL::name(in: JSon) extends GenericType(in) {
+  val virtualValues = Nil@VAL::definition[|@USE::VirtualType|]
   @VAL::definition[|@USE::VariableGetterSetter|]
-  def toJson: Try[JSon] = {
-    (List[Try[JSon]]()@VAL::definition[|@USE::VirtualType|]).foldRight[Try[JSon]](Success(data)) {
-      (current, result) => result flatMap (value => current map (_ overrides value))
-    }
-  }
 }
 
 object @VAL::name {

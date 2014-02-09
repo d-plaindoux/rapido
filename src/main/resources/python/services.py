@@ -7,6 +7,12 @@
     [|@VAL::object[|[@REP(, )::attributes[|'@VAL::name'|]]|]|]
     [|[]|]|]
 
+
+@MACRO::Virtuals
+    [|@OR
+    [|@VAL::object[|[@REP(, )::virtual[|"@VAL::name"|]]|]|]
+    [|[]|]|]
+
 @[|------------------------------------------------------------------------------------------
     Service and method parameters
    ------------------------------------------------------------------------------------------|]
@@ -59,8 +65,8 @@ class __@VAL::name(services.BasicService):
         result = self.http_request(
             path=@OR[|@VAL::path[|self.get_path(data, @USE::PathAsString, @USE::PathVariables)|]|][|""|],
             operation="@VAL::operation",
-            body=@OR[|@VAL::body[|self.get_object(data, @USE::Attributes)|]|][|{}|],
-            header=@OR[|@VAL::header[|self.get_object(data, @USE::Attributes)|]|][|{}|]
+            body=@OR[|@VAL::body[|self.get_object(types.@VAL::name(data).to_dict(), @USE::Attributes + @USE::Virtuals)|]|][|{}|],
+            header=@OR[|@VAL::header[|self.get_object(types.@VAL::name(data).to_dict(), @USE::Attributes + @USE::Virtuals)|]|][|{}|]
         )
 
         return @VAL::signature::output[|types.@VAL::name(result)|]

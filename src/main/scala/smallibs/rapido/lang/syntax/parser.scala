@@ -40,7 +40,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     }
 
   def serviceSpecification: PackratParser[Entity] =
-    ("service" ~> ident) ~ ("(" ~> repsep(mainTypeDefinition, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
+    ("service" ~> ident) ~ ("(" ~> repsep(identified, ",") <~ ")").? ~! path ~ ("{" ~> serviceDefinition.* <~ "}") ^^ {
       case n ~ None ~ r ~ l => ServiceEntity(n, Route(n, Nil, r), l)
       case n ~ Some(p) ~ r ~ l => ServiceEntity(n, Route(n, p, r), l)
     }
@@ -59,13 +59,6 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
       case n ~ t => (n, t)
     }
 
-
-  def mainTypeDefinition: PackratParser[Type] =
-    identified ~ "*".? ^^ {
-      case t ~ None => t
-      case t ~ _ => TypeMultiple(t)
-    }
-
   def typeDefinition: PackratParser[Type] =
     (atomic | extensible) ~ ("*" | "?").? ^^ {
       case t ~ None => t
@@ -74,13 +67,13 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     }
 
   private def directive(name: String): PackratParser[Type] =
-    name ~> "[" ~> typeDefinition <~ "]"
+    name ~> "[" ~> identified <~ "]"
 
   def serviceDefinition: PackratParser[Service] =
-    (ident <~ ":") ~! (repsep(mainTypeDefinition, ",") <~ "=>") ~ mainTypeDefinition ~ ("or" ~> mainTypeDefinition).? ~ ("=" ~> restAction) ~
-      path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ~ directive("RETURN").? ^^ {
-      case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body ~ result =>
-        Service(name, Action(action, path, param, body, header, result), ServiceType(in, out, err))
+    (ident <~ ":") ~! (repsep(identified, ",") <~ "=>") ~ identified ~ ("or" ~> identified).? ~ ("=" ~> restAction) ~
+      path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ^^ {
+      case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body =>
+        Service(name, Action(action, path, param, body, header), ServiceType(in, out, err))
     }
 
   def restAction: PackratParser[Operation] =
@@ -121,9 +114,9 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     ident | ("\"" ~> regex(new Regex("[^\"]+")) <~ "\"") | ("'" ~> regex(new Regex("[^\']+")) <~ "'")
 
   def getterSetter: PackratParser[Option[String] => Access] =
-    "@get" ^^ {
+    "@" ~ "get" ^^ {
       _ => GetAccess
-    } | "@set" ^^ {
+    } | "@" ~ "set" ^^ {
       _ => SetAccess
     } | ("@" ~ "{" ~ (("set" ~ "," ~ "get") | ("get" ~ "," ~ "set")) ~ "}") ^^ {
       _ => SetGetAccess

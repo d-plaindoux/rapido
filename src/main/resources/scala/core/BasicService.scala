@@ -43,7 +43,7 @@ trait BasicService {
         header("Content-Type", "application/json");
 
       val builder2 = header.getOrElse(Map()).foldRight(builder) {
-        (kv, b) => builder.header(kv._1, kv._2.toJSonString)
+        (kv, b) => builder.header(kv._1, kv._2.toString)
       }
 
       operation match {

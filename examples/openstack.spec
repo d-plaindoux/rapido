@@ -16,7 +16,10 @@ type Error = {
 
 type Authentication = {
     auth: {
-        passwordCredentials: { @set username: string, @set password: string },
+        passwordCredentials: {
+            @set username: string,
+            @set password: string
+        },
         @set tenantName: string?
     }
 }

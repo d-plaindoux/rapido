@@ -261,7 +261,6 @@ class EntryProvider(entry: Service, types: Map[String, Type]) extends DataProvid
       case "params" => for (b <- entry.action.params) yield TypeProvider(b, types)
       case "body" => for (b <- entry.action.body) yield TypeProvider(b, types)
       case "header" => for (b <- entry.action.header) yield TypeProvider(b, types)
-      case "return" => for (b <- entry.action.result) yield TypeProvider(b, types)
       case _ => None
     }
 }

@@ -45,3 +45,18 @@ trait Type {
   }
 }
 
+case class VirtualValue(path: List[String], model: String, values: List[List[String]])
+
+abstract class GenericType(in: JSon) extends Type {
+  val virtualValues: List[VirtualValue]
+
+  val data = in
+
+  def toJson: Try[JSon] = {
+    virtualValues.foldLeft[List[Try[JSon]]](Nil) {
+      case (result, VirtualValue(path, model, values)) => result :+ setVirtualValue(path, model, values)
+    }.foldRight[Try[JSon]](Success(data)) {
+      (current, result) => result flatMap (value => current map (_ overrides value))
+    }
+  }
+}
