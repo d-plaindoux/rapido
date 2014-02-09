@@ -12,7 +12,7 @@ from @OPT[|@USE::package|] import services
 class @VAL::name:
     class secured:
         def __init__(self, url):
-            @REP(        )::provides[|self.@VAL = services.@VAL("https", url)
+            @REP(            )::provides[|self.@VAL = services.@VAL("https", url)
 |]
     def __init__(self, url):
         @REP(        )::provides[|self.@VAL = services.@VAL("http", url)

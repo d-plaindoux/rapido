@@ -29,5 +29,9 @@ class Type:
             return self.__get_value(data[attributes[0]], attributes[1:])
 
     def virtual_value(self, data, path, virtual, attributes):
-        subData = self.__get_value(data, path)
-        subData[virtual] = self.__get_value(data, attributes)
+        current = data
+        for key in path:
+            if key not in current:
+                current[key] = dict()
+            current = current[key]
+        current[virtual] = self.__get_value(data, attributes)

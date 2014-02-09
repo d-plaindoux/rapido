@@ -87,8 +87,9 @@ class @VAL::name(Type):
     def __init__(self, data=None):
         Type.__init__(self)
         if not data:
-            data = dict()
-        self.data = data
+            self.data = dict()
+        else:
+            self.data = data.copy()
     @VAL::definition[|@USE::VariableGetterSetter|]
     def to_dict(self):
         # Review this code / Wrong generation

@@ -33,9 +33,9 @@ class BasicService:
     #
 
     def __init__(self, protocol, url):
-        if self.protocol == "http":
+        if protocol is "http":
             self.connectionFactory = http.HTTPConnection
-        elif self.protocol == "https":
+        elif protocol is "https":
             self.connectionFactory = http.HTTPSConnection
         else:
             raise UnsupportedProtocol(protocol)
