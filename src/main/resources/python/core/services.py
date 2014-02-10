@@ -48,7 +48,7 @@ class BasicService:
     # Public behaviors
     #
 
-    def http_request(self, path, operation, body=None, header=None, implicit_header=None):
+    def http_request(self, path, operation, params=None, body=None, header=None, implicit_header=None):
         connection = self.connectionFactory(self.url)
 
         if not header:
@@ -80,7 +80,7 @@ class BasicService:
         return pattern % tuple([self.__get_value(data, attribute) for attribute in Attributes])
 
     @staticmethod
-    def get_data(data, Attributes):
+    def get_params(data, Attributes):
         return '&'.join([key + "=" + str(data[key]) for key in Attributes if data[key]])
 
     @staticmethod
@@ -88,7 +88,7 @@ class BasicService:
         return dict([(key, data[key]) for key in Attributes if data[key]])
 
     @staticmethod
-    def merge_data(datas):
+    def merge_data(data_set):
         def deep_merge(data1, data2):
             if type(data1) is not dict or type(data2) is not dict:
                 return data2
@@ -102,7 +102,7 @@ class BasicService:
 
         data = dict()
 
-        for d in datas:
+        for d in data_set:
             if isinstance(d, types.Type):
                 data = deep_merge(data, d.to_dict())
             else:

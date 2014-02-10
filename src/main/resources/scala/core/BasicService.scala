@@ -31,30 +31,33 @@ trait BasicService {
   //
   // Public behaviors
   //
-  def httpRequest(servicePath: String, operation: String, body: Option[Map[String, JSon]], header: Option[Map[String, JSon]]): Try[JSon] = {
+  def httpRequest(servicePath: String, operation: String, params: Option[Map[String, JSon]], body: Option[Map[String, JSon]], header: Option[Map[String, JSon]]): Try[JSon] = {
     val client: Client = Client.create(new DefaultClientConfig)
     val uri: URI = UriBuilder.fromUri(url).build()
     val inputData: String = ObjectData(body.getOrElse(Map())).toJSonString
     try {
-      val builder: WebResource#Builder = client.
+      val builder: WebResource = client.
         resource(uri).
         path(path).
-        path(servicePath).
-        header("Content-Type", "application/json");
+        path(servicePath)
 
-      val builder2 = header.getOrElse(Map()).foldRight(builder) {
-        (kv, b) => builder.header(kv._1, kv._2.toString)
+      val builderWithParams = params.getOrElse(Map()).foldRight(builder) {
+        (kv, builder) => builder.queryParam(kv._1, kv._2.toString)
+      }
+
+      val builderWithHeader = header.getOrElse(Map()).foldRight(builderWithParams.header("Content-Type", "application/json")) {
+        (kv, builder) => builder.header(kv._1, kv._2.toString)
       }
 
       operation match {
         case "POST" =>
-          JSon.fromString(builder2.post(classOf[String], inputData))
+          JSon.fromString(builderWithHeader.post(classOf[String], inputData))
         case "PUT" =>
-          JSon.fromString(builder2.put(classOf[String], inputData))
+          JSon.fromString(builderWithHeader.put(classOf[String], inputData))
         case "GET" =>
-          JSon.fromString(builder2.get(classOf[String]))
+          JSon.fromString(builderWithHeader.get(classOf[String]))
         case "DELETE" =>
-          JSon.fromString(builder2.delete(classOf[String]))
+          JSon.fromString(builderWithHeader.delete(classOf[String]))
         case _ => throw new UnsupportedOperationException(operation)
       }
     } catch {

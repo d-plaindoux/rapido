@@ -65,6 +65,7 @@ class __@VAL::name(services.BasicService):
         result = self.http_request(
             path=@OR[|@VAL::path[|self.get_path(data, @USE::PathAsString, @USE::PathVariables)|]|][|""|],
             operation="@VAL::operation",
+            params=@OR[|@VAL::params[|self.get_object(types.@VAL::name(data).to_dict(), @USE::Attributes + @USE::Virtuals)|]|][|{}|],
             body=@OR[|@VAL::body[|self.get_object(types.@VAL::name(data).to_dict(), @USE::Attributes + @USE::Virtuals)|]|][|{}|],
             header=@OR[|@VAL::header[|self.get_object(types.@VAL::name(data).to_dict(), @USE::Attributes + @USE::Virtuals)|]|][|{}|]
         )
