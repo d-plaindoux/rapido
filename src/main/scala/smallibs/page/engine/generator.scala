@@ -37,6 +37,10 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
     }
 
   def generateWithDefinitions(template: Template): Try[(Option[String], Definitions)] = {
+    def elementNotFound(name: String): Failure[Nothing] = {
+      Failure(new NoSuchElementException(path.reverse.mkString("::") + ": " + name + " at " + template.pos))
+    }
+
     template match {
       case NoTemplate =>
         Success(Some(""), definitions)
@@ -48,7 +52,7 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
         generateWithDefinitions(newTemplate)
       case Value(Some(name), value) => data get name match {
         case None =>
-          Failure(new NoSuchElementException(path.reverse + ": " + name + " at " + template.pos))
+          elementNotFound(name)
         case Some(newData) =>
           new Engine(name :: path, newData, definitions).generateWithDefinitions(Value(None, value))
       }
@@ -60,7 +64,7 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
         generateWithDefinitions_repetition(sep, content.getOrElse(Value(None, None)))
       case Repetition(Some(name), sep, content) => data get name match {
         case None =>
-          Failure(new NoSuchElementException(data + ": " + name + " at " + template.pos))
+          elementNotFound(name)
         case Some(newData) =>
           new Engine(name :: path, newData, definitions).generateWithDefinitions(Repetition(None, sep, content))
       }
@@ -75,14 +79,14 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
         }
       case Optional(Some(name), innerTemplate) => data get name match {
         case None =>
-          Failure(new NoSuchElementException(path.reverse + ": " + name + " at " + template.pos))
+          elementNotFound(name)
         case Some(newData) =>
           new Engine(name :: path, newData, definitions).generateWithDefinitions(Optional(None, innerTemplate))
       }
       case Alternate(None, l) => generateWithDefinitions_alternate(l)
       case Alternate(Some(name), l) => data get name match {
         case None =>
-          Failure(new NoSuchElementException(path.reverse + ": " + name + " at " + template.pos))
+          elementNotFound(name)
         case Some(newData) =>
           new Engine(name :: path, newData, definitions).generateWithDefinitions_alternate(l)
       }
@@ -97,7 +101,7 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
       case Use(name) =>
         definitions get name match {
           case None =>
-            Failure(new NoSuchElementException(path.reverse + ": " + name + " at " + template.pos))
+            elementNotFound(name)
           case Some(t) =>
             generateWithDefinitions(t)
         }

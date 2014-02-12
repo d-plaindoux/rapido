@@ -22,16 +22,21 @@ class Type:
     def __init__(self):
         self.data = None
 
-    def __get_value(self, data, attributes):
-        if attributes is None or not attributes:
-            return data
-        else:
-            return self.__get_value(data[attributes[0]], attributes[1:])
+    @staticmethod
+    def get_value(data, attributes):
+        current = data
+        for key in attributes:
+            current = current[key]
+        return current
 
-    def virtual_value(self, data, path, virtual, attributes):
+    @staticmethod
+    def set_value(data, path, virtual, value):
         current = data
         for key in path:
             if key not in current:
                 current[key] = dict()
             current = current[key]
-        current[virtual] = self.__get_value(data, attributes)
+        current[virtual] = value
+
+    def set_virtual_value(self, data, path, virtual, attributes):
+        self.set_value(data, path, virtual, self.get_value(data, attributes))

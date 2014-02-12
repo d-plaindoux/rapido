@@ -18,6 +18,10 @@
 
 package smallibs.rapido.lang.checker.types
 
+/**
+ * The type check validates the specification checking object
+ * type compatibilities and definition in each service scope
+ */
 object TypeChecker {
 
   // TODO

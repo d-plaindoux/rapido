@@ -9,29 +9,29 @@
     Attribute specified with GET, SET
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar|]['@VAL::name']|]|]
+@MACRO::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar, |]'@VAL::name'|]|]
 
 @MACRO::GenerateGetterSetter
     [|@OR
     [|
     def @VAL::get(self):
-        return self.data@USE::AccessVar
+        return self.get_value(self.data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
 |][|
     def @VAL::set(self, value):
-        self.data@USE::AccessVar = value
+        self.set_value(self.data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
         return self
 |][|
     def @VAL::set_get(self, value=None):
         if value is None:
-            return self.data@USE::AccessVar
+            return self.get_value(self.data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
         else:
-            self.data@USE::AccessVar = value
+            self.set_value(self.data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
             return self
 |][||]|]
 
 @MACRO::VariableGetterSetter
     [|@OPT
-    [|@VAL::object[|@REP::attributes[|@USE::PushAccessVar@USE::GenerateGetterSetter@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
+    [|@VAL::object[|@REP::attributes[|@USE::GenerateGetterSetter@USE::PushAccessVar@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
 
 @[|------------------------------------------------------------------------------------------
     Type parameters
@@ -68,7 +68,7 @@
     [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
         [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual
-        [|        self.virtual_value(self.data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
+        [|        self.set_virtual_value(self.data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
 |]|]|]
     [||]|]
 
