@@ -1,3 +1,7 @@
+#
+# This file has been generated / Do not modify it
+#
+
 """
 The following package provides facilities for REST services.
 These services are synthesized by the following exhaustive

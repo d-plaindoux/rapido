@@ -59,7 +59,7 @@ case class BooleanData(s: Boolean) extends JSon {
     if (s) "true" else "false"
 }
 
-case class NumberData(s: Int) extends JSon {
+case class NumberData(s: Double) extends JSon {
   def toRaw: Any = s
 
   override def toJSonString: String =
@@ -118,6 +118,7 @@ object JSon {
       case s: String => Success(StringData(s))
       case s: Boolean => Success(BooleanData(s))
       case s: Int => Success(NumberData(s))
+      case s: Double => Success(NumberData(s))
       case null => Success(NullData)
       case a: List[_] =>
         (for (e <- a) yield JSon(e)).foldRight[Try[List[JSon]]](Success(Nil)) {

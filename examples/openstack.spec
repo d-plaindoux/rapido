@@ -25,15 +25,11 @@ type Authentication = {
 }
 
 type Token = {
-    access: {
-        token: { issued_at: string, expires: string, @get id: string }
-    },
-
-    virtual 'X-Auth-Token' = [<access.token.id>]
+    access: { token: { id: string } }
 }
 
 type AuthToken = {
-    @{get,set}(token) 'X-Auth-Token': string
+    virtual 'X-Auth-Token' = [<access.token.id>]
 }
 
 type Belongs = {
@@ -50,11 +46,11 @@ type Endpoints = {
 
 type Empty = {}
 
-service tokens [v2.0/tokens] {
-    authenticate: Authentication    => Token or Error       = POST BODY[Authentication]
-    validate    : TokenId, Belongs  => Token or Error       = GET[<tokenId>?<belongsTo>]
-    validateOnly: TokenId, Belongs  => Empty or Error       = HEAD[<tokenId>?<belongsTo>]
-    endpoints   : Token, TokenId    => Endpoints or Error   = GET[<tokenId>/endpoints] HEADER[AuthToken]
+service tokens [v2.0] {
+    authenticate: Authentication    => Token or Error       = POST[tokens] BODY[Authentication]
+    validate    : TokenId, Belongs  => Token or Error       = GET[tokens/<tokenId>?<belongsTo>]
+    validateOnly: TokenId, Belongs  => Empty or Error       = HEAD[tokens/<tokenId>?<belongsTo>]
+    endpoints   : Token, TokenId    => Endpoints or Error   = GET[/tokens/<tokenId>/endpoints] HEADER[AuthToken]
 }
 
 //---------------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+#
+# This file has been generated / Do not modify it
+#
+
 """
 Clients providing main entry for the REST API.
 """

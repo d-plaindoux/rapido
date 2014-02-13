@@ -49,17 +49,20 @@ trait BasicService {
         (kv, builder) => builder.header(kv._1, kv._2.toString)
       }
 
-      operation match {
+      val result = operation match {
         case "POST" =>
-          JSon.fromString(builderWithHeader.post(classOf[String], inputData))
+          builderWithHeader.post(classOf[String], inputData)
         case "PUT" =>
-          JSon.fromString(builderWithHeader.put(classOf[String], inputData))
+          builderWithHeader.put(classOf[String], inputData)
         case "GET" =>
-          JSon.fromString(builderWithHeader.get(classOf[String]))
+          builderWithHeader.get(classOf[String])
         case "DELETE" =>
-          JSon.fromString(builderWithHeader.delete(classOf[String]))
+          builderWithHeader.delete(classOf[String])
         case _ => throw new UnsupportedOperationException(operation)
       }
+
+      JSon.fromString(result)
+
     } catch {
       case e: Throwable => Failure(e)
     }

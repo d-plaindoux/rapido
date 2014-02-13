@@ -1,3 +1,7 @@
+#
+# This file has been generated / Do not modify it
+#
+
 @[|------------------------------------------------------------------------------------------
     Path array representation
    ------------------------------------------------------------------------------------------|]
@@ -68,7 +72,7 @@
     [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
         [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual
-        [|        self.set_virtual_value(self.data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
+        [|        self.set_virtual_value(data, [@OPT[|@USE::ArrayVar|]], '@VAL::name', @USE::PathVariable)
 |]|]|]
     [||]|]
 
@@ -87,13 +91,14 @@ class @VAL::name(Type):
     def __init__(self, data=None):
         Type.__init__(self)
         if not data:
-            self.data = dict()
+            self.__data = dict()
         else:
-            self.data = data.copy()
+            self.__data = data
     @VAL::definition[|@USE::VariableGetterSetter|]
     def to_dict(self):
+        data = self.__data.copy()
         # Review this code / Wrong generation
 @VAL::definition[|@USE::VirtualType|]
-        return self.data
+        return data
 
 |]
