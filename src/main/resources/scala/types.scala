@@ -77,5 +77,4 @@ object @VAL::name {
 
   def fromData(data: JSon): @VAL::name = new @VAL::name(data)
 }
-
 |]

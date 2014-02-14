@@ -57,8 +57,9 @@ trait BasicService {
         case "GET" =>
           builderWithHeader.get(classOf[String])
         case "DELETE" =>
-          builderWithHeader.delete(classOf[String])
-        case _ => throw new UnsupportedOperationException(operation)
+          builderWithHeader.delete(classOf[String], inputData)
+        case _ =>
+          throw new UnsupportedOperationException(operation)
       }
 
       JSon.fromString(result)
