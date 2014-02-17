@@ -27,7 +27,8 @@ import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
 import smallibs.page.{Provider, DataProvider}
 import smallibs.rapido.utils.{Options, Resources}
 import smallibs.rapido.lang.ast.Entities
-import smallibs.rapido.lang.checker.types.{ServiceChecker, TypeChecker}
+import smallibs.rapido.lang.checker.types.TypeChecker
+import smallibs.rapido.lang.checker.services.ServiceChecker
 
 object GenAPI {
 
@@ -80,7 +81,12 @@ object GenAPI {
 
     // Check the specification right now
     val checker = TypeChecker(Entities(specification.get))
+
     val conflicts = checker.findConflicts
+
+    if (!ServiceChecker(specification.get).checkServices) {
+      print("[WARNING] type services are not well specified\n")
+    }
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
       throw new Exception(s"File files.rdo for $lang is not available")
@@ -112,9 +118,6 @@ object GenAPI {
       new File(Engine(Provider.empty, Map("lang" -> lang)).generate(template).get.get)
     }
 
-    if (!ServiceChecker(specification.get).checkServices) {
-      print("[WARNING] type services are not well specified\n")
-    }
 
     generateAll(arguments, RapidoProvider.entities(specification.get), outputNameGenerator, inputNameGenerator, files)
   }
