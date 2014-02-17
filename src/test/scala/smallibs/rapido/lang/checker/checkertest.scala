@@ -27,33 +27,77 @@ import smallibs.rapido.lang.ast.TypeEntity
 
 object TypeCheckerTest extends Specification {
 
+  "Type composition" should {
+    "of attributes returns the second one when its not an object type" in {
+      val att1 = ConcreteTypeAttribute(None, TypeString)
+      val att2 = ConcreteTypeAttribute(None, TypeNumber)
+      TypeChecker().composeAttribute(att1, att2) mustEqual att2
+    }
+
+    "of different objects returns both in one" in {
+      val v1 = Map("a" -> ConcreteTypeAttribute(None, TypeString))
+      val v2 = Map("b" -> ConcreteTypeAttribute(None, TypeNumber))
+      val t1 = TypeObject(v1)
+      val t2 = TypeObject(v2)
+      val tr = TypeObject(v1 ++ v2)
+      TypeChecker().derefType(TypeComposed(t1, t2)) mustEqual tr
+    }
+
+    "of different object with same attributes overrides object type" in {
+      val v1 = Map("a" -> ConcreteTypeAttribute(None, TypeString))
+      val v2 = Map("a" -> ConcreteTypeAttribute(None, TypeNumber))
+      val t1 = TypeObject(v1)
+      val t2 = TypeObject(v2)
+      TypeChecker().derefType(TypeComposed(t1, t2)) mustEqual t2
+    }
+
+    "of different encapsulated object with different attributes returns encapsulation of both in one" in {
+      val v1 = Map("a" -> ConcreteTypeAttribute(None, TypeString))
+      val v2 = Map("b" -> ConcreteTypeAttribute(None, TypeNumber))
+      val t1 = TypeObject(v1)
+      val t2 = TypeObject(v2)
+      val tr = TypeObject(v1 ++ v2)
+      val ft = (t: Type) => TypeObject(Map("c" -> ConcreteTypeAttribute(None, t)))
+      TypeChecker().derefType(TypeComposed(ft(t1), ft(t2))) mustEqual ft(tr)
+    }
+
+    "of different encapsulated object with same attributes overrides encapsulation of object type" in {
+      val v1 = Map("a" -> ConcreteTypeAttribute(None, TypeString))
+      val v2 = Map("a" -> ConcreteTypeAttribute(None, TypeNumber))
+      val t1 = TypeObject(v1)
+      val t2 = TypeObject(v2)
+      val ft = (t: Type) => TypeObject(Map("c" -> ConcreteTypeAttribute(None, t)))
+      TypeChecker().derefType(TypeComposed(ft(t1), ft(t2))) mustEqual ft(t2)
+    }
+  }
+
   "Entities universe" should {
 
     "with only one definition has not conflict" in {
-      val e1 = TypeEntity("t1", TypeNumber)
+      val e1 = TypeEntity("t1", TypeObject(Map()))
       TypeChecker(e1).findConflicts mustEqual Map()
     }
 
     "with two different definitions has not conflict" in {
-      val e1 = TypeEntity("t1", TypeNumber)
-      val e2 = TypeEntity("t2", TypeNumber)
+      val e1 = TypeEntity("t1", TypeObject(Map()))
+      val e2 = TypeEntity("t2", TypeObject(Map()))
       TypeChecker(e1, e2).findConflicts mustEqual Map()
     }
 
     "with two different types with the same name is a conflict" in {
-      val e1 = TypeEntity("t1", TypeNumber)
-      val e2 = TypeEntity("t1", TypeNumber)
+      val e1 = TypeEntity("t1", TypeObject(Map()))
+      val e2 = TypeEntity("t1", TypeObject(Map()))
       TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
     }
 
     "with two different type and service with the same name is a conflict" in {
-      val e1 = TypeEntity("t1", TypeNumber)
+      val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = ServiceEntity("t1", Route("", Nil, Path(Nil)), Nil)
       TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
     }
 
     "with two different type and client with the same name is a conflict" in {
-      val e1 = TypeEntity("t1", TypeNumber)
+      val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = ClientEntity("t1", Nil)
       TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
     }
@@ -71,7 +115,7 @@ object TypeCheckerTest extends Specification {
     }
 
     "be consistent if its a referenced and defined type" in {
-      TypeChecker(TypeEntity("a", TypeNumber)).missingDefinitions(TypeIdentifier("a")) mustEqual Nil
+      TypeChecker(TypeEntity("a", TypeObject(Map()))).missingDefinitions(TypeIdentifier("a")) mustEqual Nil
     }
 
     "be inconsistent if its a referenced and undefined type" in {
@@ -94,6 +138,37 @@ object TypeCheckerTest extends Specification {
 
   "SubTyping" should {
     "accept same native types" in {
+      TypeChecker().acceptType(TypeString, TypeString) mustEqual true
+    }
+
+    "reject different native types" in {
+      TypeChecker().acceptType(TypeString, TypeNumber) mustEqual false
+    }
+
+    "accept optional type versus type" in {
+      TypeChecker().acceptType(TypeOptional(TypeString), TypeString) mustEqual true
+    }
+
+    "accept optional type versus optional type" in {
+      TypeChecker().acceptType(TypeOptional(TypeString), TypeOptional(TypeString)) mustEqual true
+    }
+
+    "accept optional object with an optional attribute versus empty object type" in {
+      val t1: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
+      val t2: TypeObject = TypeObject(Map())
+      TypeChecker().acceptType(t1, t2) mustEqual true
+    }
+
+    "reject empty object type versus optional object with an optional attribute" in {
+      val t1: TypeObject = TypeObject(Map())
+      val t2: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
+      TypeChecker().acceptType(t1, t2) mustEqual false
+    }
+
+    "accept optional object with an optional attribute versus empty object type" in {
+      val t1: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
+      val t2: TypeObject = TypeObject(Map())
+      TypeChecker().acceptType(t1, t2) mustEqual true
     }
   }
 }

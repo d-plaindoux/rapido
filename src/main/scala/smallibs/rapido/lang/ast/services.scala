@@ -20,6 +20,6 @@ package smallibs.rapido.lang.ast
 
 case class Service(name: String, action: Action, signature: ServiceType)
 
-case class ServiceType(inputs: List[Type], output: Type, error: Option[Type])
+case class ServiceType(inputs: List[TypeRecord], output: TypeRecord, error: Option[TypeRecord])
 
-case class Action(operation: Operation, path: Option[Path], params: Option[Type], body: Option[Type], header: Option[Type])
+case class Action(operation: Operation, path: Option[Path], params: Option[TypeRecord], body: Option[TypeRecord], header: Option[TypeRecord])

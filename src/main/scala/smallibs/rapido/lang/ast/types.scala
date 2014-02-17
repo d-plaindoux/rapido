@@ -24,21 +24,25 @@ package smallibs.rapido.lang.ast
 
 trait Type
 
-case class TypeIdentifier(name: String) extends Type
-
-case class TypeObject(values: Map[String, TypeAttribute]) extends Type
-
 case class TypeMultiple(value: Type) extends Type
 
 case class TypeOptional(value: Type) extends Type
 
-case object TypeBoolean extends Type
+trait TypeAtomic extends Type
 
-case object TypeString extends Type
+case object TypeBoolean extends TypeAtomic
 
-case object TypeNumber extends Type
+case object TypeString extends TypeAtomic
 
-case class TypeComposed(left: Type, right: Type) extends Type
+case object TypeNumber extends TypeAtomic
+
+trait TypeRecord extends Type
+
+case class TypeIdentifier(name: String) extends TypeRecord
+
+case class TypeObject(values: Map[String, TypeAttribute]) extends TypeRecord
+
+case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord
 
 //---------------------------------------------------------------------------------------------------
 // Attribute definitions

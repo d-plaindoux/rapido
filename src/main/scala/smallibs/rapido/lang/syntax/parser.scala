@@ -35,7 +35,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     positioned(typeSpecification | serviceSpecification | clientSpecification)
 
   def typeSpecification: PackratParser[Entity] =
-    ("type" ~> ident <~ "=") ~! typeDefinition ^^ {
+    ("type" ~> ident <~ "=") ~! extensible ^^ {
       case n ~ t => TypeEntity(n, t)
     }
 
@@ -66,7 +66,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
       case t ~ Some("?") => TypeOptional(t)
     }
 
-  private def directive(name: String): PackratParser[Type] =
+  private def directive(name: String): PackratParser[TypeRecord] =
     name ~> "[" ~> identified <~ "]"
 
   def serviceDefinition: PackratParser[Service] =
@@ -105,7 +105,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
   def boolean: PackratParser[Type] =
     Terminal("bool") produces TypeBoolean
 
-  def identified: PackratParser[Type] =
+  def identified: PackratParser[TypeRecord] =
     ident ^^ {
       TypeIdentifier
     }
@@ -133,7 +133,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
       case i ~ p => (i, VirtualTypeAttribute(p))
     }
 
-  def record: PackratParser[Type] =
+  def record: PackratParser[TypeRecord] =
     "{" ~> repsep(virtual | attribute, ";" | ",") <~ "}" ^^ {
       l => TypeObject(l.toMap)
     }
@@ -141,7 +141,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
   def atomic: PackratParser[Type] =
     number | string | boolean
 
-  def extensible: PackratParser[Type] =
+  def extensible: PackratParser[TypeRecord] =
     (record | identified) ~ ("with" ~> extensible).* ^^ {
       case t ~ l => l.foldLeft(t) {
         TypeComposed
