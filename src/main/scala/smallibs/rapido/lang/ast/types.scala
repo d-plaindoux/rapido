@@ -24,25 +24,45 @@ package smallibs.rapido.lang.ast
 
 trait Type
 
-case class TypeMultiple(value: Type) extends Type
+case class TypeMultiple(value: Type) extends Type {
+  override def toString: String = s"($value)*"
+}
 
-case class TypeOptional(value: Type) extends Type
+case class TypeOptional(value: Type) extends Type {
+  override def toString: String = s"($value)?"
+}
 
 trait TypeAtomic extends Type
 
-case object TypeBoolean extends TypeAtomic
+case object TypeBoolean extends TypeAtomic {
+  override def toString: String = "bool"
+}
 
-case object TypeString extends TypeAtomic
+case object TypeString extends TypeAtomic {
+  override def toString: String = "string"
+}
 
-case object TypeNumber extends TypeAtomic
+case object TypeNumber extends TypeAtomic {
+  override def toString: String = "int"
+}
 
 trait TypeRecord extends Type
 
-case class TypeIdentifier(name: String) extends TypeRecord
+case class TypeIdentifier(name: String) extends TypeRecord {
+  override def toString: String = name
+}
 
-case class TypeObject(values: Map[String, TypeAttribute]) extends TypeRecord
+case class TypeObject(values: Map[String, TypeAttribute]) extends TypeRecord {
+  override def toString: String = s"{${
+    values.foldLeft[String]("") {
+      case (str, (name, attribute)) => s"$name: $attribute${if (str == "") "" else s", $str"}"
+    }
+  }}"
+}
 
-case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord
+case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord {
+  override def toString: String = s"$left with $right"
+}
 
 //---------------------------------------------------------------------------------------------------
 // Attribute definitions
@@ -50,9 +70,13 @@ case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord
 
 trait TypeAttribute
 
-case class ConcreteTypeAttribute(access: Option[Access], kind: Type) extends TypeAttribute
+case class ConcreteTypeAttribute(access: Option[Access], kind: Type) extends TypeAttribute {
+  override def toString: String = kind.toString
+}
 
-case class VirtualTypeAttribute(value: Path) extends TypeAttribute
+case class VirtualTypeAttribute(value: Path) extends TypeAttribute {
+  override def toString: String = "string"
+}
 
 //---------------------------------------------------------------------------------------------------
 // Attribute access mode

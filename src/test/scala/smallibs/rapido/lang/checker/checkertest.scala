@@ -138,37 +138,37 @@ object TypeCheckerTest extends Specification {
 
   "SubTyping" should {
     "accept same native types" in {
-      TypeChecker().acceptType(TypeString, TypeString) mustEqual true
+      TypeChecker().acceptType(TypeString, TypeString) mustEqual None
     }
 
     "reject different native types" in {
-      TypeChecker().acceptType(TypeString, TypeNumber) mustEqual false
+      TypeChecker().acceptType(TypeString, TypeNumber) mustEqual Some((TypeString,TypeNumber))
     }
 
     "accept optional type versus type" in {
-      TypeChecker().acceptType(TypeOptional(TypeString), TypeString) mustEqual true
+      TypeChecker().acceptType(TypeOptional(TypeString), TypeString) mustEqual None
     }
 
     "accept optional type versus optional type" in {
-      TypeChecker().acceptType(TypeOptional(TypeString), TypeOptional(TypeString)) mustEqual true
+      TypeChecker().acceptType(TypeOptional(TypeString), TypeOptional(TypeString)) mustEqual None
     }
 
     "accept optional object with an optional attribute versus empty object type" in {
       val t1: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
       val t2: TypeObject = TypeObject(Map())
-      TypeChecker().acceptType(t1, t2) mustEqual true
+      TypeChecker().acceptType(t1, t2) mustEqual None
     }
 
     "reject empty object type versus optional object with an optional attribute" in {
       val t1: TypeObject = TypeObject(Map())
       val t2: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
-      TypeChecker().acceptType(t1, t2) mustEqual false
+      TypeChecker().acceptType(t1, t2) mustEqual Some((t1,t2))
     }
 
     "accept optional object with an optional attribute versus empty object type" in {
       val t1: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
       val t2: TypeObject = TypeObject(Map())
-      TypeChecker().acceptType(t1, t2) mustEqual true
+      TypeChecker().acceptType(t1, t2) mustEqual None
     }
   }
 }

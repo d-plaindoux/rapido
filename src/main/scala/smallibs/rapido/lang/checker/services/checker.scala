@@ -29,7 +29,7 @@ import smallibs.rapido.lang.checker.types.TypeChecker
 
 class ServiceChecker(entities: Entities) {
 
-  def checkService(params: List[TypeRecord], service: Service): Boolean = {
+  def checkRouteService(params: List[TypeRecord], service: Service): Option[(Type, Type)] = {
     val checker = TypeChecker(entities)
 
     val inputs = (params ++ service.signature.inputs).foldRight[TypeRecord](TypeObject(Map())) {
@@ -37,30 +37,39 @@ class ServiceChecker(entities: Entities) {
     }
 
     val acceptHeader = service.action.header match {
-      case None => true
+      case None => None
       case Some(value) => checker.acceptType(value, inputs)
     }
 
     val acceptParams = service.action.params match {
-      case None => true
+      case None => None
       case Some(value) => checker.acceptType(value, inputs)
     }
 
     val acceptBody = service.action.body match {
-      case None => true
+      case None => None
       case Some(value) => checker.acceptType(value, inputs)
     }
 
-    acceptHeader && acceptParams && acceptBody
-  }
-
-  def checkServices: Boolean =
-    entities.services forall {
-      case (name, definition) => definition.entries forall {
-        service => checkService(definition.route.params, service)
+    acceptHeader orElse {
+      acceptParams orElse {
+        acceptBody
       }
     }
+  }
 
+  def checkServices: Option[((String, String), (Type, Type))] =
+    entities.services.foldLeft[Option[((String, String), (Type, Type))]](None) {
+      case (Some(r),_) => Some(r)
+      case (None, (name,definition)) =>
+        definition.entries.foldLeft[Option[((String, String), (Type, Type))]](None) {
+        case (Some(r),_) => Some(r)
+        case (None, service) =>
+          checkRouteService(definition.route.params, service) map {
+            error => ((definition.name,service.name),error)
+          }
+      }
+    }
 }
 
 object ServiceChecker {

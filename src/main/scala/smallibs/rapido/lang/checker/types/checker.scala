@@ -89,13 +89,16 @@ class TypeChecker(entities: Entities) {
   def deref(name: String): TypeObject =
     derefType((entities.types get name).get.definition)
 
-  def acceptType(receiver: Type, value: Type): Boolean =
+  def acceptType(receiver: Type, value: Type): Option[(Type, Type)] =
     (receiver, value) match {
-      case (TypeBoolean, TypeBoolean) => true
-      case (TypeNumber, TypeNumber) => true
-      case (TypeString, TypeString) => true
+      case (TypeBoolean, TypeBoolean) => None
+      case (TypeNumber, TypeNumber) => None
+      case (TypeString, TypeString) => None
       case (TypeIdentifier(name1), TypeIdentifier(name2)) =>
-        name1 == name2
+        if (name1 == name2)
+          None
+        else
+          Some((receiver, value))
       case (TypeIdentifier(name), _) =>
         acceptType(deref(name), value)
       case (_, TypeIdentifier(name)) =>
@@ -112,14 +115,16 @@ class TypeChecker(entities: Entities) {
             case ConcreteTypeAttribute(_, type2) => type2
             case VirtualTypeAttribute(_) => TypeString
           }
-        map2 forall {
-          case (name, att2) =>
+        map2.foldLeft[Option[(Type, Type)]](None) {
+          case (None, (name, att2)) =>
             map1 get name match {
-              case None => false
+              case None => Some((receiver, value))
               case Some(att1) => acceptType(attributeType(att1), attributeType(att2))
             }
+          case (Some(l), _) =>
+            Some(l)
         }
-      case _ => false
+      case _ => Some((receiver, value))
     }
 }
 

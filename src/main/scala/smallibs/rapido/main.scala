@@ -84,8 +84,10 @@ object GenAPI {
 
     val conflicts = checker.findConflicts
 
-    if (!ServiceChecker(specification.get).checkServices) {
-      print("[WARNING] type services are not well specified\n")
+    ServiceChecker(specification.get).checkServices map {
+      case ((sn,rn),(t1,t2)) =>
+        println(s"[WARNING] type error in service $sn and entry $rn")
+        println(s"          $t2 is not a subtype of $t1")
     }
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
