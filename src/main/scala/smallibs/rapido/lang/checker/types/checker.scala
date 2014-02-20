@@ -89,11 +89,47 @@ class TypeChecker(entities: Entities) {
   def deref(name: String): TypeObject =
     derefType((entities.types get name).get.definition)
 
+  def acceptVirtual(initial: Type, path: Path): Option[(Type, Type)] =
+    path.values.foldLeft[Option[(Type, Type)]](None) {
+      case (Some(r), _) => Some(r)
+      case (None, StaticLevel(_)) => None
+      case (None, DynamicLevel(l)) =>
+        val synthetizedType = l.foldRight[Type](TypeString) {
+          case (e, r) => TypeObject(Map(e -> ConcreteTypeAttribute(None, r)))
+        }
+        acceptType(initial, synthetizedType)
+    }
+
+  def virtualDefinitions(value: Type): List[Path] =
+    value match {
+      case TypeOptional(value) =>
+        virtualDefinitions(value)
+      case TypeMultiple(value) =>
+        virtualDefinitions(value)
+      case TypeObject(value) =>
+        value.map {
+          case (_, ConcreteTypeAttribute(_, value)) => virtualDefinitions(value)
+          case (_, VirtualTypeAttribute(value)) => List(value)
+        }.flatten.toList
+      case _ => Nil
+    }
+
+  def validateType(value: Type): List[Path] =
+    for (path <- virtualDefinitions(value)
+         if acceptVirtual(value, path) != None)
+    yield path
+
   def acceptType(receiver: Type, value: Type): Option[(Type, Type)] =
     (receiver, value) match {
       case (TypeBoolean, TypeBoolean) => None
       case (TypeNumber, TypeNumber) => None
       case (TypeString, TypeString) => None
+
+      case (TypeComposed(l, r), _) =>
+        acceptType(derefType(TypeComposed(l, r)), value)
+      case (_, TypeComposed(l, r)) =>
+        acceptType(receiver, derefType(TypeComposed(l, r)))
+
       case (TypeIdentifier(name1), TypeIdentifier(name2)) =>
         if (name1 == name2)
           None
@@ -103,23 +139,28 @@ class TypeChecker(entities: Entities) {
         acceptType(deref(name), value)
       case (_, TypeIdentifier(name)) =>
         acceptType(receiver, deref(name))
+
       case (TypeOptional(receiver), TypeOptional(value)) =>
         acceptType(receiver, value)
       case (TypeOptional(receiver), _) =>
         acceptType(receiver, value)
       case (TypeMultiple(receiver), TypeMultiple(value)) =>
         acceptType(receiver, value)
+
       case (TypeObject(map1), TypeObject(map2)) =>
         def attributeType(attribute: TypeAttribute): Type =
           attribute match {
             case ConcreteTypeAttribute(_, type2) => type2
-            case VirtualTypeAttribute(_) => TypeString
+            case VirtualTypeAttribute(l) => TypeString
           }
         map2.foldLeft[Option[(Type, Type)]](None) {
           case (None, (name, att2)) =>
             map1 get name match {
               case None => Some((receiver, value))
-              case Some(att1) => acceptType(attributeType(att1), attributeType(att2))
+              case Some(att1) =>
+                val t1 = attributeType(att1)
+                val t2 = attributeType(att2)
+                acceptType(t1, t2)
             }
           case (Some(l), _) =>
             Some(l)

@@ -20,7 +20,7 @@ package smallibs.rapido.lang.ast
 
 case class Path(values: List[PathEntry])
 
-trait PathEntry
+sealed trait PathEntry
 
 case class StaticLevel(name: String) extends PathEntry
 
