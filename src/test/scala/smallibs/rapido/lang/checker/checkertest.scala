@@ -40,7 +40,7 @@ object TypeCheckerTest extends Specification {
       val t1 = TypeObject(v1)
       val t2 = TypeObject(v2)
       val tr = TypeObject(v1 ++ v2)
-      TypeChecker().derefType(TypeComposed(t1, t2)) mustEqual tr
+      TypeChecker().unfoldType(TypeComposed(t1, t2)) mustEqual tr
     }
 
     "of different object with same attributes overrides object type" in {
@@ -48,7 +48,7 @@ object TypeCheckerTest extends Specification {
       val v2 = Map("a" -> ConcreteTypeAttribute(None, TypeNumber))
       val t1 = TypeObject(v1)
       val t2 = TypeObject(v2)
-      TypeChecker().derefType(TypeComposed(t1, t2)) mustEqual t2
+      TypeChecker().unfoldType(TypeComposed(t1, t2)) mustEqual t2
     }
 
     "of different encapsulated object with different attributes returns encapsulation of both in one" in {
@@ -58,7 +58,7 @@ object TypeCheckerTest extends Specification {
       val t2 = TypeObject(v2)
       val tr = TypeObject(v1 ++ v2)
       val ft = (t: Type) => TypeObject(Map("c" -> ConcreteTypeAttribute(None, t)))
-      TypeChecker().derefType(TypeComposed(ft(t1), ft(t2))) mustEqual ft(tr)
+      TypeChecker().unfoldType(TypeComposed(ft(t1), ft(t2))) mustEqual ft(tr)
     }
 
     "of different encapsulated object with same attributes overrides encapsulation of object type" in {
@@ -67,7 +67,7 @@ object TypeCheckerTest extends Specification {
       val t1 = TypeObject(v1)
       val t2 = TypeObject(v2)
       val ft = (t: Type) => TypeObject(Map("c" -> ConcreteTypeAttribute(None, t)))
-      TypeChecker().derefType(TypeComposed(ft(t1), ft(t2))) mustEqual ft(t2)
+      TypeChecker().unfoldType(TypeComposed(ft(t1), ft(t2))) mustEqual ft(t2)
     }
   }
 
@@ -137,22 +137,23 @@ object TypeCheckerTest extends Specification {
   }
 
   "Type definition" should {
-    "be valid" in {
+    "be valid when no external reference is done" in {
       TypeChecker().validateType(TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeString)))) mustEqual Nil
     }
 
-    "be valid with a virtual attribute" in {
+    "be valid with a virtual attribute referencing a defined type" in {
       TypeChecker().validateType(TypeObject(Map(
         "a" -> ConcreteTypeAttribute(None, TypeString),
         "b" -> VirtualTypeAttribute(Path(List(DynamicLevel(List("a")))))
       ))) mustEqual Nil
     }
-
-    "be invalid with a virtual attribute" in {
+/*
+    "be invalid with a virtual attribute referencing an undefined type" in {
       TypeChecker().validateType(TypeObject(Map(
         "b" -> VirtualTypeAttribute(Path(List(DynamicLevel(List("a")))))
       ))) mustEqual List(Path(List(DynamicLevel(List("a")))))
     }
+*/
   }
 
   "SubTyping" should {
@@ -175,17 +176,23 @@ object TypeCheckerTest extends Specification {
     "accept optional object with an optional attribute versus empty object type" in {
       val t1: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
       val t2: TypeObject = TypeObject(Map())
-      TypeChecker().acceptType(t1, t2) mustEqual None
+      TypeChecker().acceptType(t1, t2) mustEqual Some((t1, t2))
     }
 
     "reject empty object type versus optional object with an optional attribute" in {
       val t1: TypeObject = TypeObject(Map())
       val t2: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
-      TypeChecker().acceptType(t1, t2) mustEqual Some((t1, t2))
+      TypeChecker().acceptType(t1, t2) mustEqual None
     }
 
     "accept optional object with an optional attribute versus empty object type" in {
       val t1: TypeObject = TypeObject(Map("a" -> ConcreteTypeAttribute(None, TypeOptional(TypeString))))
+      val t2: TypeObject = TypeObject(Map())
+      TypeChecker().acceptType(t1, t2) mustEqual Some((t1, t2))
+    }
+
+    "accept type with virtual definition as-is" in {
+      val t1: TypeObject = TypeObject(Map("a" -> VirtualTypeAttribute(Path(Nil))))
       val t2: TypeObject = TypeObject(Map())
       TypeChecker().acceptType(t1, t2) mustEqual None
     }

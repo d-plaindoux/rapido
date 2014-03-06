@@ -27,6 +27,16 @@ import smallibs.rapido.lang.checker.types.TypeChecker
  * type compatibilities and definition in each service scope
  */
 
+sealed trait ServiceError
+
+case class SubTypingError(receive: Type, value: Type) extends ServiceError
+
+case class VirtualTypeError(path: Path) extends ServiceError
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Service checker
+// ---------------------------------------------------------------------------------------------------------------------
+
 class ServiceChecker(entities: Entities) {
 
   def checkRouteService(params: List[TypeRecord], service: Service): Option[(Type, Type)] = {
@@ -60,15 +70,15 @@ class ServiceChecker(entities: Entities) {
 
   def checkServices: Option[((String, String), (Type, Type))] =
     entities.services.foldLeft[Option[((String, String), (Type, Type))]](None) {
-      case (Some(r),_) => Some(r)
-      case (None, (name,definition)) =>
+      case (Some(r), _) => Some(r)
+      case (None, (name, definition)) =>
         definition.entries.foldLeft[Option[((String, String), (Type, Type))]](None) {
-        case (Some(r),_) => Some(r)
-        case (None, service) =>
-          checkRouteService(definition.route.params, service) map {
-            error => ((definition.name,service.name),error)
-          }
-      }
+          case (Some(r), _) => Some(r)
+          case (None, service) =>
+            checkRouteService(definition.route.params, service) map {
+              error => ((definition.name, service.name), error)
+            }
+        }
     }
 }
 

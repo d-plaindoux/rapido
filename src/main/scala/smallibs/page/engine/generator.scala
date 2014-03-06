@@ -70,8 +70,8 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
       }
       case Optional(None, None) =>
         generateWithDefinitions(Value(None, None))
-      case Optional(None, Some(template)) =>
-        generateWithDefinitions(template) match {
+      case Optional(None, Some(aTemplate)) =>
+        generateWithDefinitions(aTemplate) match {
           case f@Failure(_) =>
             Success(None, definitions)
           case success =>
@@ -124,12 +124,12 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
     def generateWithDefinitions_from_list(values: List[DataProvider], definitions: Definitions): List[String] =
       values match {
         case Nil => Nil
-        case data :: values =>
-          new Engine(path, data, definitions).generateWithDefinitions(template) match {
+        case aData :: subValue =>
+          new Engine(path, aData, definitions).generateWithDefinitions(template) match {
             case Success((None, d)) =>
-              generateWithDefinitions_from_list(values, d)
+              generateWithDefinitions_from_list(subValue, d)
             case Success((Some(e), d)) =>
-              e :: generateWithDefinitions_from_list(values, d)
+              e :: generateWithDefinitions_from_list(subValue, d)
             case Failure(f) =>
               throw f
           }
@@ -142,8 +142,8 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
     }
   }
 
-  def generateWithDefinitions_alternate(l: List[Template]): Try[(Option[String], Definitions)] =
-    l match {
+  def generateWithDefinitions_alternate(list: List[Template]): Try[(Option[String], Definitions)] =
+    list match {
       case Nil =>
         Failure(new IllegalAccessException(path.reverse.toString))
       case e :: l => generateWithDefinitions(e) match {

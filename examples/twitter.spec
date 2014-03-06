@@ -16,7 +16,7 @@ type Token = {
 }
 
 type Credentials = {
-    Authorization: String
+    Authorization: string
 }
 
 service OAuth2 [oauth2/token] {

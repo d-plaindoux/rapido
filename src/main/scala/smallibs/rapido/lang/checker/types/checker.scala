@@ -29,6 +29,10 @@ class TypeChecker(entities: Entities) {
 
   type Conflicts = Map[String, List[Entity]]
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // Find attribut definitions which imply a conflict
+  // -------------------------------------------------------------------------------------------------------------------
+
   def findConflicts: Conflicts = {
     def find(entities: List[Entity], conflicts: Conflicts): Conflicts =
       entities match {
@@ -44,6 +48,10 @@ class TypeChecker(entities: Entities) {
     for (e <- find(entities.values, Map()) if e._2.size > 1) yield e
   }
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // Check missing type definitions
+  // -------------------------------------------------------------------------------------------------------------------
+
   def missingDefinitions(value: Type): List[String] =
     value match {
       case TypeBoolean | TypeNumber | TypeString => Nil
@@ -51,6 +59,8 @@ class TypeChecker(entities: Entities) {
         if (entities.types contains name) Nil else List(name)
       case TypeOptional(value) =>
         missingDefinitions(value)
+      case TypeComposed(l,r) =>
+        missingDefinitions(l) ++ missingDefinitions(r)
       case TypeMultiple(value) =>
         missingDefinitions(value)
       case TypeObject(value) =>
@@ -60,10 +70,19 @@ class TypeChecker(entities: Entities) {
         }.flatten.toList
     }
 
+  def missingDefinitions: Map[String, List[String]] =
+    (for ((n, e) <- entities.types) yield (n, missingDefinitions(e.definition))).filterNot {
+      case (_, l) => l.isEmpty
+    }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Type unfolding operation and composition
+  // -------------------------------------------------------------------------------------------------------------------
+
   def composeAttribute(att1: TypeAttribute, att2: TypeAttribute): TypeAttribute =
     (att1, att2) match {
       case (ConcreteTypeAttribute(a1, t1: TypeRecord), ConcreteTypeAttribute(a2, t2: TypeRecord)) =>
-        ConcreteTypeAttribute(a2, derefType(TypeComposed(t1, t2)))
+        ConcreteTypeAttribute(a2, unfoldType(TypeComposed(t1, t2)))
       case _ => att2
     }
 
@@ -76,18 +95,22 @@ class TypeChecker(entities: Entities) {
     (r1 ++ r2).toMap
   }
 
-  def derefType(value: TypeRecord): TypeObject =
+  def unfoldType(value: TypeRecord): TypeObject =
     value match {
       case value: TypeObject => value
-      case TypeIdentifier(name) => deref(name)
+      case TypeIdentifier(name) => unfoldTypeByName(name)
       case TypeComposed(t1, t2) =>
-        val TypeObject(v1) = derefType(t1)
-        val TypeObject(v2) = derefType(t2)
+        val TypeObject(v1) = unfoldType(t1)
+        val TypeObject(v2) = unfoldType(t2)
         TypeObject(composeSetOfAttributes(v1, v2))
     }
 
-  def deref(name: String): TypeObject =
-    derefType((entities.types get name).get.definition)
+  def unfoldTypeByName(name: String): TypeObject =
+    unfoldType((entities.types get name).get.definition)
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Virtual type corner
+  // -------------------------------------------------------------------------------------------------------------------
 
   def acceptVirtual(initial: Type, path: Path): Option[(Type, Type)] =
     path.values.foldLeft[Option[(Type, Type)]](None) {
@@ -97,7 +120,7 @@ class TypeChecker(entities: Entities) {
         val synthetizedType = l.foldRight[Type](TypeString) {
           case (e, r) => TypeObject(Map(e -> ConcreteTypeAttribute(None, r)))
         }
-        acceptType(initial, synthetizedType)
+        acceptType(synthetizedType, initial)
     }
 
   def virtualDefinitions(value: Type): List[Path] =
@@ -108,8 +131,10 @@ class TypeChecker(entities: Entities) {
         virtualDefinitions(value)
       case TypeObject(value) =>
         value.map {
-          case (_, ConcreteTypeAttribute(_, value)) => virtualDefinitions(value)
-          case (_, VirtualTypeAttribute(value)) => List(value)
+          case (_, ConcreteTypeAttribute(_, value)) =>
+            virtualDefinitions(value)
+          case (_, VirtualTypeAttribute(value)) =>
+            List(value)
         }.flatten.toList
       case _ => Nil
     }
@@ -119,6 +144,10 @@ class TypeChecker(entities: Entities) {
          if acceptVirtual(value, path) != None)
     yield path
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // Check whether a value can be used in place of type receiver
+  // -------------------------------------------------------------------------------------------------------------------
+
   def acceptType(receiver: Type, value: Type): Option[(Type, Type)] =
     (receiver, value) match {
       case (TypeBoolean, TypeBoolean) => None
@@ -126,9 +155,9 @@ class TypeChecker(entities: Entities) {
       case (TypeString, TypeString) => None
 
       case (TypeComposed(l, r), _) =>
-        acceptType(derefType(TypeComposed(l, r)), value)
+        acceptType(unfoldType(TypeComposed(l, r)), value)
       case (_, TypeComposed(l, r)) =>
-        acceptType(receiver, derefType(TypeComposed(l, r)))
+        acceptType(receiver, unfoldType(TypeComposed(l, r)))
 
       case (TypeIdentifier(name1), TypeIdentifier(name2)) =>
         if (name1 == name2)
@@ -136,9 +165,9 @@ class TypeChecker(entities: Entities) {
         else
           Some((receiver, value))
       case (TypeIdentifier(name), _) =>
-        acceptType(deref(name), value)
+        acceptType(unfoldTypeByName(name), value)
       case (_, TypeIdentifier(name)) =>
-        acceptType(receiver, deref(name))
+        acceptType(receiver, unfoldTypeByName(name))
 
       case (TypeOptional(receiver), TypeOptional(value)) =>
         acceptType(receiver, value)
@@ -148,25 +177,37 @@ class TypeChecker(entities: Entities) {
         acceptType(receiver, value)
 
       case (TypeObject(map1), TypeObject(map2)) =>
-        def attributeType(attribute: TypeAttribute): Type =
+        def valueType(attribute: TypeAttribute): Type =
           attribute match {
-            case ConcreteTypeAttribute(_, type2) => type2
-            case VirtualTypeAttribute(l) => TypeString
+            case ConcreteTypeAttribute(_, type1) =>
+              type1
+            case VirtualTypeAttribute(l) =>
+              TypeString
           }
-        map2.foldLeft[Option[(Type, Type)]](None) {
-          case (None, (name, att2)) =>
-            map1 get name match {
+        map1.foldLeft[Option[(Type, Type)]](None) {
+          case (None, (name, ConcreteTypeAttribute(_, t1))) =>
+            map2 get name match {
               case None => Some((receiver, value))
-              case Some(att1) =>
-                val t1 = attributeType(att1)
-                val t2 = attributeType(att2)
+              case Some(att2) =>
+                val t2 = valueType(att2)
                 acceptType(t1, t2)
             }
+          case (None, (name, VirtualTypeAttribute(_))) =>
+            None
           case (Some(l), _) =>
             Some(l)
         }
       case _ => Some((receiver, value))
     }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Check whether a value can be used in place of type receiver
+  // -------------------------------------------------------------------------------------------------------------------
+
+  def acceptVirtualType(receiver: Type, value: Type): List[Path] =
+    for (path <- virtualDefinitions(receiver)
+         if acceptVirtual(value, path) != None)
+    yield path
 }
 
 object TypeChecker {
