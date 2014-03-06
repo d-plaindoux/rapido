@@ -26,9 +26,7 @@ import smallibs.rapido.page.RapidoProvider
 import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
 import smallibs.page.{Provider, DataProvider}
 import smallibs.rapido.utils.{Options, Resources}
-import smallibs.rapido.lang.ast.Entities
-import smallibs.rapido.lang.checker.types.TypeChecker
-import smallibs.rapido.lang.checker.services.ServiceChecker
+import smallibs.rapido.lang.checker.SpecificationChecker
 
 object GenAPI {
 
@@ -75,47 +73,13 @@ object GenAPI {
 
     val specificationContent = Resources getContent new File(spec).toURI.toURL
     val specification = RapidoParser.parseAll(RapidoParser.specifications, specificationContent)
+
     if (!specification.successful) {
       throw new Exception(specification.toString)
     }
 
     // Check the specification right now
-    val checker = TypeChecker(Entities(specification.get))
-    val conflicts = checker.findConflicts
-
-    if (!conflicts.isEmpty) {
-      conflicts.map {
-        case (name,entities) =>
-          println(s"symbol defined more than once $name")
-      }
-
-      throw new Exception(s"[Aborted] find duplicated names")
-    }
-
-    val missing = checker.missingDefinitions
-
-    if (!missing.isEmpty) {
-      missing.map {
-        case (name,list) =>
-          println(s"undefined symbol(s) in $name: ${list.addString(new StringBuilder, "(", ", ", ")").toString}")
-      }
-
-      throw new Exception(s"[Aborted] find undefined symbols")
-    }
-
-
-
-    val typeErrors = ServiceChecker(specification.get).checkServices
-
-    if (!typeErrors.isEmpty) {
-      typeErrors map {
-        case ((sn, rn), (t1, t2)) =>
-          println(s"[WARNING] type error in service [$sn#$rn]")
-          println(s"          $t1 cannot be generated using $t2")
-      }
-
-      throw new Exception(s"[Aborted] find incompatoible types")
-    }
+    SpecificationChecker.validateSpecification(specification.get)
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
       throw new Exception(s"File files.rdo for $lang is not available")
@@ -177,7 +141,6 @@ object GenAPI {
       }).foreach(output)
     } catch {
       case e: Throwable =>
-        e.printStackTrace
         println(e.getMessage)
     }
   }
