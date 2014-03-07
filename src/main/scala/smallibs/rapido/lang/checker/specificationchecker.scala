@@ -18,9 +18,8 @@
 
 package smallibs.rapido.lang.checker
 
-import smallibs.rapido.lang.checker.types.TypeChecker
 import smallibs.rapido.lang.ast.{Entity, Entities}
-import smallibs.rapido.lang.checker.services.ServiceChecker
+import smallibs.rapido.lang.checker.{TypeChecker, ServiceChecker}
 
 object SpecificationChecker {
 

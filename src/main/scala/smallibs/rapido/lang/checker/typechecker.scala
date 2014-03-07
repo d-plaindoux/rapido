@@ -16,7 +16,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.rapido.lang.checker.types
+package smallibs.rapido.lang.checker
 
 import smallibs.rapido.lang.ast._
 import scala.Some

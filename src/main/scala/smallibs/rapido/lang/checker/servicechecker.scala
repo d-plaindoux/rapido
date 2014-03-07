@@ -16,11 +16,11 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package smallibs.rapido.lang.checker.services
+package smallibs.rapido.lang.checker
 
 import smallibs.rapido.lang.ast._
 import scala.Some
-import smallibs.rapido.lang.checker.types.TypeChecker
+import smallibs.rapido.lang.checker.TypeChecker
 
 /**
  * The type check validates the specification checking object

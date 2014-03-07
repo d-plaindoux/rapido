@@ -20,10 +20,10 @@ package smallibs.rapido.lang.checker
 
 import org.specs2.mutable._
 import smallibs.rapido.lang.ast._
-import smallibs.rapido.lang.checker.types.TypeChecker
 import smallibs.rapido.lang.ast.ServiceEntity
 import smallibs.rapido.lang.ast.Route
 import smallibs.rapido.lang.ast.TypeEntity
+import smallibs.rapido.lang.checker.TypeChecker
 
 object TypeCheckerTest extends Specification {
 
