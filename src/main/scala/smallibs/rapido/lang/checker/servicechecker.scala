@@ -20,7 +20,6 @@ package smallibs.rapido.lang.checker
 
 import smallibs.rapido.lang.ast._
 import scala.Some
-import smallibs.rapido.lang.checker.TypeChecker
 
 /**
  * The type check validates the specification checking object
@@ -39,45 +38,60 @@ case class VirtualTypeError(path: Path) extends ServiceError
 
 class ServiceChecker(entities: Entities) {
 
-  def checkRouteService(params: List[TypeRecord], service: Service): Option[(Type, Type)] = {
+  def checkRouteService(notifier: ErrorAtPositionNotifier, params: List[TypeRecord], service: Service): ErrorNotifier = {
     val checker = TypeChecker(entities)
 
-    val inputs = (params ++ service.signature.inputs).foldRight[TypeRecord](TypeObject(Map())) {
+    val inputs = (params ++ service.signature.inputs).foldLeft[TypeRecord](TypeObject(Map())) {
       (result, current) => TypeComposed(result, current)
     }
 
-    val acceptHeader = service.action.header match {
+    val acceptHeader: Option[(Type, Type)] = service.action.header match {
       case None => None
       case Some(value) => checker.acceptType(value, inputs)
     }
 
-    val acceptParams = service.action.params match {
+    val acceptParams: Option[(Type, Type)] = service.action.params match {
       case None => None
       case Some(value) => checker.acceptType(value, inputs)
     }
 
-    val acceptBody = service.action.body match {
+    val acceptBody: Option[(Type, Type)] = service.action.body match {
       case None => None
       case Some(value) => checker.acceptType(value, inputs)
     }
 
-    acceptHeader orElse {
-      acceptParams orElse {
-        acceptBody
-      }
+    notifier.
+      subtype(acceptHeader).
+      subtype(acceptParams).
+      subtype(acceptBody).
+      terminate
+  }
+
+  def missingDefinitions(notifier: ErrorNotifier): ErrorNotifier = {
+    val typeChecker = TypeChecker(entities)
+    entities.services.foldLeft[ErrorNotifier](notifier) {
+      case (map, (name, service)) =>
+        val missingDefinitionsInParameters: List[String] = service.route.params.flatMap {
+          typeChecker.missingDefinitions(_)
+        }
+        val missingDefinitionsInEntries: List[String] = service.entries.flatMap {
+          entry =>
+            entry.signature.inputs.flatMap {
+              typeChecker.missingDefinitions(_)
+            } ++ typeChecker.missingDefinitions(entry.signature.output)
+        }
+        missingDefinitionsInParameters ++ missingDefinitionsInEntries match {
+          case Nil => notifier
+          case undefined => notifier.atPosition(service.pos).undefined(undefined).terminate
+        }
     }
   }
 
-  def checkServices: Option[((String, String), (Type, Type))] =
-    entities.services.foldLeft[Option[((String, String), (Type, Type))]](None) {
-      case (Some(r), _) => Some(r)
-      case (None, (name, definition)) =>
-        definition.entries.foldLeft[Option[((String, String), (Type, Type))]](None) {
-          case (Some(r), _) => Some(r)
-          case (None, service) =>
-            checkRouteService(definition.route.params, service) map {
-              error => ((definition.name, service.name), error)
-            }
+  def checkTypeServices(notifier: ErrorNotifier): ErrorNotifier =
+    entities.services.foldLeft[ErrorNotifier](notifier) {
+      case (notifier, (name, definition)) =>
+        definition.entries.foldLeft[ErrorNotifier](notifier) {
+          (notifier, service) => checkRouteService(notifier.atPosition(service.pos), definition.route.params, service)
         }
     }
 }

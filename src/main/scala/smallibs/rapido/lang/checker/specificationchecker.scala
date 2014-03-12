@@ -18,52 +18,50 @@
 
 package smallibs.rapido.lang.checker
 
-import smallibs.rapido.lang.ast.{Entity, Entities}
-import smallibs.rapido.lang.checker.{TypeChecker, ServiceChecker}
+import smallibs.rapido.lang.ast.{Entities, Entity}
 
-object SpecificationChecker {
+class SpecificationChecker(entities: Entities) {
 
-  def validateSpecification(specification:List[Entity]): Unit = {
-    // Check the specification right now
-    val checker = TypeChecker(Entities(specification))
-    val conflicts = checker.findConflicts
+  def findConflicts(notifier: ErrorNotifier): ErrorNotifier = {
+    type Conflicts = Map[String, List[Entity]]
 
-    // Duplicated symbols
-    if (!conflicts.isEmpty) {
-      conflicts.map {
-        case (name,entities) =>
-          println(s"symbol defined more than once $name")
+    def find(entities: List[Entity], conflicts: Conflicts): Conflicts =
+      entities match {
+        case Nil =>
+          conflicts
+        case entity :: otherEntities =>
+          val newConflicts = conflicts get entity.name match {
+            case None => conflicts + (entity.name -> List(entity))
+            case Some(l) => conflicts + (entity.name -> (l ++ List(entity)))
+          }
+          find(otherEntities, newConflicts)
       }
-
-      throw new Exception(s"[Aborted] find duplicated names")
+    find(entities.values, Map()).foldLeft[ErrorNotifier](notifier) {
+      case (notifier, (name, entity :: otherEntities)) if otherEntities.size > 0 =>
+        notifier.atPosition(entity.pos).conflict(name, otherEntities.map {
+          _.pos
+        }).terminate
+      case (notifier, _) =>
+        notifier
     }
-
-    // Missing definitions
-    val missing = checker.missingDefinitions
-
-    if (!missing.isEmpty) {
-      missing.map {
-        case (name,list) =>
-          println(s"undefined symbol(s) in $name: ${list.addString(new StringBuilder, "(", ", ", ")").toString}")
-      }
-
-      throw new Exception(s"[Aborted] find undefined symbols")
-    }
-
-    // Type incompatibility
-    val typeErrors = ServiceChecker(specification).checkServices
-
-    if (!typeErrors.isEmpty) {
-      typeErrors map {
-        case ((sn, rn), (t1, t2)) =>
-          println(s"[WARNING] type error in service [$sn#$rn]")
-          println(s"          $t1 cannot be generated using $t2")
-      }
-
-      throw new Exception(s"[Aborted] find incompatoible types")
-    }
-
   }
 
+  def validateSpecification(notifier: ErrorNotifier): ErrorNotifier = {
+    // Check the specification right now
+    val typeChecker = TypeChecker(entities)
+    val serviceChecker = ServiceChecker(entities)
 
+    // Missing definitions
+    notifier.
+      findWith(this.findConflicts).
+      findWith(typeChecker.missingDefinitions).
+      findWith(serviceChecker.missingDefinitions).
+      findWith(serviceChecker.checkTypeServices)
+  }
+}
+
+object SpecificationChecker {
+  def apply(entities: List[Entity]): SpecificationChecker = new SpecificationChecker(Entities(entities))
+
+  def apply(entities: Entity*): SpecificationChecker = this(entities.toList)
 }

@@ -23,9 +23,8 @@ import smallibs.rapido.lang.ast._
 import smallibs.rapido.lang.ast.ServiceEntity
 import smallibs.rapido.lang.ast.Route
 import smallibs.rapido.lang.ast.TypeEntity
-import smallibs.rapido.lang.checker.TypeChecker
 
-object TypeCheckerTest extends Specification {
+object CheckerTest extends Specification {
 
   "Type composition" should {
     "of attributes returns the second one when its not an object type" in {
@@ -75,37 +74,37 @@ object TypeCheckerTest extends Specification {
 
     "with only one definition has not conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
-      TypeChecker(e1).findConflicts mustEqual Map()
+      SpecificationChecker(e1).findConflicts(ErrorNotifier()).hasError mustEqual false
     }
 
     "with two different definitions has not conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = TypeEntity("t2", TypeObject(Map()))
-      TypeChecker(e1, e2).findConflicts mustEqual Map()
+      SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual false
     }
 
     "with two different types with the same name is a conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = TypeEntity("t1", TypeObject(Map()))
-      TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
+      SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
 
     "with two different type and service with the same name is a conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = ServiceEntity("t1", Route("", Nil, Path(Nil)), Nil)
-      TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
+      SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
 
     "with two different type and client with the same name is a conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = ClientEntity("t1", Nil)
-      TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
+      SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
 
     "with two different service and client with the same name is a conflict" in {
       val e1 = ServiceEntity("t1", Route("", Nil, Path(Nil)), Nil)
       val e2 = ClientEntity("t1", Nil)
-      TypeChecker(e1, e2).findConflicts mustEqual Map("t1" -> List(e1, e2))
+      SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
   }
 
@@ -147,13 +146,12 @@ object TypeCheckerTest extends Specification {
         "b" -> VirtualTypeAttribute(Path(List(DynamicLevel(List("a")))))
       ))) mustEqual Nil
     }
-/*
+
     "be invalid with a virtual attribute referencing an undefined type" in {
       TypeChecker().validateType(TypeObject(Map(
         "b" -> VirtualTypeAttribute(Path(List(DynamicLevel(List("a")))))
       ))) mustEqual List(Path(List(DynamicLevel(List("a")))))
     }
-*/
   }
 
   "SubTyping" should {

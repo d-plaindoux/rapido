@@ -30,10 +30,11 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
 
   type Definitions = Map[String, Template]
 
-  def generate(template: Template): Try[Option[String]] =
+  def generate(template: Template): Try[String] =
     generateWithDefinitions(template) match {
       case f@Failure(e) => Failure(e)
-      case Success((s, _)) => Success(s)
+      case Success((None, _)) => Success("")
+      case Success((Some(s), _)) => Success(s)
     }
 
   def generateWithDefinitions(template: Template): Try[(Option[String], Definitions)] = {

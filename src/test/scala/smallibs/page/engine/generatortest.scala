@@ -28,17 +28,17 @@ object EngineTest extends Specification {
 
     "provides a result with an empty" in {
       val engine = Engine(Provider.empty)
-      engine.generate(NoTemplate) mustEqual Success(Some(""))
+      engine.generate(NoTemplate) mustEqual Success("")
     }
 
     "provides a result with an input text" in {
       val engine = Engine(Provider.empty)
-      engine.generate(Text("Hello, World")) mustEqual Success(Some("Hello, World"))
+      engine.generate(Text("Hello, World")) mustEqual Success("Hello, World")
     }
 
     "provides a result with an input Ident" in {
       val engine = Engine(Provider.record("hello" -> Provider.constant("World")))
-      engine.generate(Value(Some("hello"), None)) mustEqual Success(Some("World"))
+      engine.generate(Value(Some("hello"), None)) mustEqual Success("World")
     }
 
     "provides a result with an input sequence" in {
@@ -48,7 +48,7 @@ object EngineTest extends Specification {
       ))
       engine.generate(
         Sequence(List(Value(Some("hello"), None), Text(", "), Value(Some("world"), None), Text("!")))
-      ) mustEqual Success(Some("Hello, World!"))
+      ) mustEqual Success("Hello, World!")
     }
 
     "provides a result with an anonymous repeatable" in {
@@ -57,7 +57,7 @@ object EngineTest extends Specification {
       ))
       engine.generate(
         Repetition(None, None, Some(Sequence(List(Text(" - "), Value(None, None)))))
-      ) mustEqual Success(Some(" - Hello - World"))
+      ) mustEqual Success(" - Hello - World")
     }
 
     "provides a result with a named repeatable" in {
@@ -66,7 +66,7 @@ object EngineTest extends Specification {
       ))
       engine.generate(
         Repetition(Some("keys"), None, Some(Sequence(List(Text(" - "), Value(None, None)))))
-      ) mustEqual Success(Some(" - Hello - World"))
+      ) mustEqual Success(" - Hello - World")
     }
 
     "provides a result with a named complex repeatable" in {
@@ -78,7 +78,7 @@ object EngineTest extends Specification {
           )))
       engine.generate(
         Repetition(Some("keys"), None, Some(Sequence(List(Text(" - "), Value(Some("name"), None)))))
-      ) mustEqual Success(Some(" - Hello - World"))
+      ) mustEqual Success(" - Hello - World")
     }
 
     "provides a result with a named alternative" in {
@@ -89,7 +89,7 @@ object EngineTest extends Specification {
         ))
       engine.generate(
         Repetition(None, None, Some(Alternate(None, List(Value(Some("name"), None), Text("...")))))
-      ) mustEqual Success(Some("Hello..."))
+      ) mustEqual Success("Hello...")
     }
 
   }

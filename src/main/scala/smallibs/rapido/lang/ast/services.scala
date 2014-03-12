@@ -18,7 +18,9 @@
 
 package smallibs.rapido.lang.ast
 
-case class Service(name: String, action: Action, signature: ServiceType)
+import scala.util.parsing.input.Positional
+
+case class Service(name: String, action: Action, signature: ServiceType) extends Positional
 
 case class ServiceType(inputs: List[TypeRecord], output: TypeRecord, error: Option[TypeRecord])
 

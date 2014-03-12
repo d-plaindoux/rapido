@@ -27,27 +27,6 @@ import scala.Some
  */
 class TypeChecker(entities: Entities) {
 
-  type Conflicts = Map[String, List[Entity]]
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // Find attribut definitions which imply a conflict
-  // -------------------------------------------------------------------------------------------------------------------
-
-  def findConflicts: Conflicts = {
-    def find(entities: List[Entity], conflicts: Conflicts): Conflicts =
-      entities match {
-        case Nil =>
-          conflicts
-        case entity :: entities =>
-          val newConflicts = conflicts get entity.name match {
-            case None => conflicts + (entity.name -> List(entity))
-            case Some(l) => conflicts + (entity.name -> (l ++ List(entity)))
-          }
-          find(entities, newConflicts)
-      }
-    for (e <- find(entities.values, Map()) if e._2.size > 1) yield e
-  }
-
   // -------------------------------------------------------------------------------------------------------------------
   // Check missing type definitions
   // -------------------------------------------------------------------------------------------------------------------
@@ -59,7 +38,7 @@ class TypeChecker(entities: Entities) {
         if (entities.types contains name) Nil else List(name)
       case TypeOptional(value) =>
         missingDefinitions(value)
-      case TypeComposed(l,r) =>
+      case TypeComposed(l, r) =>
         missingDefinitions(l) ++ missingDefinitions(r)
       case TypeMultiple(value) =>
         missingDefinitions(value)
@@ -70,9 +49,10 @@ class TypeChecker(entities: Entities) {
         }.flatten.toList
     }
 
-  def missingDefinitions: Map[String, List[String]] =
-    (for ((n, e) <- entities.types) yield (n, missingDefinitions(e.definition))).filterNot {
-      case (_, l) => l.isEmpty
+  def missingDefinitions(notifier: ErrorNotifier): ErrorNotifier =
+    entities.types.foldLeft[ErrorNotifier](notifier) {
+      case (notifier, (name, aType)) =>
+        notifier.atPosition(aType.pos).undefined(missingDefinitions(aType.definition)).terminate
     }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -213,5 +193,7 @@ class TypeChecker(entities: Entities) {
 object TypeChecker {
   def apply(entities: Entities): TypeChecker = new TypeChecker(entities)
 
-  def apply(entities: Entity*): TypeChecker = new TypeChecker(Entities(entities.toList))
+  def apply(entities: List[Entity]): TypeChecker = this(Entities(entities))
+
+  def apply(entities: Entity*): TypeChecker = this(entities.toList)
 }

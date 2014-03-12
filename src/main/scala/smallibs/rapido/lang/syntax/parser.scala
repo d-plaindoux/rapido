@@ -70,11 +70,11 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     name ~> "[" ~> identified <~ "]"
 
   def serviceDefinition: PackratParser[Service] =
-    (ident <~ ":") ~! (repsep(identified, ",") <~ "=>") ~ identified ~ ("or" ~> identified).? ~ ("=" ~> restAction) ~
+    positioned((ident <~ ":") ~! (repsep(identified, ",") <~ "=>") ~ identified ~ ("or" ~> identified).? ~ ("=" ~> restAction) ~
       path.? ~ directive("HEADER").? ~ directive("PARAMS").? ~ directive("BODY").? ^^ {
       case name ~ in ~ out ~ err ~ action ~ path ~ header ~ param ~ body =>
         Service(name, Action(action, path, param, body, header), ServiceType(in, out, err))
-    }
+    })
 
   def restAction: PackratParser[Operation] =
     ("GET" | "POST" | "PUT" | "DELETE" | ident) ^^ {

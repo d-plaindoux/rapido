@@ -26,7 +26,7 @@ import smallibs.rapido.page.RapidoProvider
 import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
 import smallibs.page.{Provider, DataProvider}
 import smallibs.rapido.utils.{Options, Resources}
-import smallibs.rapido.lang.checker.SpecificationChecker
+import smallibs.rapido.lang.checker.{ErrorNotifier, SpecificationChecker}
 
 object GenAPI {
 
@@ -45,7 +45,7 @@ object GenAPI {
         if (!template.successful) {
           throw new Exception(template.toString)
         }
-        List((outputDirectory(file), Engine(provider, arguments).generate(template.get).get.get))
+        List((outputDirectory(file), Engine(provider, arguments).generate(template.get).get))
       case JSONArray(l) =>
         l.foldRight[List[(File, String)]](Nil) {
           (e, l) => l ++ generateAll(arguments, provider, outputDirectory, inputDirectory, e)
@@ -54,7 +54,8 @@ object GenAPI {
         l.foldRight[List[(File, String)]](Nil) {
           (e, l) => l ++ generateAll(arguments, provider, outputDirectory, inputDirectory, e._2)
         }
-      case _ => Nil
+      case _ =>
+        Nil
     }
 
   def rapido(arguments: Map[String, String], spec: String, lang: String): List[(File, String)] = {
@@ -72,14 +73,22 @@ object GenAPI {
       }
 
     val specificationContent = Resources getContent new File(spec).toURI.toURL
-    val specification = RapidoParser.parseAll(RapidoParser.specifications, specificationContent)
+
+    val specification = RapidoParser.
+      parseAll(RapidoParser.specifications, specificationContent)
 
     if (!specification.successful) {
       throw new Exception(specification.toString)
     }
 
     // Check the specification right now
-    SpecificationChecker.validateSpecification(specification.get)
+    val notifier = ErrorNotifier().
+      findWith(SpecificationChecker(specification.get).
+      validateSpecification)
+
+    if (notifier.hasError) {
+      throw new Exception(notifier.finish.toString)
+    }
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
       throw new Exception(s"File files.rdo for $lang is not available")
@@ -101,16 +110,15 @@ object GenAPI {
     val outputNameGenerator = arguments get "package" match {
       case Some(packageName) => (input: String) => {
         val template = PageParser.parseAll(PageParser.template, input).get
-        new File(Engine(Provider.empty, Map("package" -> packageName)).generate(template).get.get)
+        new File(Engine(Provider.empty, Map("package" -> packageName)).generate(template).get)
       }
       case None => (input: String) => new File(input)
     }
 
     val inputNameGenerator = (input: String) => {
       val template = PageParser.parseAll(PageParser.template, input).get
-      new File(Engine(Provider.empty, Map("lang" -> lang)).generate(template).get.get)
+      new File(Engine(Provider.empty, Map("lang" -> lang)).generate(template).get)
     }
-
 
     generateAll(arguments, RapidoProvider.entities(specification.get), outputNameGenerator, inputNameGenerator, files)
   }

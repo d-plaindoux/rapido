@@ -22,7 +22,7 @@ package smallibs.rapido.lang.ast
 // Type definitions
 //---------------------------------------------------------------------------------------------------
 
-trait Type
+sealed trait Type
 
 case class TypeMultiple(value: Type) extends Type {
   override def toString: String = s"($value)*"
@@ -32,7 +32,7 @@ case class TypeOptional(value: Type) extends Type {
   override def toString: String = s"($value)?"
 }
 
-trait TypeAtomic extends Type
+sealed trait TypeAtomic extends Type
 
 case object TypeBoolean extends TypeAtomic {
   override def toString: String = "bool"
@@ -46,7 +46,7 @@ case object TypeNumber extends TypeAtomic {
   override def toString: String = "int"
 }
 
-trait TypeRecord extends Type
+sealed trait TypeRecord extends Type
 
 case class TypeIdentifier(name: String) extends TypeRecord {
   override def toString: String = name
@@ -68,7 +68,7 @@ case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord 
 // Attribute definitions
 //---------------------------------------------------------------------------------------------------
 
-trait TypeAttribute
+sealed trait TypeAttribute
 
 case class ConcreteTypeAttribute(access: Option[Access], kind: Type) extends TypeAttribute {
   override def toString: String = kind.toString
@@ -82,7 +82,7 @@ case class VirtualTypeAttribute(value: Path) extends TypeAttribute {
 // Attribute access mode
 //---------------------------------------------------------------------------------------------------
 
-trait Access {
+sealed trait Access {
   val n: Option[String]
 
   def name: Option[String] = this.n
