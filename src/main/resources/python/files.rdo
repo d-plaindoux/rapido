@@ -3,12 +3,12 @@
         "package"
     ],
     "files": [
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]__init__.py",
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]clients.py",
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]services.py",
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]types.py",
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/__init__.py",
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/services.py",
-        "@OPT[|@OR[|@USE::package/|][|/@USE::lang/|]|]core/types.py"
+        "@OR[|@USE::package/|][|/@USE::lang/|]__init__.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]clients.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]services.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]types.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/__init__.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/services.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/types.py"
     ]
 }

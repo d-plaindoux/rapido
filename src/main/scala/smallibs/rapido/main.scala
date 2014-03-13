@@ -66,10 +66,16 @@ object GenAPI {
         case _ => None
       }
 
-    def getRequiredArguments(data: Any): Option[Any] =
+    def getRequiredArguments(data: Any): List[String] =
       data match {
-        case JSONObject(l) => l get "arguments"
-        case _ => None
+        case JSONObject(l) =>
+          l get "arguments" match {
+            case Some(JSONArray(args)) => args.map {
+              _.toString
+            }
+            case _ => Nil
+          }
+        case _ => Nil
       }
 
     val specificationContent = Resources getContent new File(spec).toURI.toURL
@@ -98,8 +104,12 @@ object GenAPI {
       throw new Exception(s"File files.rdo for $lang is not using JSON formalism")
     }
 
-    val requiredArguments = getRequiredArguments(description) getOrElse {
-      Map()
+    val requiredArguments = getRequiredArguments(description)
+    val missingArguments =
+      for (r <- requiredArguments if !arguments.contains(r) || (arguments get r).getOrElse("").trim.isEmpty) yield r
+
+    if (!missingArguments.isEmpty) {
+      throw new Exception(s"the following arguments are required: ${missingArguments.mkString(", ")}")
     }
 
     val files = getFiles(description) getOrElse {
@@ -122,9 +132,6 @@ object GenAPI {
 
     generateAll(arguments, RapidoProvider.entities(specification.get), outputNameGenerator, inputNameGenerator, files)
   }
-
-  def checkArguments(required: List[String], provided: List[String]): List[String] =
-    for (r <- required if !(provided contains r)) yield r
 
   def main(args: Array[String]) = {
     try {
