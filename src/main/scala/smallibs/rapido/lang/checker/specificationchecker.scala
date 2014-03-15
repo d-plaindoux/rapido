@@ -38,9 +38,9 @@ class SpecificationChecker(entities: Entities) {
       }
     find(entities.values, Map()).foldLeft[ErrorNotifier](notifier) {
       case (notifier, (name, entity :: otherEntities)) if otherEntities.size > 0 =>
-        notifier.atPosition(entity.pos).conflict(name, otherEntities.map {
+        notifier.locate(entity.pos).conflict(name, otherEntities.map {
           _.pos
-        }).terminate
+        }).unlocate
       case (notifier, _) =>
         notifier
     }
@@ -56,7 +56,8 @@ class SpecificationChecker(entities: Entities) {
       findWith(this.findConflicts).
       findWith(typeChecker.missingDefinitions).
       findWith(serviceChecker.missingDefinitions).
-      findWith(serviceChecker.checkTypeServices)
+      findWith(serviceChecker.typeSpecificationErrors).
+      findWith(serviceChecker.pathSpecificationErrors)
   }
 }
 

@@ -20,6 +20,7 @@ package smallibs.rapido.lang.checker
 
 import smallibs.rapido.lang.ast._
 import scala.Some
+import scala.util.parsing.input.Position
 
 /**
  * The type check validates the specification checking object
@@ -41,9 +42,7 @@ class ServiceChecker(entities: Entities) {
   def checkRouteService(notifier: ErrorAtPositionNotifier, params: List[TypeRecord], service: Service): ErrorNotifier = {
     val checker = TypeChecker(entities)
 
-    val inputs = (params ++ service.signature.inputs).foldLeft[TypeRecord](TypeObject(Map())) {
-      (result, current) => TypeComposed(result, current)
-    }
+    val inputs = Types(params ++ service.signature.inputs)
 
     val acceptHeader: Option[(Type, Type)] = service.action.header match {
       case None => None
@@ -64,36 +63,68 @@ class ServiceChecker(entities: Entities) {
       subtype(acceptHeader).
       subtype(acceptParams).
       subtype(acceptBody).
-      terminate
+      unlocate
   }
 
   def missingDefinitions(notifier: ErrorNotifier): ErrorNotifier = {
     val typeChecker = TypeChecker(entities)
+
+    def missingDefinitions(pos: Position, atype: Type): ErrorNotifier =
+      ErrorNotifier().locate(pos).undefined(typeChecker.missingDefinitions(atype)).unlocate
+
     entities.services.foldLeft[ErrorNotifier](notifier) {
-      case (map, (name, service)) =>
-        val missingDefinitionsInParameters: List[String] = service.route.params.flatMap {
-          typeChecker.missingDefinitions(_)
-        }
-        val missingDefinitionsInEntries: List[String] = service.entries.flatMap {
-          entry =>
-            entry.signature.inputs.flatMap {
-              typeChecker.missingDefinitions(_)
-            } ++ typeChecker.missingDefinitions(entry.signature.output)
-        }
-        missingDefinitionsInParameters ++ missingDefinitionsInEntries match {
-          case Nil => notifier
-          case undefined => notifier.atPosition(service.pos).undefined(undefined).terminate
-        }
+      case (notifier, (name, service)) =>
+        notifier ++
+          missingDefinitions(service.pos, Types(service.route.params)) ++
+          service.entries.foldLeft[ErrorNotifier](ErrorNotifier()) {
+            (notifier, entry) =>
+              notifier ++
+                missingDefinitions(entry.pos, Types(entry.signature.inputs :+ entry.signature.output)) ++
+                missingDefinitions(entry.pos, entry.action.header getOrElse Types(Nil)) ++
+                missingDefinitions(entry.pos, entry.action.params getOrElse Types(Nil)) ++
+                missingDefinitions(entry.pos, entry.action.body getOrElse Types(Nil))
+          }
     }
   }
 
-  def checkTypeServices(notifier: ErrorNotifier): ErrorNotifier =
-    entities.services.foldLeft[ErrorNotifier](notifier) {
-      case (notifier, (name, definition)) =>
-        definition.entries.foldLeft[ErrorNotifier](notifier) {
-          (notifier, service) => checkRouteService(notifier.atPosition(service.pos), definition.route.params, service)
-        }
-    }
+  def typeSpecificationErrors(notifier: ErrorNotifier): ErrorNotifier =
+    if (notifier.hasError)
+      notifier
+    else
+      entities.services.foldLeft[ErrorNotifier](notifier) {
+        case (newNotifier, (name, definition)) =>
+          definition.entries.foldLeft[ErrorNotifier](newNotifier) {
+            (notifier, service) =>
+              checkRouteService(notifier.locate(service.pos), definition.route.params, service)
+          }
+      }
+
+  def pathSpecificationErrors(notifier: ErrorNotifier): ErrorNotifier = {
+    val typeChecker = TypeChecker(entities)
+
+    if (notifier.hasError)
+      notifier
+    else
+      entities.services.foldLeft[ErrorNotifier](notifier) {
+        case (notifier, (name, definition)) =>
+          notifier.
+            locate(definition.pos).
+            path(typeChecker.acceptVirtual(Types(definition.route.params), definition.route.path)).
+            unlocate ++
+            definition.entries.foldLeft[ErrorNotifier](ErrorNotifier()) {
+              (notifier, service) =>
+                val inputs = definition.route.params ++ service.signature.inputs
+                  notifier.
+                    locate(service.pos).
+                    pathes(typeChecker.validateType(Types(inputs))).
+                    pathes(typeChecker.validateType(Types(inputs :+ service.action.header.getOrElse(Types(Nil))))).
+                    pathes(typeChecker.validateType(Types(inputs :+ service.action.params.getOrElse(Types(Nil))))).
+                    pathes(typeChecker.validateType(Types(inputs :+ service.action.body.getOrElse(Types(Nil))))).
+                    path(typeChecker.acceptVirtual(Types(inputs), service.action.path.getOrElse(Path(Nil)))).
+                    unlocate
+            }
+      }
+  }
 }
 
 object ServiceChecker {

@@ -43,16 +43,16 @@ class TypeChecker(entities: Entities) {
       case TypeMultiple(value) =>
         missingDefinitions(value)
       case TypeObject(value) =>
-        value.map {
+        value.flatMap {
           case (_, ConcreteTypeAttribute(_, value)) => missingDefinitions(value)
           case (_, VirtualTypeAttribute(value)) => Nil
-        }.flatten.toList
+        }.toList
     }
 
   def missingDefinitions(notifier: ErrorNotifier): ErrorNotifier =
     entities.types.foldLeft[ErrorNotifier](notifier) {
       case (notifier, (name, aType)) =>
-        notifier.atPosition(aType.pos).undefined(missingDefinitions(aType.definition)).terminate
+        notifier.locate(aType.pos).undefined(missingDefinitions(aType.definition)).unlocate
     }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -92,16 +92,20 @@ class TypeChecker(entities: Entities) {
   // Virtual type corner
   // -------------------------------------------------------------------------------------------------------------------
 
-  def acceptVirtual(initial: Type, path: Path): Option[(Type, Type)] =
-    path.values.foldLeft[Option[(Type, Type)]](None) {
+  def acceptVirtual(initial: Type, path: Path): Option[Path] = {
+    path.values.foldLeft[Option[Path]](None) {
       case (Some(r), _) => Some(r)
       case (None, StaticLevel(_)) => None
       case (None, DynamicLevel(l)) =>
         val synthetizedType = l.foldRight[Type](TypeString) {
           case (e, r) => TypeObject(Map(e -> ConcreteTypeAttribute(None, r)))
         }
-        acceptType(synthetizedType, initial)
+        acceptType(synthetizedType, initial) match {
+          case None => None
+          case Some(_) => Some(path)
+        }
     }
+  }
 
   def virtualDefinitions(value: Type): List[Path] =
     value match {
@@ -109,6 +113,10 @@ class TypeChecker(entities: Entities) {
         virtualDefinitions(value)
       case TypeMultiple(value) =>
         virtualDefinitions(value)
+      case t@TypeIdentifier(name) =>
+        virtualDefinitions(unfoldType(t))
+      case t@TypeComposed(_,_) =>
+        virtualDefinitions(unfoldType(t))
       case TypeObject(value) =>
         value.map {
           case (_, ConcreteTypeAttribute(_, value)) =>

@@ -1,7 +1,7 @@
 package smallibs.rapido.lang.checker
 
 import scala.util.parsing.input.Position
-import smallibs.rapido.lang.ast.Type
+import smallibs.rapido.lang.ast.{Path, Type}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Error categories
@@ -13,6 +13,8 @@ case class TypeConflicts(position: Position, name: String, positions: List[Posit
 
 case class TypeUndefined(position: Position, undefined: List[String]) extends CheckerError
 
+case class PathesError(position: Position, undefined: List[Path]) extends CheckerError
+
 case class SubTypeError(position: Position, receiver: Type, value: Type) extends CheckerError
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -21,14 +23,21 @@ case class SubTypeError(position: Position, receiver: Type, value: Type) extends
 
 class ErrorNotifier(errors: List[CheckerError]) {
 
-  def finish: List[CheckerError] = errors
-
   def hasError: Boolean = !errors.isEmpty
 
-  def findWith(checker: ErrorNotifier => ErrorNotifier): ErrorNotifier = checker(this)
+  def getErrors: List[CheckerError] = this.errors
 
-  def atPosition(position: Position): ErrorAtPositionNotifier =
+  def onError[B](default: List[CheckerError] => Unit): Unit =
+    if (hasError) default(errors)
+
+  def findWith(checker: ErrorNotifier => ErrorNotifier): ErrorNotifier =
+    checker(this)
+
+  def locate(position: Position): ErrorAtPositionNotifier =
     new ErrorAtPositionNotifier(position, errors)
+
+  def ++(notifier: ErrorNotifier): ErrorNotifier =
+    new ErrorNotifier(this.errors ++ notifier.getErrors)
 }
 
 class ErrorAtPositionNotifier(position: Position, errors: List[CheckerError]) {
@@ -42,6 +51,17 @@ class ErrorAtPositionNotifier(position: Position, errors: List[CheckerError]) {
       case notEmpty => new ErrorAtPositionNotifier(position, errors :+ TypeUndefined(position, notEmpty))
     }
 
+  def path(path: Option[Path]): ErrorAtPositionNotifier =
+    path match {
+      case None => this
+      case Some(p) => new ErrorAtPositionNotifier(position, errors :+ PathesError(position, List(p)))
+    }
+
+  def pathes(path: List[Path]): ErrorAtPositionNotifier =
+    path match {
+      case Nil => this
+      case p => new ErrorAtPositionNotifier(position, errors :+ PathesError(position, p))
+    }
 
   def subtype(subtype: Option[(Type, Type)]): ErrorAtPositionNotifier =
     subtype match {
@@ -49,7 +69,7 @@ class ErrorAtPositionNotifier(position: Position, errors: List[CheckerError]) {
       case Some((r, v)) => new ErrorAtPositionNotifier(position, errors :+ SubTypeError(position, r, v))
     }
 
-  def terminate: ErrorNotifier =
+  def unlocate: ErrorNotifier =
     new ErrorNotifier(errors)
 
 }

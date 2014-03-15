@@ -53,15 +53,21 @@ case class TypeIdentifier(name: String) extends TypeRecord {
 }
 
 case class TypeObject(values: Map[String, TypeAttribute]) extends TypeRecord {
-  override def toString: String = s"{${
-    values.foldLeft[String]("") {
-      case (str, (name, attribute)) => s"$name: $attribute${if (str == "") "" else s", $str"}"
-    }
-  }}"
+  override def toString: String = (for ((n, v) <- values) yield s"$n: $v").toList.mkString("{", ",", "}")
 }
 
 case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord {
   override def toString: String = s"$left with $right"
+}
+
+object Types {
+  def apply(types: List[TypeRecord]): TypeRecord =
+    types.toList match {
+      case List(e) => e
+      case l => l.foldLeft[TypeRecord](TypeObject(Map())) {
+        (result, current) => TypeComposed(result, current)
+      }
+    }
 }
 
 //---------------------------------------------------------------------------------------------------

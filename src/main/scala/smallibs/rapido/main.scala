@@ -80,20 +80,15 @@ object GenAPI {
 
     val specificationContent = Resources getContent new File(spec).toURI.toURL
 
-    val specification = RapidoParser.
-      parseAll(RapidoParser.specifications, specificationContent)
+    val specification = RapidoParser.parseAll(RapidoParser.specifications, specificationContent)
 
     if (!specification.successful) {
       throw new Exception(specification.toString)
     }
 
     // Check the specification right now
-    val notifier = ErrorNotifier().
-      findWith(SpecificationChecker(specification.get).
-      validateSpecification)
-
-    if (notifier.hasError) {
-      throw new Exception(notifier.finish.toString)
+    ErrorNotifier().findWith(SpecificationChecker(specification.get).validateSpecification) onError {
+      errors => throw new Exception(errors.toString)
     }
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
@@ -104,9 +99,10 @@ object GenAPI {
       throw new Exception(s"File files.rdo for $lang is not using JSON formalism")
     }
 
-    val requiredArguments = getRequiredArguments(description)
     val missingArguments =
-      for (r <- requiredArguments if !arguments.contains(r) || (arguments get r).getOrElse("").trim.isEmpty) yield r
+      for (r <- getRequiredArguments(description)
+           if !arguments.contains(r) || (arguments get r).getOrElse("").trim.isEmpty)
+      yield r
 
     if (!missingArguments.isEmpty) {
       throw new Exception(s"the following arguments are required: ${missingArguments.mkString(", ")}")
