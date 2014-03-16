@@ -26,9 +26,14 @@ import smallibs.rapido.page.RapidoProvider
 import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
 import smallibs.page.{Provider, DataProvider}
 import smallibs.rapido.utils.{Options, Resources}
-import smallibs.rapido.lang.checker.{ErrorNotifier, SpecificationChecker}
+import smallibs.rapido.lang.checker._
+import scala.util.parsing.json.JSONArray
+import scala.util.parsing.json.JSONObject
+import scala.Some
+import smallibs.rapido.lang.checker.TypeUndefined
+import smallibs.rapido.lang.checker.TypeConflicts
 
-object GenAPI {
+object Rapido {
 
   val usage = """
     Usage: rapido --lang [python|scala] --api filename [--out filename] [-- <name>=<value>*]
@@ -58,7 +63,7 @@ object GenAPI {
         Nil
     }
 
-  def rapido(arguments: Map[String, String], spec: String, lang: String): List[(File, String)] = {
+  def generate(arguments: Map[String, String], spec: String, lang: String): List[(File, String)] = {
 
     def getFiles(data: Any): Option[Any] =
       data match {
@@ -88,7 +93,19 @@ object GenAPI {
 
     // Check the specification right now
     ErrorNotifier().findWith(SpecificationChecker(specification.get).validateSpecification) onError {
-      errors => throw new Exception(errors.toString)
+      errors =>
+        for(error <- errors)
+          error match {
+            case TypeConflicts(p, n, lp) =>
+              println(s"[error] type $n defined at line ${p.line} is also defined at line ${lp.map{_.line}.mkString(" and ")}")
+            case TypeUndefined(p, l) =>
+              println(s"[error] undefined type line ${p.line} ${l.mkString(" and ")}")
+            case SubTypeError(p, l, r) =>
+              println(s"[error] subtyping error at line ${p.line}: ${l.toString} is not a subtype of ${r.toString}")
+            case PathError(p ,l) =>
+              println(s"[error] virtual type error at line ${p.line}: ${l.mkString(", ")}")
+          }
+        throw new Exception(s"${errors.size} error${if (errors.size>1) "s" else ""} detected")
     }
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
@@ -147,7 +164,7 @@ object GenAPI {
         }
       }
 
-      rapido(arguments, (options get 'api).get, (options get 'lang).getOrElse {
+      generate(arguments, (options get 'api).get, (options get 'lang).getOrElse {
         throw new Exception("option --lang must be specified")
       }).foreach(output)
     } catch {

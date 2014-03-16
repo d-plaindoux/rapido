@@ -27,12 +27,6 @@ import scala.util.parsing.input.Position
  * type compatibilities and definition in each service scope
  */
 
-sealed trait ServiceError
-
-case class SubTypingError(receive: Type, value: Type) extends ServiceError
-
-case class VirtualTypeError(path: Path) extends ServiceError
-
 // ---------------------------------------------------------------------------------------------------------------------
 // Service checker
 // ---------------------------------------------------------------------------------------------------------------------

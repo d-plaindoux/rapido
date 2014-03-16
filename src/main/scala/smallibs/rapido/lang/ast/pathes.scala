@@ -18,10 +18,19 @@
 
 package smallibs.rapido.lang.ast
 
-case class Path(values: List[PathEntry])
+case class Path(values: List[PathEntry]) {
+  override def toString: String=
+    values.mkString("[", "", "]")
+}
 
 sealed trait PathEntry
 
-case class StaticLevel(name: String) extends PathEntry
+case class StaticLevel(name: String) extends PathEntry {
+  override def toString: String =
+    name
+}
 
-case class DynamicLevel(values: List[String]) extends PathEntry
+case class DynamicLevel(values: List[String]) extends PathEntry {
+  override def toString: String =
+    values.mkString("<",".",">")
+}
