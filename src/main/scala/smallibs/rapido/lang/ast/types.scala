@@ -63,7 +63,8 @@ case class TypeComposed(left: TypeRecord, right: TypeRecord) extends TypeRecord 
 object Types {
   def apply(types: List[TypeRecord]): TypeRecord =
     types.toList match {
-      case List(e) => e
+      case List(e) =>
+        e
       case l => l.foldLeft[TypeRecord](TypeObject(Map())) {
         (result, current) => TypeComposed(result, current)
       }

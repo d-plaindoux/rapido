@@ -92,7 +92,7 @@ class TypeChecker(entities: Entities) {
   // Virtual type corner
   // -------------------------------------------------------------------------------------------------------------------
 
-  def acceptVirtual(initial: Type, path: Path): Option[Path] = {
+  def acceptVirtualType(initial: Type, path: Path): Option[Path] = {
     path.values.foldLeft[Option[Path]](None) {
       case (Some(r), _) => Some(r)
       case (None, StaticLevel(_)) => None
@@ -129,7 +129,7 @@ class TypeChecker(entities: Entities) {
 
   def validateType(value: Type): List[Path] =
     for (path <- virtualDefinitions(value)
-         if acceptVirtual(value, path) != None)
+         if acceptVirtualType(value, path) != None)
     yield path
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -147,11 +147,8 @@ class TypeChecker(entities: Entities) {
       case (_, TypeComposed(l, r)) =>
         acceptType(receiver, unfoldType(TypeComposed(l, r)))
 
-      case (TypeIdentifier(name1), TypeIdentifier(name2)) =>
-        if (name1 == name2)
-          None
-        else
-          Some((receiver, value))
+      case (TypeIdentifier(name1), TypeIdentifier(name2)) if name1 == name2 =>
+        None
       case (TypeIdentifier(name), _) =>
         acceptType(unfoldTypeByName(name), value)
       case (_, TypeIdentifier(name)) =>
@@ -194,7 +191,7 @@ class TypeChecker(entities: Entities) {
 
   def acceptVirtualType(receiver: Type, value: Type): List[Path] =
     for (path <- virtualDefinitions(receiver)
-         if acceptVirtual(value, path) != None)
+         if acceptVirtualType(value, path) != None)
     yield path
 }
 

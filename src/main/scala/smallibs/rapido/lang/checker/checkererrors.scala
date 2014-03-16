@@ -13,7 +13,7 @@ case class TypeConflicts(position: Position, name: String, positions: List[Posit
 
 case class TypeUndefined(position: Position, undefined: List[String]) extends CheckerError
 
-case class PathesError(position: Position, undefined: List[Path]) extends CheckerError
+case class PathError(position: Position, undefined: List[Path]) extends CheckerError
 
 case class SubTypeError(position: Position, receiver: Type, value: Type) extends CheckerError
 
@@ -54,13 +54,13 @@ class ErrorAtPositionNotifier(position: Position, errors: List[CheckerError]) {
   def path(path: Option[Path]): ErrorAtPositionNotifier =
     path match {
       case None => this
-      case Some(p) => new ErrorAtPositionNotifier(position, errors :+ PathesError(position, List(p)))
+      case Some(p) => new ErrorAtPositionNotifier(position, errors :+ PathError(position, List(p)))
     }
 
   def pathes(path: List[Path]): ErrorAtPositionNotifier =
     path match {
       case Nil => this
-      case p => new ErrorAtPositionNotifier(position, errors :+ PathesError(position, p))
+      case p => new ErrorAtPositionNotifier(position, errors :+ PathError(position, p))
     }
 
   def subtype(subtype: Option[(Type, Type)]): ErrorAtPositionNotifier =

@@ -109,7 +109,7 @@ class ServiceChecker(entities: Entities) {
         case (notifier, (name, definition)) =>
           notifier.
             locate(definition.pos).
-            path(typeChecker.acceptVirtual(Types(definition.route.params), definition.route.path)).
+            path(typeChecker.acceptVirtualType(Types(definition.route.params), definition.route.path)).
             unlocate ++
             definition.entries.foldLeft[ErrorNotifier](ErrorNotifier()) {
               (notifier, service) =>
@@ -120,7 +120,7 @@ class ServiceChecker(entities: Entities) {
                     pathes(typeChecker.validateType(Types(inputs :+ service.action.header.getOrElse(Types(Nil))))).
                     pathes(typeChecker.validateType(Types(inputs :+ service.action.params.getOrElse(Types(Nil))))).
                     pathes(typeChecker.validateType(Types(inputs :+ service.action.body.getOrElse(Types(Nil))))).
-                    path(typeChecker.acceptVirtual(Types(inputs), service.action.path.getOrElse(Path(Nil)))).
+                    path(typeChecker.acceptVirtualType(Types(inputs), service.action.path.getOrElse(Path(Nil)))).
                     unlocate
             }
       }
