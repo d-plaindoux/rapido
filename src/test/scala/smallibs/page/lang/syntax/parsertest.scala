@@ -126,7 +126,12 @@ object PageSpec extends Specification {
 
     "provides a use" in {
       val parsed = PageParser.parseAll(PageParser.template, "@USE::type")
-      parsed.get mustEqual Use("type")
+      parsed.get mustEqual Use("type", None)
+    }
+
+    "provides a use with a content" in {
+      val parsed = PageParser.parseAll(PageParser.template, "@USE::type[|content|]")
+      parsed.get mustEqual Use("type", Some(Text("content")))
     }
 
     "provides an empty define" in {

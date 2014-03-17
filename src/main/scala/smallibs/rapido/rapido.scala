@@ -169,6 +169,7 @@ object Rapido {
       }).foreach(output)
     } catch {
       case e: Throwable =>
+        e.printStackTrace
         println(e.getMessage)
     }
   }

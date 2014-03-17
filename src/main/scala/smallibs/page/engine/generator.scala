@@ -99,12 +99,15 @@ class Engine(path: List[String], data: DataProvider, definitions: Map[String, Te
             (None, definitions)
           case (Some(e), _) => (None, definitions ++ Map(name -> Text(e)))
         }
-      case Use(name) =>
+      case Use(name, content) =>
         definitions get name match {
           case None =>
             elementNotFound(name)
           case Some(t) =>
-            generateWithDefinitions(t)
+            generateWithDefinitions(content match {
+              case None => t
+              case Some(t) => t
+            })
         }
     }
   }

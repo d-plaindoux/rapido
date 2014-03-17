@@ -45,9 +45,9 @@
 @[|------------------------------------------------------------------------------------------
     Main for services generation
    ------------------------------------------------------------------------------------------|]
-//------------------------------------------------------------------------------------------
-// Services:@REP(, )::services[|@VAL::name|]
-//------------------------------------------------------------------------------------------
+/*
+ * Services:@REP(, )::services[|@VAL::name|]
+ */
 
 @OPT[|package @USE::package|]
 
@@ -56,9 +56,9 @@ import scala.util.{Try, Success, Failure}
 import @OPT[|@USE::package.|]core.BasicService
 
 @REP::services[|
-//------------------------------------------------------------------------------------------
-// Service @VAL::name
-//------------------------------------------------------------------------------------------
+/*
+ * Service @VAL::name
+ */
 class @VAL::name[|@VALService|](override val url: String@VAL::route[|@USE::ParametersTypes|]) extends BasicService {
   @SET::serviceParameters[|@VAL::route[|@USE::ParametersValues|]|]
 

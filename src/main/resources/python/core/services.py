@@ -67,12 +67,9 @@ class BasicService:
         try:
             response = connection.getresponse()
             data = response.read()
-            try:
-                return json.loads(data)
-            except Exception, e:
-                return response
+            return json.loads(data)
         except Exception, e:
-            return e
+            raise e
         finally:
             connection.close()
 

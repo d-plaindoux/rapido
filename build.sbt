@@ -8,13 +8,13 @@ artifact := Artifact("smallibs.rapido")
 
 name := "rapido"
 
-version := "0.1.0"
+version := "0.1-alpha"
 
 scalaVersion := "2.10.2"
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
-mainClass := Some("smallibs.rapido.GenAPI")
+mainClass := Some("smallibs.rapido.Rapido")
 
 // Test corner
 

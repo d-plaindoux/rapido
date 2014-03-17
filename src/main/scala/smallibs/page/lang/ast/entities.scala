@@ -32,7 +32,7 @@ case class Macro(name: String, content: Template) extends Template
 
 case class Define(name: String, content: Template) extends Template
 
-case class Use(name: String) extends Template
+case class Use(name: String, content: Option[Template]) extends Template
 
 case class Repetition(name: Option[String], separator: Option[String], content: Option[Template]) extends Template
 
