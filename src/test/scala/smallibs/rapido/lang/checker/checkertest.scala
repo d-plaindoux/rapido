@@ -194,5 +194,11 @@ object CheckerTest extends Specification {
       val t2: TypeObject = TypeObject(Map())
       TypeChecker().acceptType(t1, t2) mustEqual None
     }
+
+    "accept type with embedded virtual definition as-is" in {
+      val t1: TypeObject = TypeObject(Map("b" -> ConcreteTypeAttribute(None,TypeObject(Map("a" -> VirtualTypeAttribute(Path(Nil)))))))
+      val t2: TypeObject = TypeObject(Map())
+      TypeChecker().acceptType(t1, t2) mustEqual None
+    }
   }
 }
