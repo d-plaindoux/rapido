@@ -11,16 +11,15 @@ type Nothing = {}
 
 type Token = {
     token_type: string,
-    access_token: string,
-    virtual Authorization = [<type> <token>]
+    access_token: string
 }
 
 type Credentials = {
-    Authorization: string
+    virtual Authorization = [<token_type> <access_token>]
 }
 
 service OAuth2 [oauth2/token] {
-    authenticate: Token => Token or Error = POST HEADER[Credentials]
+    authenticate: Token => Token = POST HEADER[Credentials]
 }
 
 //------------------------------------------------------------------------------------------
@@ -58,10 +57,10 @@ type RetweetsOfMe = Timeline with {
 }
 
 service timelines(Token) [1.1/statuses] {
-    mentions_timeline: MentionsTimeline => Nothing or Error = GET[mentions_timeline.json] HEADER[Credentials] PARAMS[MentionsTimeline]
-    user_timeline: UserTimeline => Nothing or Error = GET[user_timeline.json] HEADER[Credentials] PARAMS[UserTimeline]
-    home_timeline: HomeTimeline => Nothing or Error = GET[home_timeline.json] HEADER[Credentials] PARAMS[HomeTimeline]
-    retweets_of_me: RetweetsOfMe => Nothing or Error = GET[retweets_of_me.json] HEADER[Credentials] PARAMS[RetweetsOfMe]
+    mentions_timeline: MentionsTimeline => Nothing = GET[mentions_timeline.json] HEADER[Credentials] PARAMS[MentionsTimeline]
+    user_timeline    : UserTimeline     => Nothing = GET[user_timeline.json]     HEADER[Credentials] PARAMS[UserTimeline]
+    home_timeline    : HomeTimeline     => Nothing = GET[home_timeline.json]     HEADER[Credentials] PARAMS[HomeTimeline]
+    retweets_of_me   : RetweetsOfMe     => Nothing = GET[retweets_of_me.json]    HEADER[Credentials] PARAMS[RetweetsOfMe]
 }
 
 client twitterRest provides timelines

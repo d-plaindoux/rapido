@@ -23,7 +23,7 @@ import smallibs.rapido.lang.syntax.RapidoParser
 import smallibs.page.lang.syntax.PageParser
 import smallibs.page.engine.Engine
 import smallibs.rapido.page.RapidoProvider
-import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
+import scala.util.parsing.json.JSON
 import smallibs.page.{Provider, DataProvider}
 import smallibs.rapido.utils.{Options, Resources}
 import smallibs.rapido.lang.checker._
@@ -36,7 +36,7 @@ import smallibs.rapido.lang.checker.TypeConflicts
 object Rapido {
 
   val usage = """
-    Usage: rapido --lang [python|scala] --api filename [--out filename] [-- <name>=<value>*]
+    Usage: rapido [--debug] --lang [python|scala] --api filename [--out filename] [-- <name>=<value>*]
               """
 
   def generateAll(arguments: Map[String, String], provider: DataProvider, outputDirectory: String => File, inputDirectory: String => File, files: Any): List[(File, String)] =
@@ -94,18 +94,18 @@ object Rapido {
     // Check the specification right now
     ErrorNotifier().findWith(SpecificationChecker(specification.get).validateSpecification) onError {
       errors =>
-        for(error <- errors)
+        for (error <- errors)
           error match {
             case TypeConflicts(p, n, lp) =>
-              println(s"[error] type $n defined at line ${p.line} is also defined at line ${lp.map{_.line}.mkString(" and ")}")
+              println(s"[error] type $n defined at line ${p.line} is also defined at line ${lp.map {_.line}.mkString(" and ")}")
             case TypeUndefined(p, l) =>
               println(s"[error] undefined type line ${p.line} ${l.mkString(" and ")}")
             case SubTypeError(p, l, r) =>
-              println(s"[error] subtyping error at line ${p.line}: ${l.toString} is not a subtype of ${r.toString}")
-            case PathError(p ,l) =>
+              println(s"[error] subtype error at line ${p.line}: ${l.toString} is not a subtype of ${r.toString}")
+            case PathError(p, l) =>
               println(s"[error] virtual type error at line ${p.line}: ${l.mkString(", ")}")
           }
-        throw new Exception(s"${errors.size} error${if (errors.size>1) "s" else ""} detected")
+        throw new Exception(s"${errors.size} error${if (errors.size > 1) "s" else ""} detected")
     }
 
     val filesURL = (Resources getURL s"/$lang/files.rdo") getOrElse {
@@ -147,8 +147,9 @@ object Rapido {
   }
 
   def main(args: Array[String]) = {
+    val (options, arguments) = Options parse(usage, args)
+
     try {
-      val (options, arguments) = Options parse(usage, args)
       val output = options get 'out match {
         case None => {
           (entry: (File, String)) =>
@@ -169,8 +170,10 @@ object Rapido {
       }).foreach(output)
     } catch {
       case e: Throwable =>
-        e.printStackTrace
         println(e.getMessage)
+        if (options contains 'debug)
+          e.printStackTrace
+
     }
   }
 }

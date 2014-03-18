@@ -97,7 +97,7 @@ class TypeChecker(entities: Entities) {
       case (Some(r), _) => Some(r)
       case (None, StaticLevel(_)) => None
       case (None, DynamicLevel(l)) =>
-        val synthetizedType = l.foldRight[Type](TypeString) {
+        val synthetizedType = l.foldRight[Type](TypeBot) {
           case (e, r) => TypeObject(Map(e -> ConcreteTypeAttribute(None, r)))
         }
         acceptType(synthetizedType, initial) match {
@@ -115,7 +115,7 @@ class TypeChecker(entities: Entities) {
         virtualDefinitions(value)
       case t@TypeIdentifier(name) =>
         virtualDefinitions(unfoldType(t))
-      case t@TypeComposed(_,_) =>
+      case t@TypeComposed(_, _) =>
         virtualDefinitions(unfoldType(t))
       case TypeObject(value) =>
         value.map {
@@ -126,6 +126,27 @@ class TypeChecker(entities: Entities) {
         }.flatten.toList
       case _ => Nil
     }
+
+  def isVirtual(value: Type): Boolean =
+    value match {
+      case TypeOptional(value) =>
+        isVirtual(value)
+      case TypeMultiple(value) =>
+        isVirtual(value)
+      case t@TypeIdentifier(name) =>
+        isVirtual(unfoldType(t))
+      case t@TypeComposed(_, _) =>
+        isVirtual(unfoldType(t))
+      case TypeObject(value) =>
+        value.forall {
+          case (name, ConcreteTypeAttribute(access, value)) =>
+            isVirtual(value)
+          case (_, VirtualTypeAttribute(value)) =>
+            true
+        }
+      case _ => false
+    }
+
 
   def validateType(value: Type): List[Path] =
     for (path <- virtualDefinitions(value)
@@ -138,6 +159,7 @@ class TypeChecker(entities: Entities) {
 
   def acceptType(receiver: Type, value: Type): Option[(Type, Type)] =
     (receiver, value) match {
+      case (TypeBot, _:TypeAtomic) => None
       case (TypeBoolean, TypeBoolean) => None
       case (TypeNumber, TypeNumber) => None
       case (TypeString, TypeString) => None
@@ -172,6 +194,7 @@ class TypeChecker(entities: Entities) {
         map1.foldLeft[Option[(Type, Type)]](None) {
           case (None, (name, ConcreteTypeAttribute(_, t1))) =>
             map2 get name match {
+              case None if isVirtual(t1) => None
               case None => Some((receiver, value))
               case Some(att2) =>
                 val t2 = valueType(att2)

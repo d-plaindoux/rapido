@@ -1,14 +1,6 @@
-//---------------------------------------------------------------------------------
+//
 // Open stack API
-//---------------------------------------------------------------------------------
-
-type Error = {
-    error: {
-        @get code: int,
-        @get title: string,
-        @get message: string
-    }
-}
+//
 
 //---------------------------------------------------------------------------------
 // Token service
@@ -33,7 +25,7 @@ type AuthToken = {
 }
 
 type Belongs = {
-    @set(value) belongsTo: string?
+    @set(value) belongsTo: string
 }
 
 type TokenId = {
@@ -47,10 +39,10 @@ type Endpoints = {
 type Empty = {}
 
 service tokens [v2.0] {
-    authenticate: Authentication    => Token or Error       = POST[tokens] BODY[Authentication]
-    validate    : TokenId, Belongs  => Token or Error       = GET[tokens/<tokenId>?<belongsTo>]
-    validateOnly: TokenId, Belongs  => Empty or Error       = HEAD[tokens/<tokenId>?<belongsTo>]
-    endpoints   : Token, TokenId    => Endpoints or Error   = GET[/tokens/<tokenId>/endpoints] HEADER[AuthToken]
+    authenticate: Authentication   => Token     = POST[tokens] BODY[Authentication]
+    validate    : TokenId, Belongs => Token     = GET[tokens/<tokenId>?<belongsTo>]
+    validateOnly: TokenId, Belongs => Empty     = HEAD[tokens/<tokenId>?<belongsTo>]
+    endpoints   : Token, TokenId   => Endpoints = GET[/tokens/<tokenId>/endpoints] HEADER[AuthToken]
 }
 
 //---------------------------------------------------------------------------------

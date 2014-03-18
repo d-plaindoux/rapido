@@ -34,6 +34,9 @@ case class TypeOptional(value: Type) extends Type {
 
 sealed trait TypeAtomic extends Type
 
+// Internal use for virtual types validation
+case object TypeBot extends Type
+
 case object TypeBoolean extends TypeAtomic {
   override def toString: String = "bool"
 }

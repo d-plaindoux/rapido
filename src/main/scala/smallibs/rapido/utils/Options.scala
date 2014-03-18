@@ -50,6 +50,8 @@ object Options {
           nextOption(map ++ Map('api -> value), tail)
         case "--out" :: value :: tail =>
           nextOption(map ++ Map('out -> value), tail)
+        case "--debug" :: tail =>
+          nextOption(map ++ Map('debug -> "-"), tail)
         case "--" :: tail =>
           (map, nextArguments(Map(), tail))
         case option :: tail => println("Unknown option " + option)
