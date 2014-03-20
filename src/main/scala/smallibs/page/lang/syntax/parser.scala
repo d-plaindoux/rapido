@@ -73,7 +73,7 @@ object PageParser extends JavaTokenParsers {
     }
 
   private def use: Parser[Template] =
-    ("@USE" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? <~ spaces ^^ {
+    ("@USE" ~> "::" ~> ident) ~ (spaces ~> "[|" ~> innerTemplate <~ "|]").? ^^ {
       case n ~ t => Use(n, t)
     }
 

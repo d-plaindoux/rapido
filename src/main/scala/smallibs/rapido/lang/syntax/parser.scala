@@ -60,7 +60,7 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     }
 
   def typeDefinition: PackratParser[Type] =
-    (atomic | extensible) ~ ("*" | "?").? ^^ {
+    (atomic | array | extensible) ~ ("*" | "?").? ^^ {
       case t ~ None => t
       case t ~ Some("*") => TypeMultiple(t)
       case t ~ Some("?") => TypeOptional(t)
@@ -134,8 +134,13 @@ object RapidoParser extends JavaTokenParsers with PackratParsers {
     }
 
   def record: PackratParser[TypeRecord] =
-    "{" ~> repsep(virtual | attribute, ";" | ",") <~ "}" ^^ {
+    "{" ~> repsep(virtual | attribute, (";" | ",").?) <~ "}" ^^ {
       l => TypeObject(l.toMap)
+    }
+
+  def array: PackratParser[TypeMultiple] =
+    "[" ~> typeDefinition <~ "]" ^^ {
+      t => TypeMultiple(t)
     }
 
   def atomic: PackratParser[Type] =

@@ -19,17 +19,17 @@
     [|@OR
     [|
     def @VAL::get(self):
-        return self.get_value(self.data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
+        return self.get_value(self.__data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
 |][|
     def @VAL::set(self, value):
-        self.set_value(self.data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
+        self.set_value(self.__data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
         return self
 |][|
     def @VAL::set_get(self, value=None):
         if value is None:
-            return self.get_value(self.data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
+            return self.get_value(self.__data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
         else:
-            self.set_value(self.data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
+            self.set_value(self.__data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
             return self
 |][||]|]
 

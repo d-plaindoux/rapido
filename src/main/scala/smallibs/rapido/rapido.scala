@@ -153,8 +153,7 @@ object Rapido {
       val output = options get 'out match {
         case None => {
           (entry: (File, String)) =>
-            println("--- File " + entry._1 + " ----")
-            println(entry._2)
+            println("File " + entry._1 + " generation is correct")
         }
         case Some(name) => {
           (entry: (File, String)) =>
