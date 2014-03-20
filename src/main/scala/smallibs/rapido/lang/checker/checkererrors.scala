@@ -11,7 +11,7 @@ sealed trait CheckerError
 
 case class TypeConflicts(position: Position, name: String, positions: List[Position]) extends CheckerError
 
-case class TypeUndefined(position: Position, undefined: List[String]) extends CheckerError
+case class EntityUndefined(position: Position, undefined: List[String]) extends CheckerError
 
 case class PathError(position: Position, undefined: List[Path]) extends CheckerError
 
@@ -48,7 +48,7 @@ class ErrorAtPositionNotifier(position: Position, errors: List[CheckerError]) {
   def undefined(undefined: List[String]): ErrorAtPositionNotifier =
     undefined match {
       case Nil => this
-      case notEmpty => new ErrorAtPositionNotifier(position, errors :+ TypeUndefined(position, notEmpty))
+      case notEmpty => new ErrorAtPositionNotifier(position, errors :+ EntityUndefined(position, notEmpty))
     }
 
   def path(path: Option[Path]): ErrorAtPositionNotifier =

@@ -33,7 +33,7 @@ class TypeChecker(entities: Entities) {
 
   def missingDefinitions(value: Type): List[String] =
     value match {
-      case TypeBoolean | TypeNumber | TypeString => Nil
+      case TypeBoolean | TypeNumber | TypeString | TypeBot => Nil
       case TypeIdentifier(name) =>
         if (entities.types contains name) Nil else List(name)
       case TypeOptional(value) =>
@@ -146,7 +146,6 @@ class TypeChecker(entities: Entities) {
         }
       case _ => false
     }
-
 
   def validateType(value: Type): List[Path] =
     for (path <- virtualDefinitions(value)

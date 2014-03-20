@@ -30,7 +30,7 @@ import smallibs.rapido.lang.checker._
 import scala.util.parsing.json.JSONArray
 import scala.util.parsing.json.JSONObject
 import scala.Some
-import smallibs.rapido.lang.checker.TypeUndefined
+import smallibs.rapido.lang.checker.EntityUndefined
 import smallibs.rapido.lang.checker.TypeConflicts
 
 object Rapido {
@@ -98,8 +98,8 @@ object Rapido {
           error match {
             case TypeConflicts(p, n, lp) =>
               println(s"[error] type $n defined at line ${p.line} is also defined at line ${lp.map {_.line}.mkString(" and ")}")
-            case TypeUndefined(p, l) =>
-              println(s"[error] undefined type line ${p.line} ${l.mkString(" and ")}")
+            case EntityUndefined(p, l) =>
+              println(s"[error] defintion not found line ${p.line} ${l.mkString(" and ")}")
             case SubTypeError(p, l, r) =>
               println(s"[error] subtype error at line ${p.line}: ${l.toString} is not a subtype of ${r.toString}")
             case PathError(p, l) =>

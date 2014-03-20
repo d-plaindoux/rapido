@@ -50,12 +50,14 @@ class SpecificationChecker(entities: Entities) {
     // Check the specification right now
     val typeChecker = TypeChecker(entities)
     val serviceChecker = ServiceChecker(entities)
+    val clientChecker = ClientChecker(entities)
 
     // Missing definitions
     notifier.
       findWith(this.findConflicts).
       findWith(typeChecker.missingDefinitions).
       findWith(serviceChecker.missingDefinitions).
+      findWith(clientChecker.missingDefinitions).
       findWith(serviceChecker.typeSpecificationErrors).
       findWith(serviceChecker.pathSpecificationErrors)
   }
