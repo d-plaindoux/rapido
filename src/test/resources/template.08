@@ -1,4 +1,4 @@
-@MACRO::Types
+@DEFINE::Types
 [|@OR
 [|@VAL::bool[|bool|]|]
 [|@VAL::int[|int|]|]

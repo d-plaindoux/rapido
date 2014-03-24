@@ -6,19 +6,19 @@
     Path string and array representation
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PathAsString
+@DEFINE::PathAsString
   [|"@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
-@MACRO::PathVariable
+@DEFINE::PathVariable
     [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
 
 @[|------------------------------------------------------------------------------------------
     Attribute specified with GET, SET
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar, |]"@VAL::name"|]|]
+@DEFINE::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar, |]"@VAL::name"|]|]
 
-@MACRO::GenerateGetterSetter
+@DEFINE::GenerateGetterSetter
     [|@OR
     [|
   def @VAL::get: Try[JSon] =
@@ -34,7 +34,7 @@
     new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
 |][||]|]
 
-@MACRO::VariableGetterSetter
+@DEFINE::VariableGetterSetter
     [|@OPT
     [|@VAL::object[|@REP::attributes[|@USE::PushAccessVar@USE::GenerateGetterSetter@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
 
@@ -42,9 +42,9 @@
     Virtual variables
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushArrayVar[|@SET::ArrayVar[|@OPT[|@USE::ArrayVar, |]"@VAL::name"|]|]
+@DEFINE::PushArrayVar[|@SET::ArrayVar[|@OPT[|@USE::ArrayVar, |]"@VAL::name"|]|]
 
-@MACRO::VirtualType
+@DEFINE::VirtualType
     [|@OR
     [|@VAL::opt[|@USE::VirtualType|]|]
     [|@VAL::array[|@USE::VirtualType|]|]

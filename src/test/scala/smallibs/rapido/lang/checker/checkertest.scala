@@ -72,36 +72,36 @@ object CheckerTest extends Specification {
 
   "Entities universe" should {
 
-    "with only one definition has not conflict" in {
+    "accept only one definition with no conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       SpecificationChecker(e1).findConflicts(ErrorNotifier()).hasError mustEqual false
     }
 
-    "with two different definitions has not conflict" in {
+    "accept two different definitions with no conflict" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = TypeEntity("t2", TypeObject(Map()))
       SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual false
     }
 
-    "with two different types with the same name is a conflict" in {
+    "reject two different types with the same name" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = TypeEntity("t1", TypeObject(Map()))
       SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
 
-    "with two different type and service with the same name is a conflict" in {
+    "reject two different type and service with the same name" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = ServiceEntity("t1", Route("", Nil, Path(Nil)), Nil)
       SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
 
-    "with two different type and client with the same name is a conflict" in {
+    "reject two different type and client with the same name" in {
       val e1 = TypeEntity("t1", TypeObject(Map()))
       val e2 = ClientEntity("t1", Nil)
       SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
     }
 
-    "with two different service and client with the same name is a conflict" in {
+    "reject two different service and client with the same name" in {
       val e1 = ServiceEntity("t1", Route("", Nil, Path(Nil)), Nil)
       val e2 = ClientEntity("t1", Nil)
       SpecificationChecker(e1, e2).findConflicts(ErrorNotifier()).hasError mustEqual true
@@ -199,6 +199,19 @@ object CheckerTest extends Specification {
       val t1: TypeObject = TypeObject(Map("b" -> ConcreteTypeAttribute(None,TypeObject(Map("a" -> VirtualTypeAttribute(Path(Nil)))))))
       val t2: TypeObject = TypeObject(Map())
       TypeChecker().acceptType(t1, t2) mustEqual None
+    }
+  }
+
+  "Client definition" should {
+    "be accepted when services are defined" in {
+      val e1 = ServiceEntity("t1", Route("", Nil, Path(Nil)), Nil)
+      val e2 = ClientEntity("c1", List("t1"))
+      ClientChecker(e1, e2).missingDefinitions(ErrorNotifier()).hasError mustEqual false
+    }
+
+    "be accepted when services are not defined" in {
+      val e1 = ClientEntity("c1", List("t1"))
+      ClientChecker(e1).missingDefinitions(ErrorNotifier()).hasError mustEqual true
     }
   }
 }

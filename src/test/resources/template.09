@@ -1,11 +1,11 @@
-@MACRO::IsAtomicType
+@DEFINE::IsAtomicType
     [|@OR
     [|@VAL::bool[||]|]
     [|@VAL::int[||]|]
     [|@VAL::string[||]|]
     [|@VAL::opt[|@USE::IsAtomicType|]|]|]
 
-@MACRO::VariableTypes
+@DEFINE::VariableTypes
     [|@OR
     [|@VAL::opt[|@USE::VariableTypes|]|]
     [|@VAL::array[|@USE::VariableTypes|]|]

@@ -1,4 +1,4 @@
-@MACRO::parameters[|@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|.@VAL|]|]|]|]
+@DEFINE::parameters[|@REP(,)::values[|@OPT[|@VAL::object@REP::fields[|.@VAL|]|]|]|]
 @REP(,)::routes
     [|@VAL::path
         [|"@REP::values

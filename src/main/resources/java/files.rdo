@@ -1,0 +1,13 @@
+{
+    "arguments": [
+        "package"
+    ],
+    "files": [
+        "@OR[|@USE::package/|][|/@USE::lang/|]clients.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]services.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]types.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/__init__.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/services.py",
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/types.py"
+    ]
+}

@@ -6,13 +6,13 @@
     Higher attributes for object construction
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::Attributes
+@DEFINE::Attributes
     [|@OR
     [|@VAL::object[|[@REP(, )::attributes[|'@VAL::name'|]]|]|]
     [|[]|]|]
 
 
-@MACRO::Virtuals
+@DEFINE::Virtuals
     [|@OR
     [|@VAL::object[|[@REP(, )::virtual[|"@VAL::name"|]]|]|]
     [|[]|]|]
@@ -21,20 +21,20 @@
     Service and method parameters
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::ParameterNames
+@DEFINE::ParameterNames
     [|@REP::params[|, @VAL::name|]|]
 
 @[|------------------------------------------------------------------------------------------
      Path transformed using string interpolation and Path variables
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PathAsString
+@DEFINE::PathAsString
     [|"/@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
-@MACRO::PathVariable
+@DEFINE::PathVariable
     [|@REP(, )::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]|]
 
-@MACRO::PathVariables
+@DEFINE::PathVariables
     [|[@USE::PathVariable]|]
 
 @[|------------------------------------------------------------------------------------------

@@ -6,16 +6,16 @@
     Path array representation
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PathVariable
+@DEFINE::PathVariable
     [|@REP(, )::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]|]
 
 @[|------------------------------------------------------------------------------------------
     Attribute specified with GET, SET
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar, |]'@VAL::name'|]|]
+@DEFINE::PushAccessVar[|@SET::AccessVar[|@OPT[|@USE::AccessVar, |]'@VAL::name'|]|]
 
-@MACRO::GenerateGetterSetter
+@DEFINE::GenerateGetterSetter
     [|@OR
     [|
     def @VAL::get(self):
@@ -33,7 +33,7 @@
             return self
 |][||]|]
 
-@MACRO::VariableGetterSetter
+@DEFINE::VariableGetterSetter
     [|@OPT
     [|@VAL::object[|@REP::attributes[|@USE::GenerateGetterSetter@USE::PushAccessVar@VAL::type[|@USE::VariableGetterSetter|]|]|]|]|]
 
@@ -41,17 +41,17 @@
     Type parameters
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::SingleVariableAsParameter
+@DEFINE::SingleVariableAsParameter
     [|@OR
     [|, @VAL::set=None|]
     [|, @VAL::set_get=None|]
     [||]|]
 
-@MACRO::VariablesAsParameter
+@DEFINE::VariablesAsParameter
     [|@OPT
     [|@VAL::object[|@REP::attributes[|@USE::SingleVariableAsParameter@VAL::type[|@USE::VariablesAsParameter|]|]|]|]|]
 
-@MACRO::Types
+@DEFINE::Types
     [|@OR
     [|@VAL::bool[|True|]|]
     [|@VAL::int[|0|]|]
@@ -64,9 +64,9 @@
     Virtual variables
    ------------------------------------------------------------------------------------------|]
 
-@MACRO::PushArrayVar[|@SET::ArrayVar[|@OPT[|@USE::ArrayVar, |]'@VAL::name'|]|]
+@DEFINE::PushArrayVar[|@SET::ArrayVar[|@OPT[|@USE::ArrayVar, |]'@VAL::name'|]|]
 
-@MACRO::VirtualType
+@DEFINE::VirtualType
     [|@OR
     [|@VAL::opt[|@USE::VirtualType|]|]
     [|@VAL::array[|@USE::VirtualType|]|]

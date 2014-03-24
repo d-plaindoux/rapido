@@ -49,5 +49,7 @@ class ClientChecker(entities: Entities) {
 object ClientChecker {
   def apply(entities: Entities): ClientChecker = new ClientChecker(entities)
 
-  def apply(entities: List[Entity]): ClientChecker = new ClientChecker(Entities(entities))
+  def apply(entities: List[Entity]): ClientChecker = this(Entities(entities))
+
+  def apply(entities: Entity*): ClientChecker = this(entities.toList)
 }

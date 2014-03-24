@@ -82,7 +82,7 @@ object EngineGeneratorTest extends Specification {
     }
 
     "provides a result using Define and Use" in {
-      val template = PageParser.parseAll(PageParser.template, "@MACRO::keys[|@REP::keys[| - @VAL::name|]|]\n@USE::keys")
+      val template = PageParser.parseAll(PageParser.template, "@DEFINE::keys[|@REP::keys[| - @VAL::name|]|]\n@USE::keys")
       val engine = Engine(Provider.record(
         "keys" ->
           Provider.set(
