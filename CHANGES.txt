@@ -1,0 +1,8 @@
+0.1-alpha
+ - First version
+
+0.X
+ - clients definitions are now checked
+ - Syntax revisited semi-colon are optional
+ - Java back-end
+
