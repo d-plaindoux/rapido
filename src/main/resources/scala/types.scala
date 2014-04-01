@@ -67,7 +67,7 @@ import @OPT[|@USE::package.|]core.{JSon, ObjectData, GenericType, VirtualValue}
 // Type @VAL::name
 //------------------------------------------------------------------------------------------
 
-class @VAL::name(in: JSon) extends GenericType(in) {
+class @VAL::name(in: JSon) extends BasicType(in) {
   val virtualValues = Nil@VAL::definition[|@USE::VirtualType|]
   @VAL::definition[|@USE::VariableGetterSetter|]
 }

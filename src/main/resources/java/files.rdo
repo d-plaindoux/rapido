@@ -3,6 +3,7 @@
         "package"
     ],
     "files": [
+        "@OR[|@USE::package/|][|/@USE::lang/|]core/BasicService.java",
         "@OR[|@USE::package/|][|/@USE::lang/|]types.java",
         "@OR[|@USE::package/|][|/@USE::lang/|]services.java"
     ]

@@ -47,7 +47,7 @@ trait Type {
 
 case class VirtualValue(path: List[String], model: String, values: List[List[String]])
 
-abstract class GenericType(in: JSon) extends Type {
+abstract class BasicType(in: JSon) extends Type {
   val virtualValues: List[VirtualValue]
 
   val data = in
