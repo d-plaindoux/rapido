@@ -3,8 +3,9 @@
         "package"
     ],
     "files": [
-        "@OR[|@USE::package/|][|/@USE::lang/|]core/BasicService.java",
-        "@OR[|@USE::package/|][|/@USE::lang/|]types.java",
-        "@OR[|@USE::package/|][|/@USE::lang/|]services.java"
+        "@OR[|src/main/java/@USE::package/|][|/@USE::lang/|]core/BasicService.java",
+        "@OR[|src/main/java/@USE::package/|][|/@USE::lang/|]core/JSon.java",
+        "@OR[|src/main/java/@USE::package/|][|/@USE::lang/|]types.java",
+        "@OR[|src/main/java/@USE::package/|][|/@USE::lang/|]services.java"
     ]
 }

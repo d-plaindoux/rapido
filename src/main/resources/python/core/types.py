@@ -17,7 +17,7 @@
 #
 
 
-class Type:
+class BasicType:
 
     def __init__(self):
         self.data = None

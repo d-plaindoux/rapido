@@ -56,7 +56,7 @@
     [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
         [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual[| :+
-        VirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable)) |]|]|]
+        new BasicType.VirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable)) |]|]|]
     [||]|]
 
 @[|------------------------------------------------------------------------------------------

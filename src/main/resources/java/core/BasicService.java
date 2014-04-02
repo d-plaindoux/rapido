@@ -96,7 +96,7 @@ public abstract class BasicService {
 
     protected JSon mergeData(List<Type> data) {
         final AtomicReference<JSon> result = new AtomicReference<>(JSon.apply(new HashMap<String, JSon>()));
-        data.stream().forEach(e -> result.set(e.overrides(result.get())));
+        data.stream().forEach(e -> result.set(e.toJson().overrides(result.get())));
         return result.get();
     }
 }

@@ -83,10 +83,10 @@
 Types:@REP(, )::types[|@VAL::name|]
 """
 
-from @OPT[|@USE::package.|]core.types import Type
+from @OPT[|@USE::package.|]core.types import BasicType
 
 @REP::types[|
-class @VAL::name(Type):
+class @VAL::name(BasicType):
 
     def __init__(self, data=None):
         Type.__init__(self)
