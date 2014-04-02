@@ -16,13 +16,14 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package @OPT[|@USE::package.|]core
+@OPT[|@USE::package.|]core
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public abstract class BasicService {
 
@@ -42,7 +43,7 @@ public abstract class BasicService {
         final URI uri = UriBuilder.fromUri(url).build();
         final String inputData = new ObjectData(body).toJSonString();
 
-        AtomicReference<WebTarget> builder =
+        final AtomicReference<WebTarget> builder =
                 new AtomicReference<>(client.
                         target(uri).
                         path(path).
@@ -51,7 +52,8 @@ public abstract class BasicService {
         params.entrySet().stream().
                 forEach(e -> builder.set(builder.get().queryParam(e.getKey(), e.getValue().toString())));
 
-        AtomicReference<Invocation.Builder> request = new AtomicReference<>(builder.get().request());
+        final AtomicReference<Invocation.Builder> request =
+                new AtomicReference<>(builder.get().request());
 
         if (header.isEmpty()) {
             request.set(request.get().header("Content-Type", "application/json"));
@@ -73,30 +75,28 @@ public abstract class BasicService {
                 throw new UnsupportedOperationException(operation);
         }
     }
-/*
+
     protected String getPath(JSon data, String pattern, List<List<String>> attributes) {
-        (attributes map (data getValue _)).foldRight[Try[List[JSon]]](Success(Nil)) {
-            (te, tl) => for (l <- tl; e <- te) yield e :: l
-        } map {
-            pattern.format(_: _*)
-        }
+        final List<String> values = attributes.stream().
+                map(e -> getValue(data, e)).
+                collect(Collectors.toList());
+
+        return String.format(pattern, values.toArray(new String[values.size()]));
     }
 
     protected JSon getValue(JSon data, List<String> path) {
         return data.getValue(path);
     }
 
-    protected Map<String,JSon> getValues(data: JSon, path: List[String]) {
-        path.foldRight[Try[Map[String, JSon]]](Success(Map[String, JSon]())) {
-            (current, tresult) =>
-            for (result <- tresult; value <- data getValue List(current)) yield result + (current -> value)
-        }
+    protected Map<String, JSon> getValues(JSon data, List<String> path) {
+        final Map<String, JSon> map = Collections.emptyMap();
+        path.stream().forEach(e -> map.put(e, getValue(data, Arrays.asList(e))));
+        return map;
     }
 
-    protected JSon mergeData(data: List[Type]) {
-        data.foldRight[Try[JSon]](Success(ObjectData(Map()))) {
-            (te, tm) => for (e <- te.toJson; m <- tm) yield e overrides m
-        }
+    protected JSon mergeData(List<Type> data) {
+        final AtomicReference<JSon> result = new AtomicReference<>(JSon.apply(new HashMap<String, JSon>()));
+        data.stream().forEach(e -> result.set(e.overrides(result.get())));
+        return result.get();
     }
-*/
 }
