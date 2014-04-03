@@ -39,7 +39,7 @@ object Rapido {
     Usage: rapido [--debug] --lang [python|scala|java] --api filename [--out filename] [-- <name>=<value>*]
               """
 
-  def generateAll(arguments: Map[String, String], provider: DataProvider, outputDirectory: String => File, inputDirectory: String => File, files: Any): List[(File, String)] =
+  def generateAll(arguments: Map[String, String], provider: DataProvider, inputDirectory: String => File, outputDirectory: String => File, files: Any): List[(File, String)] =
     files match {
       case file: String =>
         val fileName = inputDirectory(file).getPath
@@ -53,11 +53,11 @@ object Rapido {
         List((outputDirectory(file), Engine(provider, arguments).generate(template.get).get))
       case JSONArray(l) =>
         l.foldRight[List[(File, String)]](Nil) {
-          (e, l) => l ++ generateAll(arguments, provider, outputDirectory, inputDirectory, e)
+          (e, l) => l ++ generateAll(arguments, provider, inputDirectory, outputDirectory, e)
         }
       case JSONObject(l) =>
         l.foldRight[List[(File, String)]](Nil) {
-          (e, l) => l ++ generateAll(arguments, provider, outputDirectory, inputDirectory, e._2)
+          (e, l) => l ++ generateAll(arguments, provider, inputDirectory, outputDirectory, e._2)
         }
       case _ =>
         Nil
@@ -134,16 +134,16 @@ object Rapido {
     }
 
     val outputNameGenerator = (input: String) => {
-        val template = PageParser.parseAll(PageParser.template, input).get
-        new File(Engine(Provider.empty, arguments).generate(template).get)
-      }
+      val template = PageParser.parseAll(PageParser.template, input).get
+      new File(Engine(Provider.empty, arguments).generate(template).get)
+    }
 
     val inputNameGenerator = (input: String) => {
       val template = PageParser.parseAll(PageParser.template, input).get
       new File(Engine(Provider.empty, Map("lang" -> lang)).generate(template).get)
     }
 
-    generateAll(arguments, RapidoProvider.entities(specification.get), outputNameGenerator, inputNameGenerator, files)
+    generateAll(arguments, RapidoProvider.entities(specification.get), inputNameGenerator, outputNameGenerator, files)
   }
 
   def main(args: Array[String]) = {
