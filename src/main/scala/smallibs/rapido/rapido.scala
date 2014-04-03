@@ -36,7 +36,7 @@ import smallibs.rapido.lang.checker.TypeConflicts
 object Rapido {
 
   val usage = """
-    Usage: rapido [--debug] --lang [python|scala] --api filename [--out filename] [-- <name>=<value>*]
+    Usage: rapido [--debug] --lang [python|scala|java] --api filename [--out filename] [-- <name>=<value>*]
               """
 
   def generateAll(arguments: Map[String, String], provider: DataProvider, outputDirectory: String => File, inputDirectory: String => File, files: Any): List[(File, String)] =
@@ -97,7 +97,11 @@ object Rapido {
         for (error <- errors)
           error match {
             case TypeConflicts(p, n, lp) =>
-              println(s"[error] type $n defined at line ${p.line} is also defined at line ${lp.map {_.line}.mkString(" and ")}")
+              println(s"[error] type $n defined at line ${p.line} is also defined at line ${
+                lp.map {
+                  _.line
+                }.mkString(" and ")
+              }")
             case EntityUndefined(p, l) =>
               println(s"[error] defintion not found line ${p.line} ${l.mkString(" and ")}")
             case SubTypeError(p, l, r) =>
@@ -164,9 +168,12 @@ object Rapido {
         }
       }
 
-      generate(arguments, (options get 'api).get, (options get 'lang).getOrElse {
-        throw new Exception("option --lang must be specified")
-      }).foreach(output)
+      generate(arguments, (options get 'api).getOrElse {
+        throw new Exception("option --api must be specified")
+      },
+        (options get 'lang).getOrElse {
+          throw new Exception("option --lang must be specified")
+        }).foreach(output)
     } catch {
       case e: Throwable =>
         println(e.getMessage)
