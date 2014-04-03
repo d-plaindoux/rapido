@@ -133,14 +133,10 @@ object Rapido {
       throw new Exception("JSON must provides files i.e. { files: [ ... ], ... } ")
     }
 
-    // TODO - Clean this ugly code
-    val outputNameGenerator = arguments get "package" match {
-      case Some(packageName) => (input: String) => {
+    val outputNameGenerator = (input: String) => {
         val template = PageParser.parseAll(PageParser.template, input).get
-        new File(Engine(Provider.empty, Map("package" -> packageName)).generate(template).get)
+        new File(Engine(Provider.empty, arguments).generate(template).get)
       }
-      case None => (input: String) => new File(input)
-    }
 
     val inputNameGenerator = (input: String) => {
       val template = PageParser.parseAll(PageParser.template, input).get

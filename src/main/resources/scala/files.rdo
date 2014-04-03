@@ -1,14 +1,15 @@
 {
     "arguments": [
+        "project",
         "package"
     ],
     "files": [
-        "@OR[|@USE::package[||]|][|/@USE::lang/|]build.sbt",
-        "@OR[|src/main/scala/@USE::package/|][|/@USE::lang/|]core/JSon.scala",
-        "@OR[|src/main/scala/@USE::package/|][|/@USE::lang/|]core/BasicService.scala",
-        "@OR[|src/main/scala/@USE::package/|][|/@USE::lang/|]core/Type.scala",
-        "@OR[|src/main/scala/@USE::package/|][|/@USE::lang/|]clients.scala",
-        "@OR[|src/main/scala/@USE::package/|][|/@USE::lang/|]types.scala",
-        "@OR[|src/main/scala/@USE::package/|][|/@USE::lang/|]services.scala"
+        "@OR[|@USE::project|][|/@USE::lang/|]build.sbt",
+        "@OR[|@USE::project/src/main/scala/@USE::package/|][|/@USE::lang/|]core/JSon.scala",
+        "@OR[|@USE::project/src/main/scala/@USE::package/|][|/@USE::lang/|]core/BasicService.scala",
+        "@OR[|@USE::project/src/main/scala/@USE::package/|][|/@USE::lang/|]core/Type.scala",
+        "@OR[|@USE::project/src/main/scala/@USE::package/|][|/@USE::lang/|]clients.scala",
+        "@OR[|@USE::project/src/main/scala/@USE::package/|][|/@USE::lang/|]types.scala",
+        "@OR[|@USE::project/src/main/scala/@USE::package/|][|/@USE::lang/|]services.scala"
     ]
 }

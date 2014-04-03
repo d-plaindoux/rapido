@@ -1,4 +1,4 @@
-name := "@USE::package"
+name := "@USE::project"
 
 scalaVersion := "2.10.2"
 
