@@ -35,9 +35,10 @@ import smallibs.rapido.lang.checker.TypeConflicts
 
 object Rapido {
 
-  val usage = """
+  val usage =
+    """
     Usage: rapido [--debug] --lang [python|scala|java] --api filename [--out filename] [-- <name>=<value>*]
-              """
+    """
 
   def generateAll(arguments: Map[String, String], provider: DataProvider, inputDirectory: String => File, outputDirectory: String => File, files: Any): List[(File, String)] =
     files match {

@@ -55,24 +55,28 @@
     [|@VAL::opt[|@USE::VirtualType|]|]
     [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
-        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual[| :+
-        new BasicType.VirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable)) |]|]|]
+        [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual[|.append(new BasicType.VirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable))) |]|]|]
     [||]|]
 
 @[|------------------------------------------------------------------------------------------
     Main for types generation
    ------------------------------------------------------------------------------------------|]
 
-@OPT[|package @USE::package|]
+@OPT[|package @USE::package;|]
 
-import @OPT[|@USE::package.|]core.*
+import static @OPT[|@USE::package.|]core.collections.List;
+import static @OPT[|@USE::package.|]core.collections.emptyList;
+import static @OPT[|@USE::package.|]core.collections.Map;
 
-interface Types {
+import @OPT[|@USE::package.|]core.BasicType;
+import @OPT[|@USE::package.|]core.JSon;
+
+public interface types {
 
 @REP::types[|
     @SET::this[|@VAL::name|]
     public static @VAL::name @VAL::name() {
-        return new @VAL::name(ObjectData(Map()));
+        return new @VAL::name(JSon.apply(Map()));
     }
 
     public static @VAL::name @VAL::name(JSon data) {
@@ -82,7 +86,7 @@ interface Types {
     public static class @VAL::name extends BasicType {
 
       private @VAL::name(JSon in) {
-        super(in, Nil@VAL::definition[|@USE::VirtualType|])
+        super(in, emptyList(BasicType.VirtualValue.class)@VAL::definition[|@USE::VirtualType|]);
       }
 
       @VAL::definition[|@USE::VariableGetterSetter|]

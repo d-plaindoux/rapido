@@ -16,12 +16,12 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-@OPT[|@USE::package.|]core;
+package @OPT[|@USE::package.|]core;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-interface JSon {
+public interface JSon {
 
     Object toRaw();
 
@@ -249,4 +249,9 @@ interface JSon {
             throw new IllegalArgumentException("Not a JSon well formed formula %s");
         }
     }
+
+    static JSon fromString(String string) {
+        return null;
+    }
 }
+

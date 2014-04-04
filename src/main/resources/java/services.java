@@ -49,11 +49,14 @@
  * Services:@REP(, )::services[|@VAL::name|]
  */
 
-@OPT[|package @USE::package|]
+@OPT[|package @USE::package;|]
 
-import @OPT[|@USE::package.|]core.BasicService
+import static @OPT[|@USE::package.|]core.collections.List;
+import static @OPT[|@USE::package.|]core.collections.Map;
 
-interface Services {
+import @OPT[|@USE::package.|]core.BasicService;
+
+public interface services {
 @REP::services[|
     /*
      * Service @VAL::name
@@ -69,25 +72,25 @@ interface Services {
         // Public behaviors
         //
         @REP(  )::entries[|
-        public @VAL::signature::output::name @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::name: @VAL::type::name|])|] {
-            final JSon data = mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ @USE::serviceParameters);
-            final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|]@OR
-            [|@VAL::params[|;
-            final JSon paramsObject = @VAL::name.fromData(data).toJson;
-            final Map<String,JSon> params = getValues(paramsObject, @USE::Attributes ::: @USE::Virtuals)|]|][||]@OR
-            [|@VAL::body[|;
-            final JSon bodyObject = @VAL::name.fromData(data).toJson;
-            final Map<String,JSon> body = getValues(bodyObject, @USE::Attributes ::: @USE::Virtuals)|]|][||]@OR
-            [|@VAL::header[|;
-            final JSon headerObject = @VAL::name.fromData(data).toJson;
-            final Map<String,JSon> header = getValues(headerObject, @USE::Attributes ::: @USE::Virtuals)|]|][||]);
-            return new @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|null|] ,@OR[|@VAL::body[|body|]|][|null|] ,@OR[|@VAL::header[|header|]|][|null|])));
+        public @VAL::signature::output::name @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::type::name @VAL::name|])|] {
+            final JSon data = mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]).append(@USE::serviceParameters));
+            final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables);|]|][|Success("");|]@OR
+            [|@VAL::params[|
+            final JSon paramsObject = @VAL::name.fromData(data).toJson();
+            final Map<String,JSon> params = getValues(paramsObject, @USE::Attributes.append(@USE::Virtuals));|]|][||]@OR
+            [|@VAL::body[|
+            final JSon bodyObject = @VAL::name.fromData(data).toJson();
+            final Map<String,JSon> body = getValues(bodyObject, @USE::Attributes.append(@USE::Virtuals));|]|][||]@OR
+            [|@VAL::header[|
+            final JSon headerObject = @VAL::name.fromData(data).toJson();
+            final Map<String,JSon> header = getValues(headerObject, @USE::Attributes.append(@USE::Virtuals));|]|][||]
+            return new @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|null|] ,@OR[|@VAL::body[|body|]|][|null|] ,@OR[|@VAL::header[|header|]|][|null|]));
         }
     |]
     }
 
-    public static @VAL::name[|@VALService|](url:String) {
-       return new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|])
+    public static @VAL::name[|@VALService|] @VAL::name[|@VALService|](String url) {
+       return new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|]);
     }
 |]
 }

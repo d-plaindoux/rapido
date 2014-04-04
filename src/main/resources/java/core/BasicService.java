@@ -16,8 +16,12 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-@OPT[|@USE::package.|]core
+package @OPT[|@USE::package.|]core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -41,7 +45,7 @@ public abstract class BasicService {
     protected JSon httpRequest(String servicePath, String operation, Map<String, JSon> params, Map<String, JSon> body, Map<String, JSon> header) {
         final Client client = ClientBuilder.newClient();
         final URI uri = UriBuilder.fromUri(url).build();
-        final String inputData = new ObjectData(body).toJSonString();
+        final String inputData = new JSon.ObjectData(body).toJSonString();
 
         final AtomicReference<WebTarget> builder =
                 new AtomicReference<>(client.
@@ -78,8 +82,8 @@ public abstract class BasicService {
 
     protected String getPath(JSon data, String pattern, List<List<String>> attributes) {
         final List<String> values = attributes.stream().
-                map(e -> getValue(data, e)).
-                collect(Collectors.toList());
+            map(e -> getValue(data, e).toString()).
+            collect(Collectors.toList());
 
         return String.format(pattern, values.toArray(new String[values.size()]));
     }
@@ -94,9 +98,10 @@ public abstract class BasicService {
         return map;
     }
 
-    protected JSon mergeData(List<Type> data) {
+    protected JSon mergeData(List<BasicType> data) {
         final AtomicReference<JSon> result = new AtomicReference<>(JSon.apply(new HashMap<String, JSon>()));
         data.stream().forEach(e -> result.set(e.toJson().overrides(result.get())));
         return result.get();
     }
+
 }

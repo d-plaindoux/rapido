@@ -16,24 +16,25 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package
+package @OPT[|@USE::package.|]core;
+
+import static @OPT[|@USE::package.|]core.collections.List;
+import static @OPT[|@USE::package.|]core.collections.Map;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@OPT[|@USE::package.|]core;
-
 public abstract class BasicType {
 
     public static class VirtualValue {
-        private final List<String> path;
-        private final String model;
-        private final List<List<String>> values;
+        public final List<String> path;
+        public final String pattern;
+        public final List<List<String>> attributes;
 
-        public VirtualValue(List<String> path, String model, List<List<String>> values) {
+        public VirtualValue(List<String> path, String pattern, List<List<String>> attributes) {
             this.path = path;
-            this.model = model;
-            this.values = values;
+            this.pattern = pattern;
+            this.attributes = attributes;
         }
     }
 
@@ -50,25 +51,23 @@ public abstract class BasicType {
     }
 
     protected JSon setValue(List<String> path, JSon value) {
-        return data.setValue(path, value)
+        return data.setValue(path, value);
     }
 
     private String getVirtualValue(String pattern, List<List<String>> attributes) {
-        final List<String> parameters = attributes.stream().map(l -> data.getValue(l));
-        return String.format(pattern, parameters.toString[parameters.size()]);
-        s
+        final List<String> parameters = List();
+        attributes.forEach(l -> parameters.add(data.getValue(l).toString()));
+
+        return String.format(pattern, parameters.toArray(new String[parameters.size()]));
     }
 
     protected JSon setVirtualValue(VirtualValue value) {
-        return setValue(value.path, StringData(getVirtualValue(value.pattern, value.attributes)));
+        return setValue(value.path, JSon.apply(getVirtualValue(value.pattern, value.attributes)));
     }
 
     public JSon toJson() {
-        final List<JSon> values = virtualValues.stream().
-                map(v -> setValue(v)).collect(Collectors.toList());
-
         final AtomicReference<JSon> result = new AtomicReference<>(data);
-        values.stream().forEach(v -> result.set(v.overrides(result.get())));
+        virtualValues.forEach(v -> result.set(setVirtualValue(v).overrides(result.get())));
 
         return result.get();
     }

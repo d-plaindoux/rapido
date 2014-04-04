@@ -5,7 +5,9 @@
     ],
     "files": [
         "@OR[|@USE::project/|][|/@USE::lang/|]pom.xml",
+        "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/collections.java",
         "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/BasicService.java",
+        "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/BasicType.java",
         "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/JSon.java",
         "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]types.java",
         "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]services.java"
