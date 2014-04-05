@@ -18,14 +18,16 @@
 
 package @OPT[|@USE::package.|]core;
 
+import static toto.core.collections.List;
+import static toto.core.collections.Map;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -80,25 +82,24 @@ public abstract class BasicService {
         }
     }
 
-    protected String getPath(JSon data, String pattern, List<List<String>> attributes) {
-        final List<String> values = attributes.stream().
-            map(e -> getValue(data, e).toString()).
-            collect(Collectors.toList());
+    static protected String getPath(JSon data, String pattern, List<List<String>> attributes) {
+        final List<String> values = List();
+        attributes.forEach(e -> values.add(getValue(data, e).toString()));
 
         return String.format(pattern, values.toArray(new String[values.size()]));
     }
 
-    protected JSon getValue(JSon data, List<String> path) {
+    static protected JSon getValue(JSon data, List<String> path) {
         return data.getValue(path);
     }
 
-    protected Map<String, JSon> getValues(JSon data, List<String> path) {
-        final Map<String, JSon> map = Collections.emptyMap();
-        path.stream().forEach(e -> map.put(e, getValue(data, Arrays.asList(e))));
+    static protected Map<String, JSon> getValues(JSon data, List<String> path) {
+        final Map<String, JSon> map = Map();
+        path.stream().forEach(e -> map.put(e, getValue(data, List(e))));
         return map;
     }
 
-    protected JSon mergeData(List<BasicType> data) {
+    static protected JSon mergeData(List<? extends BasicType> data) {
         final AtomicReference<JSon> result = new AtomicReference<>(JSon.apply(new HashMap<String, JSon>()));
         data.stream().forEach(e -> result.set(e.toJson().overrides(result.get())));
         return result.get();

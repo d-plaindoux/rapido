@@ -52,9 +52,14 @@
 @OPT[|package @USE::package;|]
 
 import static @OPT[|@USE::package.|]core.collections.List;
+import static @OPT[|@USE::package.|]core.collections.emptyList;
 import static @OPT[|@USE::package.|]core.collections.Map;
 
 import @OPT[|@USE::package.|]core.BasicService;
+import @OPT[|@USE::package.|]core.JSon;
+
+@REP::types[|import static @OPT[|@USE::package.|]types.@VAL::name;
+|]
 
 public interface services {
 @REP::services[|
@@ -76,15 +81,15 @@ public interface services {
             final JSon data = mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]).append(@USE::serviceParameters));
             final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables);|]|][|Success("");|]@OR
             [|@VAL::params[|
-            final JSon paramsObject = @VAL::name.fromData(data).toJson();
-            final Map<String,JSon> params = getValues(paramsObject, @USE::Attributes.append(@USE::Virtuals));|]|][||]@OR
+            final JSon paramsObject = @VAL::name(data).toJson();
+            final Map<String,JSon> params = getValues(paramsObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
             [|@VAL::body[|
-            final JSon bodyObject = @VAL::name.fromData(data).toJson();
-            final Map<String,JSon> body = getValues(bodyObject, @USE::Attributes.append(@USE::Virtuals));|]|][||]@OR
+            final JSon bodyObject = @VAL::name(data).toJson();
+            final Map<String,JSon> body = getValues(bodyObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
             [|@VAL::header[|
-            final JSon headerObject = @VAL::name.fromData(data).toJson();
-            final Map<String,JSon> header = getValues(headerObject, @USE::Attributes.append(@USE::Virtuals));|]|][||]
-            return new @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|null|] ,@OR[|@VAL::body[|body|]|][|null|] ,@OR[|@VAL::header[|header|]|][|null|]));
+            final JSon headerObject = @VAL::name(data).toJson();
+            final Map<String,JSon> header = getValues(headerObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]
+            return @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|null|] ,@OR[|@VAL::body[|body|]|][|null|] ,@OR[|@VAL::header[|header|]|][|null|]));
         }
     |]
     }
