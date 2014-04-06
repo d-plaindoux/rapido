@@ -18,6 +18,10 @@
 
 package @OPT[|@USE::package.|]core;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -250,8 +254,36 @@ public interface JSon {
         }
     }
 
+    static JSon transform(JsonElement element) {
+        if (element.isJsonObject()) {
+            final HashMap<String, Object> map = new HashMap<>();
+            element.getAsJsonObject().entrySet().
+                    forEach(e -> map.put(e.getKey(), transform(e.getValue())));
+
+            return apply(map);
+        } else if (element.isJsonArray()) {
+            final ArrayList<JSon> array = new ArrayList<>();
+            element.getAsJsonArray().iterator().
+                    forEachRemaining(e -> array.add(transform(e)));
+
+            return apply(array);
+        } else if (element.isJsonNull()) {
+            return apply(null);
+        } else if (element instanceof JsonPrimitive) {
+            final JsonPrimitive primitive = (JsonPrimitive) element;
+            if (primitive.isBoolean()) {
+                return apply(primitive.getAsBoolean());
+            } else if (primitive.isNumber()) {
+                return apply(primitive.getAsLong());
+            } else if (primitive.isString()) {
+                return apply(primitive.getAsString());
+            }
+        }
+
+        throw new IllegalAccessError();
+    }
+
     static JSon fromString(String string) {
-        return null;
+        return transform(new JsonParser().parse(string));
     }
 }
-
