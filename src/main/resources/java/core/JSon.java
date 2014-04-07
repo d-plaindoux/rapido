@@ -45,7 +45,7 @@ public interface JSon {
         // TODO: Check if any foldRight method exists ...
         JSon newResult = result;
         for (int i = path.size(); i > 0; i--) {
-            final Map<String, JSon> map = Collections.emptyMap();
+            final Map<String, JSon> map = collections.Map();
             map.put(path.get(i - 1), newResult);
             newResult = new ObjectData(map);
         }
@@ -114,6 +114,14 @@ public interface JSon {
 
         private NumberData(Long s) {
             this.s = s;
+        }
+
+        private NumberData(Integer s) {
+            this.s = Integer.toUnsignedLong(s);
+        }
+
+        private NumberData(Double s) {
+            this.s = Double.doubleToRawLongBits(s);
         }
 
         public Object toRaw() {
@@ -203,14 +211,15 @@ public interface JSon {
 
             final Map<String, JSon> r = new HashMap<>();
 
-            intersection.stream().forEach(e -> r.put(e, objectData.data.get(e)));
+            intersection.stream().
+                    forEach(e -> r.put(e, objectData.data.get(e).overrides(data.get(e))));
 
             objectData.data.entrySet().stream().
                     filter(e -> !intersection.contains(e.getKey())).
                     forEach(e -> r.put(e.getKey(), objectData.data.get(e.getKey())));
             data.entrySet().stream().
                     filter(e -> !intersection.contains(e.getKey())).
-                    forEach(e -> r.put(e.getKey(), objectData.data.get(e.getKey())));
+                    forEach(e -> r.put(e.getKey(), data.get(e.getKey())));
 
             return new ObjectData(r);
         }
@@ -232,8 +241,10 @@ public interface JSon {
         } else if (object instanceof Boolean) {
             return new BooleanData(Boolean.class.cast(object));
         } else if (object instanceof Integer) {
-            return new NumberData(Long.class.cast(object));
+            return new NumberData(Integer.class.cast(object));
         } else if (object instanceof Double) {
+            return new NumberData(Double.class.cast(object));
+        } else if (object instanceof Long) {
             return new NumberData(Long.class.cast(object));
         } else if (object instanceof List) {
             @SuppressWarnings("unchecked")
@@ -250,33 +261,33 @@ public interface JSon {
 
             return new ObjectData(result);
         } else {
-            throw new IllegalArgumentException("Not a JSon well formed formula %s");
+            throw new IllegalArgumentException(String.format("Not a JSon well formed formula %s", object.toString()));
         }
     }
 
-    static JSon transform(JsonElement element) {
+    static Object transform(JsonElement element) {
         if (element.isJsonObject()) {
             final HashMap<String, Object> map = new HashMap<>();
             element.getAsJsonObject().entrySet().
                     forEach(e -> map.put(e.getKey(), transform(e.getValue())));
 
-            return apply(map);
+            return map;
         } else if (element.isJsonArray()) {
-            final ArrayList<JSon> array = new ArrayList<>();
+            final ArrayList<Object> array = new ArrayList<>();
             element.getAsJsonArray().iterator().
                     forEachRemaining(e -> array.add(transform(e)));
 
-            return apply(array);
+            return array;
         } else if (element.isJsonNull()) {
             return apply(null);
         } else if (element instanceof JsonPrimitive) {
             final JsonPrimitive primitive = (JsonPrimitive) element;
             if (primitive.isBoolean()) {
-                return apply(primitive.getAsBoolean());
+                return primitive.getAsBoolean();
             } else if (primitive.isNumber()) {
-                return apply(primitive.getAsLong());
+                return primitive.getAsLong();
             } else if (primitive.isString()) {
-                return apply(primitive.getAsString());
+                return primitive.getAsString();
             }
         }
 
@@ -284,6 +295,6 @@ public interface JSon {
     }
 
     static JSon fromString(String string) {
-        return transform(new JsonParser().parse(string));
+        return apply(transform(new JsonParser().parse(string)));
     }
 }
