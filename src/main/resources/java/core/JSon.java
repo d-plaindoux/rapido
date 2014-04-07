@@ -45,7 +45,7 @@ public interface JSon {
         collections.List<String> list = collections.<String>List().append(path);
 
         return list.foldRigth(result).
-                apply((s, r) -> new ObjectData(collections.<String, JSon>Map().append(collections.C(s, r)))).
+                apply((s, r) -> new ObjectData(collections.<String, JSon>Map().append(s, r))).
                 overrides(this);
     }
 

@@ -82,13 +82,13 @@ public interface services {
             final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables);|]|][|Success("");|]@OR
             [|@VAL::params[|
             final JSon paramsObject = @VAL::name(data).toJson();
-            final Map<String,JSon> params = getValues(paramsObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
+            final Map<String, JSon> params = getValues(paramsObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
             [|@VAL::body[|
             final JSon bodyObject = @VAL::name(data).toJson();
-            final Map<String,JSon> body = getValues(bodyObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
+            final Map<String, JSon> body = getValues(bodyObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
             [|@VAL::header[|
             final JSon headerObject = @VAL::name(data).toJson();
-            final Map<String,JSon> header = getValues(headerObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]
+            final Map<String, JSon> header = getValues(headerObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]
             return @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|null|] ,@OR[|@VAL::body[|body|]|][|null|] ,@OR[|@VAL::header[|header|]|][|null|]));
         }
     |]

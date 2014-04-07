@@ -3,25 +3,13 @@ package @OPT[|@USE::package.|]core;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public interface collections {
 
-    static <K, E> C<K, E> C(K k, E e) {
-        return new C<>(k, e);
-    }
-
-    class C<K, E> {
-        public final K key;
-        public final E value;
-
-        public C(K key, E value) {
-            this.key = key;
-            this.value = value;
-        }
-    }
-
     static <E> List<E> emptyList(Class<E> c) {
-        return new List<E>();
+        return new List<>();
     }
 
     static <E> List<E> List(E... e) {
@@ -32,7 +20,7 @@ public interface collections {
 
     class List<E> extends ArrayList<E> {
 
-        public List<E> append(List<E> xl) {
+        public List<E> append(java.util.List<E> xl) {
             final List<E> list = List();
             list.addAll(this);
             list.addAll(xl);
@@ -60,19 +48,18 @@ public interface collections {
 
     class Map<K, E> extends HashMap<K, E> {
 
-        public Map<K, E> append(Map<K, E> xm) {
+        public Map<K, E> append(java.util.Map<K, E> xm) {
             final Map<K, E> map = Map();
             map.putAll(this);
             map.putAll(xm);
             return map;
         }
 
-        public Map<K, E> append(C<K,E>... v) {
+        public Map<K, E> append(K k, E e) {
             final Map<K, E> map = Map();
             map.putAll(this);
-            List(v).stream().forEach(c -> map.put(c.key, c.value));
+            map.put(k, e);
             return map;
         }
     }
-
 }
