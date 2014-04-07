@@ -31,13 +31,23 @@ public interface collections {
             return append(List(es));
         }
 
-        public <R> Function<BiFunction<E, R, R>, R> foldRigth(R r) {
-            return (BiFunction<E, R, R> f) -> {
-                R result = r;
-                for (int i = this.size(); i > 0; i--) {
-                    result = f.apply(this.get(i - 1), result);
+        public <R> Function<BiFunction<R, E, R>, R> foldLeft(R r) {
+            return f -> {
+                R accumulator = r;
+                for (int i = 0; i < this.size(); i--) {
+                    accumulator = f.apply(accumulator, this.get(i));
                 }
-                return result;
+                return accumulator;
+            };
+        }
+
+        public <R> Function<BiFunction<E, R, R>, R> foldRigth(R r) {
+            return f -> {
+                R accumulator = r;
+                for (int i = this.size(); i > 0; i--) {
+                    accumulator = f.apply(this.get(i - 1), accumulator);
+                }
+                return accumulator;
             };
         }
     }

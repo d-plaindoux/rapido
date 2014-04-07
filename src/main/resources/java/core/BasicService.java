@@ -16,20 +16,20 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package @OPT[|@USE::package.|]core;
+package@OPT[|@USE::package.|]core;
 
-import static toto.core.collections.List;
-import static toto.core.collections.Map;
+        import static toto.core.collections.List;
+        import static toto.core.collections.Map;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+        import java.util.ArrayList;
+        import java.util.Arrays;
+        import java.util.Collections;
+        import java.util.HashMap;
+        import javax.ws.rs.client.*;
+        import javax.ws.rs.core.UriBuilder;
+        import java.net.URI;
+        import java.util.concurrent.atomic.AtomicReference;
+        import java.util.stream.Collectors;
 
 public abstract class BasicService {
 
@@ -70,9 +70,11 @@ public abstract class BasicService {
 
         switch (operation) {
             case "POST":
-                return JSon.fromString(request.get().post(Entity.text(inputData), String.class));
+                return JSon.fromString(request.get().
+                        post(Entity.entity(inputData, MediaType.APPLICATION_JSON), String.class));
             case "PUT":
-                return JSon.fromString(request.get().put(Entity.text(inputData), String.class));
+                return JSon.fromString(request.get().
+                        put(Entity.entity(inputData, MediaType.APPLICATION_JSON), String.class));
             case "GET":
                 return JSon.fromString(request.get().get(String.class));
             case "DELETE":
