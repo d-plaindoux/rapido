@@ -22,21 +22,21 @@
 @DEFINE::GenerateGetterSetter
     [|@OR
     [|
-      public Json @VAL::set_get() {
-        return data.getValue(List(@USE::AccessVar))
-      }
+        public JSon @VAL::get() {
+            return data.getValue(List(@USE::AccessVar));
+        }
 |][|
-      public @USE::this @VAL::set_get(JSon value) {
-        return new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
-      }
+        public @USE::this @VAL::set(Object value) {
+            return new @USE::this(setValue(List(@USE::AccessVar), JSon.apply(value)));
+        }
 |][|
-      public Json @VAL::set_get() {
-        return data.getValue(List(@USE::AccessVar))
-      }
+        public Json @VAL::set_get() {
+            return data.getValue(List(@USE::AccessVar))
+        }
 
-      public @USE::this @VAL::set_get(JSon value) {
-        return new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
-      }
+        public @USE::this @VAL::set_get(Object value) {
+            return new @USE::this(setValue(List(@USE::AccessVar), JSon.apply(value)));
+        }
 |][||]|]
 
 @DEFINE::VariableGetterSetter
@@ -86,14 +86,12 @@ public interface types {
 
     public static class @VAL::name extends BasicType {
 
-      private @VAL::name(JSon in) {
-        super(in, emptyList(BasicType.VirtualValue.class)@VAL::definition[|@USE::VirtualType|]);
-      }
-
-      @VAL::definition[|@USE::VariableGetterSetter|]
+        private @VAL::name(JSon in) {
+            super(in, emptyList(BasicType.VirtualValue.class)@VAL::definition[|@USE::VirtualType|]);
+        }
+@VAL::definition[|@USE::VariableGetterSetter|]
     }
 
     //------------------------------------------------------------------------------------------
-
 |]
 }

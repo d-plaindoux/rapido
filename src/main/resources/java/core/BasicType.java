@@ -38,7 +38,8 @@ public abstract class BasicType {
         }
     }
 
-    private final JSon data;
+    protected final JSon data;
+
     private final List<VirtualValue> virtualValues;
 
     protected BasicType(JSon data, List<VirtualValue> virtualValues) {

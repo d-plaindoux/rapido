@@ -222,7 +222,7 @@ public interface JSon {
 
         public String toJSonString() {
             final String raw = this.data.entrySet().stream().
-                    map(e -> e.getKey() + "=" + e.getValue().toJSonString()).
+                    map(e -> '"' + e.getKey() + '"' + "=" + e.getValue().toJSonString()).
                     collect(Collectors.joining(","));
 
             return '{' + raw + '}';

@@ -89,7 +89,7 @@ public interface services {
             [|@VAL::header[|
             final JSon headerObject = @VAL::name(data).toJson();
             final Map<String, JSon> header = getValues(headerObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]
-            return @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|null|] ,@OR[|@VAL::body[|body|]|][|null|] ,@OR[|@VAL::header[|header|]|][|null|]));
+            return @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|Map()|] ,@OR[|@VAL::body[|body|]|][|Map()|] ,@OR[|@VAL::header[|header|]|][|Map()|]));
         }
     |]
     }
