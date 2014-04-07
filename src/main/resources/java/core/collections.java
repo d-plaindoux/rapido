@@ -43,6 +43,15 @@ public interface collections {
             return append(List(es));
         }
 
+        public <R> Function<BiFunction<E, R, R>, R> foldRigth(R r) {
+            return (BiFunction<E, R, R> f) -> {
+                R result = r;
+                for (int i = this.size(); i > 0; i--) {
+                    result = f.apply(this.get(i - 1), r);
+                }
+                return result;
+            };
+        }
     }
 
     static <K, E> Map<K, E> Map() {

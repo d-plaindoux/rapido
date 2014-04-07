@@ -42,15 +42,11 @@ public interface JSon {
     }
 
     default JSon setValue(List<String> path, JSon result) {
-        // TODO: Check if any foldRight method exists ...
-        JSon newResult = result;
-        for (int i = path.size(); i > 0; i--) {
-            final Map<String, JSon> map = collections.Map();
-            map.put(path.get(i - 1), newResult);
-            newResult = new ObjectData(map);
-        }
+        collections.List<String> list = collections.<String>List().append(path);
 
-        return newResult.overrides(this);
+        return list.foldRigth(result).
+                apply((s, r) -> new ObjectData(collections.<String, JSon>Map().append(collections.C(s, r)))).
+                overrides(this);
     }
 
     default JSon overrides(JSon data) {
