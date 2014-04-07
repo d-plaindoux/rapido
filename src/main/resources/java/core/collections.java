@@ -35,7 +35,7 @@ public interface collections {
             return (BiFunction<E, R, R> f) -> {
                 R result = r;
                 for (int i = this.size(); i > 0; i--) {
-                    result = f.apply(this.get(i - 1), r);
+                    result = f.apply(this.get(i - 1), result);
                 }
                 return result;
             };
