@@ -79,22 +79,10 @@ public interface services {
      * Service @VAL::name
      */
     public class @VAL::name[|@VALService|] extends BasicService {
-        public static class Builder {
-            private final String url;
-
-            private Builder(String url) {
-                this.url = url;
-            }
-
-            public @VAL::name[|@VALService|] get(@VAL::route[|@USE::ParametersTypesOnly|]) {
-                return new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|]);
-            }
-        }
-
         @SET::serviceParameters[|@VAL::route[|@USE::ParametersValues|]|]
         @VAL::route[|@USE::ParametersTypesSpecification|]
 
-        public @VAL::name[|@VALService|](String url@VAL::route[|@USE::ParametersTypes|]) {
+        private @VAL::name[|@VALService|](String url@VAL::route[|@USE::ParametersTypes|]) {
             super(url, @VAL::route[|getPath(mergeData(@USE::serviceParameters), @VAL::path[|@USE::PathAsString, @USE::PathVariables)|]|]);
             @VAL::route[|@USE::ParametersInitialization|]
         }
@@ -120,8 +108,8 @@ public interface services {
     |]
     }
 
-    public static @VAL::name[|@VALService|].Builder @VAL::name[|@VALService|](String url) {
-       return new @VAL::name[|@VALService|].Builder(url);
+    public static @VAL::name[|@VALService|] @VAL::name[|@VALService|](String url@VAL::route[|@USE::ParametersTypes|]) {
+       return new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|]);
     }
 |]
 }

@@ -4,6 +4,20 @@
 
 @OPT[|package @USE::package;|]
 
+@[|------------------------------------------------------------------------------------------
+        Service and method parameters
+   ------------------------------------------------------------------------------------------|]
+
+@DEFINE::ParametersTypesOnly
+        [|@REP(, )::params[|types.@VAL::type::name @VAL::name|]|]
+
+@DEFINE::ParameterNames
+        [|@REP::params[|, @VAL::name|]|]
+
+@[|------------------------------------------------------------------------------------------
+        Main for clients generation
+   ------------------------------------------------------------------------------------------|]
+
 interface clients {
 @REP::clients[|
     /*
@@ -11,12 +25,17 @@ interface clients {
      */
 
     class @VAL::name {
-        @REP(        )::provides[|final public services.@VALService.Builder @VAL;
-|]
-        @VAL::name(String url) {
-            @REP(    )::provides[|this.@VAL = services.@VALService(url);
-        |]}
+        private final String url;
 
+        @VAL::name(String url) {
+            this.url = url;
+        }
+
+        @REP::provides[|
+        final services.@VAL::name[|@VALService|] @VAL::name(@VAL::route[|@USE::ParametersTypesOnly|]) {
+            return services.@VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|]);
+        };
+        |]
         public static @VAL::name fromURL(String url) {
             return new @VAL::name(url);
         }

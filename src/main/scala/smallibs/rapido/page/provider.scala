@@ -61,7 +61,7 @@ class EntitiesProvider(elements: List[Entity]) extends DataProvider with Abstrac
       case "clients" =>
         Some(Provider.set(
           for (e <- elements if e.isInstanceOf[ClientEntity])
-          yield new ClientProvider(e.asInstanceOf[ClientEntity]))
+          yield new ClientProvider(e.asInstanceOf[ClientEntity], this))
         )
       case "types" =>
         Some(Provider.set(
@@ -148,13 +148,19 @@ class DynamicPathProvider(param: DynamicLevel) extends DataProvider with Abstrac
     }
 }
 
-class ClientProvider(client: ClientEntity) extends DataProvider with AbstractProvider {
+class ClientProvider(client: ClientEntity, entities: EntitiesProvider) extends DataProvider with AbstractProvider {
   val keys = List("name", "provides")
 
   def get(name: String): Option[DataProvider] =
     name match {
       case "name" => Some(Provider.constant(client.name))
-      case "provides" => Some(Provider.set(for (name <- client.provides) yield Provider.constant(name)))
+      case "provides" =>
+        Some(Provider.set(
+          for (name <- client.provides;
+               service <- entities.get("services").get.values
+               if service.get("name").get.toString.equals(name))
+          yield service)
+        )
       case _ => None
     }
 }

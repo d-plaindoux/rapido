@@ -10,7 +10,7 @@
  */
 
 class @VAL::name(url:String) {
-  @REP(  )::provides[|def @VAL = @VALService(url)
+  @REP(  )::provides[|def @VAL::name = @VAL::name[|@VAL|]Service(url)
 |]}
 
 object @VAL::name {
