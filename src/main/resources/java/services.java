@@ -26,6 +26,17 @@
 @DEFINE::ParametersTypes
     [|@REP::params[|,  @VAL::type::name @VAL::name|]|]
 
+@DEFINE::ParametersTypesOnly
+        [|@REP(, )::params[|@VAL::type::name @VAL::name|]|]
+
+@DEFINE::ParametersTypesSpecification
+        [|@REP(
+)::params[|private final @VAL::type::name @VAL::name;|]|]
+
+@DEFINE::ParametersInitialization
+            [|@REP(
+)::params[|this.@VAL::name = @VAL::name;|]|]
+
 @DEFINE::ParametersValues
     [|List(@REP(, )::params[|@VAL::name|])|]
 
@@ -56,6 +67,7 @@ import static @OPT[|@USE::package.|]core.collections.emptyList;
 import static @OPT[|@USE::package.|]core.collections.Map;
 
 import @OPT[|@USE::package.|]core.BasicService;
+import @OPT[|@USE::package.|]core.BasicType;
 import @OPT[|@USE::package.|]core.JSon;
 
 @REP::types[|import static @OPT[|@USE::package.|]types.@VAL::name;
@@ -67,10 +79,24 @@ public interface services {
      * Service @VAL::name
      */
     public class @VAL::name[|@VALService|] extends BasicService {
+        public static class Builder {
+            private final String url;
+
+            private Builder(String url) {
+                this.url = url;
+            }
+
+            public @VAL::name[|@VALService|] get(@VAL::route[|@USE::ParametersTypesOnly|]) {
+                return new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|]);
+            }
+        }
+
         @SET::serviceParameters[|@VAL::route[|@USE::ParametersValues|]|]
+        @VAL::route[|@USE::ParametersTypesSpecification|]
 
         public @VAL::name[|@VALService|](String url@VAL::route[|@USE::ParametersTypes|]) {
             super(url, @VAL::route[|getPath(mergeData(@USE::serviceParameters), @VAL::path[|@USE::PathAsString, @USE::PathVariables)|]|]);
+            @VAL::route[|@USE::ParametersInitialization|]
         }
 
         //
@@ -78,8 +104,8 @@ public interface services {
         //
         @REP(  )::entries[|
         public @VAL::signature::output::name @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::type::name @VAL::name|])|] {
-            final JSon data = mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]).append(@USE::serviceParameters));
-            final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables);|]|][|Success("");|]@OR
+            final JSon data = mergeData(emptyList(BasicType.class).append(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|])).append(@USE::serviceParameters));
+            final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables);|]|][|"";|]@OR
             [|@VAL::params[|
             final JSon paramsObject = @VAL::name(data).toJson();
             final Map<String, JSon> params = getValues(paramsObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
@@ -94,8 +120,8 @@ public interface services {
     |]
     }
 
-    public static @VAL::name[|@VALService|] @VAL::name[|@VALService|](String url) {
-       return new @VAL::name[|@VALService|](url@VAL::route[|@USE::ParameterNames|]);
+    public static @VAL::name[|@VALService|].Builder @VAL::name[|@VALService|](String url) {
+       return new @VAL::name[|@VALService|].Builder(url);
     }
 |]
 }

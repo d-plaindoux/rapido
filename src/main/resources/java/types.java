@@ -22,16 +22,16 @@
 @DEFINE::GenerateGetterSetter
     [|@OR
     [|
-        public JSon @VAL::get() {
-            return data.getValue(List(@USE::AccessVar));
+        public Object @VAL::get() {
+            return getValue(List(@USE::AccessVar)).toRaw();
         }
 |][|
         public @USE::this @VAL::set(Object value) {
             return new @USE::this(setValue(List(@USE::AccessVar), JSon.apply(value)));
         }
 |][|
-        public Json @VAL::set_get() {
-            return data.getValue(List(@USE::AccessVar))
+        public Object @VAL::set_get() {
+            return getValue(List(@USE::AccessVar)).toRaw()
         }
 
         public @USE::this @VAL::set_get(Object value) {

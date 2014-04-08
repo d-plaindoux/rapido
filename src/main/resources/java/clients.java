@@ -11,7 +11,7 @@ interface clients {
      */
 
     class @VAL::name {
-        @REP(        )::provides[|final public services.@VALService @VAL;
+        @REP(        )::provides[|final public services.@VALService.Builder @VAL;
 |]
         @VAL::name(String url) {
             @REP(    )::provides[|this.@VAL = services.@VALService(url);

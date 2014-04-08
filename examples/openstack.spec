@@ -17,7 +17,7 @@ type Authentication = {
 }
 
 type Token = {
-    access: { token: { id: string } }
+    access: { token: { @get id: string } }
 }
 
 type AuthToken = {
