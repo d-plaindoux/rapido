@@ -4,7 +4,7 @@
 
 @OPT[|package @USE::package|]
 
-trait clients {
+object clients {
 @REP::clients[|
   /*
    * Service client @VAL::name
