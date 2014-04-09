@@ -72,13 +72,13 @@ class @VAL::name[|@VALService|](override val url: String@VAL::route[|@USE::Param
     (for (data <- mergeData(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|]) ++ @USE::serviceParameters);
           path <- @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables)|]|][|Success("")|]@OR
           [|@VAL::params[|;
-          paramsObject <- @VAL::name.fromData(data).toJson;
+          paramsObject <- @VAL::name.fromJSon(data).toJson;
           params <- getValues(paramsObject, @USE::Attributes ::: @USE::Virtuals)|]|][||]@OR
           [|@VAL::body[|;
-          bodyObject <- @VAL::name.fromData(data).toJson;
+          bodyObject <- @VAL::name.fromJSon(data).toJson;
           body <- getValues(bodyObject, @USE::Attributes ::: @USE::Virtuals)|]|][||]@OR
           [|@VAL::header[|;
-          headerObject <- @VAL::name.fromData(data).toJson;
+          headerObject <- @VAL::name.fromJSon(data).toJson;
           header <- getValues(headerObject, @USE::Attributes ::: @USE::Virtuals)|]|][||])
     yield httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|Some(params)|]|][|None|] ,@OR[|@VAL::body[|Some(body)|]|][|None|] ,@OR[|@VAL::header[|Some(header)|]|][|None|])) flatMap {
       case Success(e) => Success(new @VAL::signature::output::name(e))

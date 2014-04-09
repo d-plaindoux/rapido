@@ -5,4 +5,7 @@
  - clients definitions are now checked
  - Syntax revisited semi-colon are optional
  - Java back-end
+ - Getter/Setter accurate type instead of root type
+ - Getter/Setter projection function related to accurate type
+
 
