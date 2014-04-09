@@ -10,7 +10,31 @@
     [|"@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
 @DEFINE::PathVariable
-    [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
+    [|@REP(, )::values[|@OPT[|Collections.List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
+
+@[|------------------------------------------------------------------------------------------
+        Attribute type for get and set operations
+   ------------------------------------------------------------------------------------------|]
+
+@DEFINE::DefineType
+    [|@OR
+        [|@VAL::name|]
+        [|@VAL::array[|List<@USE::DefineType>|]|]
+        [|@VAL::object[|Map<String, Object>|]|]
+        [|@VAL::string[|String|]|]
+        [|@VAL::bool[|boolean|]|]
+        [|@VAL::int[|long|]|]
+        [|@VAL::opt[|@USE::DefineType|]|]|]
+
+@DEFINE::GetType
+    [|@OR
+        [|Type.data(types::@VAL::name)|]
+        [|@VAL::array[|Type.list(@USE::GetType)|]|]
+        [|@VAL::object[|Type.map()|]|]
+        [|@VAL::string[|Type.string()|]|]
+        [|@VAL::bool[|Type.bool()|]|]
+        [|@VAL::int[|Type.integer()|]|]
+        [|@VAL::opt[|@USE::GetType|]|]|]
 
 @[|------------------------------------------------------------------------------------------
     Attribute specified with GET, SET
@@ -22,20 +46,20 @@
 @DEFINE::GenerateGetterSetter
     [|@OR
     [|
-        public Object @VAL::get() {
-            return getValue(List(@USE::AccessVar)).toRaw();
+        public @VAL::type[|@USE::DefineType|] @VAL::get() {
+            return @VAL::type[|@USE::GetType|].apply(getValue(Collections.List(@USE::AccessVar)));
         }
 |][|
         public @USE::this @VAL::set(Object value) {
-            return new @USE::this(setValue(List(@USE::AccessVar), JSon.apply(value)));
+            return new @USE::this(setValue(Collections.List(@USE::AccessVar), JSon.apply(value)));
         }
 |][|
-        public Object @VAL::set_get() {
-            return getValue(List(@USE::AccessVar)).toRaw()
+        public @VAL::type[|@USE::DefineType|] @VAL::set_get() {
+            return @VAL::type[|@USE::GetType|].apply(getValue(Collections.List(@USE::AccessVar)))
         }
 
         public @USE::this @VAL::set_get(Object value) {
-            return new @USE::this(setValue(List(@USE::AccessVar), JSon.apply(value)));
+            return new @USE::this(setValue(Collections.List(@USE::AccessVar), JSon.apply(value)));
         }
 |][||]|]
 
@@ -56,7 +80,7 @@
     [|@VAL::array[|@USE::VirtualType|]|]
     [|@VAL::object[|@REP::attributes
         [|@USE::PushArrayVar@VAL::type[|@USE::VirtualType|]|]@REP::virtual[|.
-            append(new BasicType.VirtualValue(List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, List(@USE::PathVariable))) |]|]|]
+            append(new BasicType.VirtualValue(Collections.List(@OPT[|@USE::ArrayVar, |]"@VAL::name"), @USE::PathAsString, Collections.List(@USE::PathVariable))) |]|]|]
     [||]|]
 
 @[|------------------------------------------------------------------------------------------
@@ -65,19 +89,20 @@
 
 @OPT[|package @USE::package;|]
 
-import static @OPT[|@USE::package.|]core.collections.List;
-import static @OPT[|@USE::package.|]core.collections.emptyList;
-import static @OPT[|@USE::package.|]core.collections.Map;
-
 import @OPT[|@USE::package.|]core.BasicType;
 import @OPT[|@USE::package.|]core.JSon;
+import @OPT[|@USE::package.|]core.Type;
+import @OPT[|@USE::package.|]core.Collections;
+
+import java.util.List;
+import java.util.Map;
 
 public interface types {
 
 @REP::types[|
     @SET::this[|@VAL::name|]
     public static @VAL::name @VAL::name() {
-        return new @VAL::name(JSon.apply(Map()));
+        return new @VAL::name(JSon.apply(Collections.Map()));
     }
 
     public static @VAL::name @VAL::name(JSon data) {
@@ -87,7 +112,7 @@ public interface types {
     public static class @VAL::name extends BasicType {
 
         private @VAL::name(JSon in) {
-            super(in, emptyList(BasicType.VirtualValue.class)@VAL::definition[|@USE::VirtualType|]);
+            super(in, Collections.emptyList(BasicType.VirtualValue.class)@VAL::definition[|@USE::VirtualType|]);
         }
 @VAL::definition[|@USE::VariableGetterSetter|]
     }

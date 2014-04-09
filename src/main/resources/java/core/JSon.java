@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public interface JSon {
 
-    Object toRaw();
+    <E> E toRaw();
 
     String toJSonString();
 
@@ -42,10 +42,10 @@ public interface JSon {
     }
 
     default JSon setValue(List<String> path, JSon result) {
-        collections.List<String> list = collections.<String>List().append(path);
+        Collections.List<String> list = Collections.<String>List().append(path);
 
         return list.foldRigth(result).
-                apply((s, r) -> new ObjectData(collections.<String, JSon>Map().append(s, r))).
+                apply((s, r) -> new ObjectData(Collections.<String, JSon>Map().append(s, r))).
                 overrides(this);
     }
 
@@ -67,7 +67,7 @@ public interface JSon {
             this.s = s;
         }
 
-        public Object toRaw() {
+        public String toRaw() {
             return s;
         }
 
@@ -90,7 +90,7 @@ public interface JSon {
             this.s = s;
         }
 
-        public Object toRaw() {
+        public Boolean toRaw() {
             return s;
         }
 
@@ -120,7 +120,7 @@ public interface JSon {
             this.s = Double.doubleToRawLongBits(s);
         }
 
-        public Object toRaw() {
+        public Long toRaw() {
             return s;
         }
 
@@ -151,8 +151,8 @@ public interface JSon {
             this.data = data;
         }
 
-        public Object toRaw() {
-            return this.data.stream().map(JSon::toRaw);
+        public List<Object> toRaw() {
+            return this.data.stream().map(JSon::toRaw).collect(Collectors.toList());
         }
 
         public String toJSonString() {
@@ -162,6 +162,10 @@ public interface JSon {
                             collect(Collectors.joining(", "));
 
             return '[' + value + ']';
+        }
+
+        public List<JSon> getData() {
+            return data;
         }
     }
 
@@ -175,7 +179,7 @@ public interface JSon {
             this.data = data;
         }
 
-        public Object toRaw() {
+        public Map<String, Object> toRaw() {
             final Map<String, Object> raw = new HashMap<>();
             this.data.entrySet().stream().
                     forEach(e -> raw.put(e.getKey(), e.getValue().toRaw()));

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public interface collections {
+public interface Collections {
 
     static <E> List<E> emptyList(Class<E> c) {
         return new List<>();

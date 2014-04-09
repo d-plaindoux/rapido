@@ -8,12 +8,12 @@
 
 @DEFINE::Attributes
     [|@OR
-    [|@VAL::object[|List(@REP(, )::attributes[|"@VAL::name"|])|]|]
+    [|@VAL::object[|Collections.List(@REP(, )::attributes[|"@VAL::name"|])|]|]
     [|[]|]|]
 
 @DEFINE::Virtuals
     [|@OR
-    [|@VAL::object[|List(@REP(, )::virtual[|"@VAL::name"|])|]|]
+    [|@VAL::object[|Collections.List(@REP(, )::virtual[|"@VAL::name"|])|]|]
     [|[]|]|]
 
 @[|------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@
 )::params[|this.@VAL::name = @VAL::name;|]|]
 
 @DEFINE::ParametersValues
-    [|List(@REP(, )::params[|@VAL::name|])|]
+    [|Collections.List(@REP(, )::params[|@VAL::name|])|]
 
 @[|------------------------------------------------------------------------------------------
      Path transformed using string interpolation and Path variables
@@ -48,10 +48,10 @@
     [|"@REP::values[|@OR[|@VAL::name|][|%s|]|]"|]
 
 @DEFINE::PathVariable
-    [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
+    [|@REP(, )::values[|@OPT[|Collections.List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
 
 @DEFINE::PathVariables
-    [|List(@USE::PathVariable)|]
+    [|Collections.List(@USE::PathVariable)|]
 
 @[|------------------------------------------------------------------------------------------
     Main for services generation
@@ -62,13 +62,12 @@
 
 @OPT[|package @USE::package;|]
 
-import static @OPT[|@USE::package.|]core.collections.List;
-import static @OPT[|@USE::package.|]core.collections.emptyList;
-import static @OPT[|@USE::package.|]core.collections.Map;
-
 import @OPT[|@USE::package.|]core.BasicService;
 import @OPT[|@USE::package.|]core.BasicType;
+import @OPT[|@USE::package.|]core.Collections;
 import @OPT[|@USE::package.|]core.JSon;
+
+import java.util.Map;
 
 @REP::types[|import static @OPT[|@USE::package.|]types.@VAL::name;
 |]
@@ -92,18 +91,18 @@ public interface services {
         //
         @REP(  )::entries[|
         public @VAL::signature::output::name @VAL::name(@VAL::signature::inputs[|@REP(, )[|@VAL::type::name @VAL::name|])|] {
-            final JSon data = mergeData(emptyList(BasicType.class).append(List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|])).append(@USE::serviceParameters));
+            final JSon data = mergeData(Collections.emptyList(BasicType.class).append(Collections.List(@VAL::signature::inputs[|@REP(, )[|@VAL::name|]|])).append(@USE::serviceParameters));
             final String path = @OR[|@VAL::path[|getPath(data, @USE::PathAsString, @USE::PathVariables);|]|][|"";|]@OR
             [|@VAL::params[|
             final JSon paramsObject = @VAL::name(data).toJson();
-            final Map<String, JSon> params = getValues(paramsObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
+            final Map<String, JSon> params = getValues(paramsObject, Collections.emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
             [|@VAL::body[|
             final JSon bodyObject = @VAL::name(data).toJson();
-            final Map<String, JSon> body = getValues(bodyObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
+            final Map<String, JSon> body = getValues(bodyObject, Collections.emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]@OR
             [|@VAL::header[|
             final JSon headerObject = @VAL::name(data).toJson();
-            final Map<String, JSon> header = getValues(headerObject, emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]
-            return @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|Map()|] ,@OR[|@VAL::body[|body|]|][|Map()|] ,@OR[|@VAL::header[|header|]|][|Map()|]));
+            final Map<String, JSon> header = getValues(headerObject, Collections.emptyList(String.class).append(@USE::Attributes).append(@USE::Virtuals));|]|][||]
+            return @VAL::signature::output::name(httpRequest(path, "@VAL::operation", @OR[|@VAL::params[|params|]|][|Collections.Map()|] ,@OR[|@VAL::body[|body|]|][|Collections.Map()|] ,@OR[|@VAL::header[|header|]|][|Collections.Map()|]));
         }
     |]
     }

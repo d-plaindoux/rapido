@@ -18,14 +18,13 @@
 
 package @OPT[|@USE::package.|]core;
 
-import static @OPT[|@USE::package.|]core.collections.List;
-import static @OPT[|@USE::package.|]core.collections.Map;
-
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class BasicService {
@@ -82,7 +81,7 @@ public abstract class BasicService {
     }
 
     static protected String getPath(JSon data, String pattern, List<List<String>> attributes) {
-        final List<String> values = List();
+        final List<String> values = Collections.List();
         attributes.forEach(e -> values.add(getValue(data, e).toString()));
 
         return String.format(pattern, values.toArray(new String[values.size()]));
@@ -93,8 +92,8 @@ public abstract class BasicService {
     }
 
     static protected Map<String, JSon> getValues(JSon data, List<String> path) {
-        final Map<String, JSon> map = Map();
-        path.stream().forEach(e -> map.put(e, getValue(data, List(e))));
+        final Map<String, JSon> map = Collections.Map();
+        path.stream().forEach(e -> map.put(e, getValue(data, Collections.List(e))));
         return map;
     }
 
@@ -103,5 +102,4 @@ public abstract class BasicService {
         data.stream().forEach(e -> result.set(e.toJson().overrides(result.get())));
         return result.get();
     }
-
 }

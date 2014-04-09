@@ -18,8 +18,8 @@
 
 package @OPT[|@USE::package.|]core;
 
-import static @OPT[|@USE::package.|]core.collections.List;
-import static @OPT[|@USE::package.|]core.collections.Map;
+import static @OPT[|@USE::package.|]core.Collections.List;
+import static @OPT[|@USE::package.|]core.Collections.Map;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
