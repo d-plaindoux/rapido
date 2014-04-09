@@ -41,7 +41,7 @@ public interface Collections {
             };
         }
 
-        public <R> Function<BiFunction<E, R, R>, R> foldRigth(R r) {
+        public <R> Function<BiFunction<E, R, R>, R> foldRight(R r) {
             return f -> {
                 R accumulator = r;
                 for (int i = this.size(); i > 0; i--) {

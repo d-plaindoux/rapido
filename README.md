@@ -20,7 +20,7 @@ which can be generated to chosen targeted languages.
 type Error = { @get code:Int, @get reason:String }
 type Address = { @{get,set} address:String? }
 type Place = Address with { @{get,set} name:String }
-type Places = { @get(values) places : Places* }
+type Places = { @get(values) places : [ Places ] }
 type Nothing = {}
 
 service places [places] {

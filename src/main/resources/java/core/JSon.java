@@ -44,7 +44,7 @@ public interface JSon {
     default JSon setValue(List<String> path, JSon result) {
         Collections.List<String> list = Collections.<String>List().append(path);
 
-        return list.foldRigth(result).
+        return list.foldRight(result).
                 apply((s, r) -> new ObjectData(Collections.<String, JSon>Map().append(s, r))).
                 overrides(this);
     }
