@@ -18,45 +18,22 @@
 
 package @OPT[|@USE::package.|]core
 
-import scala.util.Success
-import scala.util.Try
+object Type {
 
-trait Type {
-  val data: JSon
+  type ToType[E] = JSon => E
 
-  def toJson: Try[JSon]
+  def list[E](f: ToType[E]): ToType[List[E]] = _.asInstanceOf[ArrayData].data.map(f)
 
-  protected def getValue(path: List[String]): Try[JSon] = data getValue path
+  def primitive[E]: ToType[E] = _.toRaw.asInstanceOf[E]
 
-  protected def setValue(path: List[String], value: JSon): JSon = data setValue(path, value)
+  def map: ToType[Map[String, Any]] = primitive[Map[String, Any]]
 
-  private def getVirtualValue(pattern: String, attributes: List[List[String]]): Try[String] = {
-    (attributes map (data getValue (_))).foldRight[Try[List[JSon]]](Success(Nil)) {
-      (te, tl) => for (l <- tl; e <- te) yield e :: l
-    } map {
-      pattern.format(_: _*)
-    }
-  }
+  def integer: ToType[Int] = primitive[Int]
 
-  protected def setVirtualValue(path: List[String], pattern: String, attributes: List[List[String]]): Try[JSon] = {
-    getVirtualValue(pattern, attributes) map {
-      value => setValue(path, StringData(value))
-    }
-  }
-}
+  def string: ToType[String] = primitive[String]
 
-case class VirtualValue(path: List[String], model: String, values: List[List[String]])
+  def boolean: ToType[Boolean] = primitive[Boolean]
 
-abstract class BasicType(in: JSon) extends Type {
-  val virtualValues: List[VirtualValue]
+  def data[E](f: ToType[E]): ToType[E] = f
 
-  val data = in
-
-  def toJson: Try[JSon] = {
-    virtualValues.foldLeft[List[Try[JSon]]](Nil) {
-      case (result, VirtualValue(path, model, values)) => result :+ setVirtualValue(path, model, values)
-    }.foldRight[Try[JSon]](Success(data)) {
-      (current, result) => result flatMap (value => current map (_ overrides value))
-    }
-  }
 }

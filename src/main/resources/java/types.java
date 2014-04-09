@@ -50,7 +50,7 @@
             return @VAL::type[|@USE::GetType|].apply(getValue(Collections.List(@USE::AccessVar)));
         }
 |][|
-        public @USE::this @VAL::set(Object value) {
+        public @USE::this @VAL::set(@VAL::type[|@USE::DefineType|] value) {
             return new @USE::this(setValue(Collections.List(@USE::AccessVar), JSon.apply(value)));
         }
 |][|
@@ -58,7 +58,7 @@
             return @VAL::type[|@USE::GetType|].apply(getValue(Collections.List(@USE::AccessVar)))
         }
 
-        public @USE::this @VAL::set_get(Object value) {
+        public @USE::this @VAL::set_get(@VAL::type[|@USE::DefineType|] value) {
             return new @USE::this(setValue(Collections.List(@USE::AccessVar), JSon.apply(value)));
         }
 |][||]|]

@@ -70,7 +70,7 @@ trait BasicService {
   }
 
   def getPath(data: JSon, pattern: String, attributes: List[List[String]]): Try[String] = {
-    (attributes map (data getValue _)).foldRight[Try[List[JSon]]](Success(Nil)) {
+    (attributes map data.getValue).foldRight[Try[List[JSon]]](Success(Nil)) {
       (te, tl) => for (l <- tl; e <- te) yield e :: l
     } map {
       pattern.format(_: _*)
@@ -87,7 +87,7 @@ trait BasicService {
         for (result <- tresult; value <- data getValue List(current)) yield result + (current -> value)
     }
 
-  def mergeData(data: List[Type]): Try[JSon] =
+  def mergeData(data: List[BasicType]): Try[JSon] =
     data.foldRight[Try[JSon]](Success(ObjectData(Map()))) {
       (te, tm) => for (e <- te.toJson; m <- tm) yield e overrides m
     }

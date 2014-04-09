@@ -12,6 +12,31 @@
 @DEFINE::PathVariable
     [|@REP(, )::values[|@OPT[|List("@VAL::object"@REP::fields[|, "@VAL"|])|]|]|]
 
+
+@[|------------------------------------------------------------------------------------------
+Attribute type for get and set operations
+  ------------------------------------------------------------------------------------------|]
+
+@DEFINE::DefineType
+  [|@OR
+  [|@VAL::name|]
+  [|@VAL::array[|List[@USE::DefineType]|]|]
+[|@VAL::object[|Map<String, Object>|]|]
+[|@VAL::string[|String|]|]
+[|@VAL::bool[|Boolean|]|]
+[|@VAL::int[|Long|]|]
+[|@VAL::opt[|@USE::DefineType|]|]|]
+
+@DEFINE::GetType
+  [|@OR
+  [|Type.data(@VAL::name.fromJSon)|]
+[|@VAL::array[|Type.list(@USE::GetType)|]|]
+[|@VAL::object[|Type.map|]|]
+[|@VAL::string[|Type.string|]|]
+[|@VAL::bool[|Type.bool|]|]
+[|@VAL::int[|Type.integer|]|]
+[|@VAL::opt[|@USE::GetType|]|]|]
+
 @[|------------------------------------------------------------------------------------------
     Attribute specified with GET, SET
    ------------------------------------------------------------------------------------------|]
@@ -21,16 +46,16 @@
 @DEFINE::GenerateGetterSetter
     [|@OR
     [|
-  def @VAL::get: Try[JSon] =
-    getValue(List(@USE::AccessVar)).map(_.toRaw)
+  def @VAL::get: Try[@VAL::type[|@USE::DefineType|]] =
+    getValue(List(@USE::AccessVar)).map(@VAL::type[|@USE::GetType|])
 |][|
-  def @VAL::set(value: Any): @USE::this =
+  def @VAL::set(value: @VAL::type[|@USE::DefineType|]): @USE::this =
     new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
 |][|
-  def @VAL::set_get: Try[JSon] =
-    getValue(List(@USE::AccessVar)).map(_.toRaw)
+  def @VAL::set_get: Try[@VAL::type[|@USE::DefineType|]] =
+    getValue(List(@USE::AccessVar)).map(@VAL::type[|@USE::GetType|])
 
-  def @VAL::set_get(value: Any): @USE::this =
+  def @VAL::set_get(value: @VAL::type[|@USE::DefineType|]): @USE::this =
     new @USE::this(setValue(List(@USE::AccessVar), JSon(value).get))
 |][||]|]
 
@@ -59,8 +84,8 @@
 
 @OPT[|package @USE::package|]
 
-import scala.util.{Failure, Success, Try}
-import @OPT[|@USE::package.|]core.{JSon, ObjectData, GenericType, VirtualValue}
+import scala.util.Try
+import @OPT[|@USE::package.|]core.{JSon, ObjectData, BasicType, VirtualValue, Type}
 
 @REP::types[|@SET::this[|@VAL::name|]
 //------------------------------------------------------------------------------------------
@@ -75,6 +100,6 @@ class @VAL::name(in: JSon) extends BasicType(in) {
 object @VAL::name {
   def apply(): @VAL::name = new @VAL::name(ObjectData(Map()))
 
-  def fromData(data: JSon): @VAL::name = new @VAL::name(data)
+  def fromJSon(data: JSon): @VAL::name = new @VAL::name(data)
 }
 |]
