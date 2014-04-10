@@ -18,6 +18,10 @@
 
 
 class BasicType:
+    """
+    Basic class dedicated to type management providing facilities for
+    attribute get and set operations.
+    """
 
     def __init__(self):
         self.data = None
@@ -40,3 +44,26 @@ class BasicType:
 
     def set_virtual_value(self, data, path, virtual, attributes):
         self.set_value(data, path, virtual, self.get_value(data, attributes))
+
+
+# Set of facilitators
+class Type:
+    """
+    This class proposes a set of functions dedicated to type projection requires
+    by getters.
+    """
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def list(f):
+        return lambda l: [f(e) for e in l]
+
+    @staticmethod
+    def primitive():
+        return lambda e: e
+
+    @staticmethod
+    def data(f):
+        return f

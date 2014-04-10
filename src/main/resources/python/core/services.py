@@ -27,10 +27,9 @@ class UnsupportedProtocol(Exception):
 
 
 class BasicService:
-
-    #
-    # Constructor
-    #
+    """
+    Class providing main entry for http request resolution.
+    """
 
     def __init__(self, protocol, url):
         if protocol is "http":
@@ -100,7 +99,7 @@ class BasicService:
         data = dict()
 
         for d in data_set:
-            if isinstance(d, types.Type):
+            if isinstance(d, types.BasicType):
                 data = deep_merge(data, d.to_dict())
             else:
                 data = deep_merge(data, d)

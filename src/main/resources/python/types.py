@@ -10,6 +10,20 @@
     [|@REP(, )::values[|@OPT[|['@VAL::object'@REP::fields[|, '@VAL'|]]|]|]|]
 
 @[|------------------------------------------------------------------------------------------
+        Attribute type for get and set operations
+   ------------------------------------------------------------------------------------------|]
+
+@DEFINE::GetType
+  [|@OR
+    [|Type.data(@VAL::name)|]
+    [|@VAL::array[|Type.list(@USE::GetType)|]|]
+    [|@VAL::object[|Type.primitive()|]|]
+    [|@VAL::string[|Type.primitive()|]|]
+    [|@VAL::bool[|Type.primitive()|]|]
+    [|@VAL::int[|Type.primitive()|]|]
+    [|@VAL::opt[|@USE::GetType|]|]|]
+
+@[|------------------------------------------------------------------------------------------
     Attribute specified with GET, SET
    ------------------------------------------------------------------------------------------|]
 
@@ -19,7 +33,7 @@
     [|@OR
     [|
     def @VAL::get(self):
-        return self.get_value(self.__data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
+        return @VAL::type[|@USE::GetType|](self.get_value(self.__data, [@OPT[|@USE::AccessVar, |]'@VAL::name']))
 |][|
     def @VAL::set(self, value):
         self.set_value(self.__data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
@@ -27,7 +41,7 @@
 |][|
     def @VAL::set_get(self, value=None):
         if value is None:
-            return self.get_value(self.__data, [@OPT[|@USE::AccessVar, |]'@VAL::name'])
+            return @VAL::type[|@USE::GetType|](self.get_value(self.__data, [@OPT[|@USE::AccessVar, |]'@VAL::name']))
         else:
             self.set_value(self.__data, [@OPT[|@USE::AccessVar|]], '@VAL::name', value)
             return self
@@ -83,13 +97,13 @@
 Types:@REP(, )::types[|@VAL::name|]
 """
 
-from @OPT[|@USE::package.|]core.types import BasicType
+from @OPT[|@USE::package.|]core.types import BasicType, Type
 
 @REP::types[|
 class @VAL::name(BasicType):
 
     def __init__(self, data=None):
-        Type.__init__(self)
+        BasicType.__init__(self)
         if not data:
             self.__data = dict()
         else:
