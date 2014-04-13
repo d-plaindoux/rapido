@@ -2,6 +2,7 @@ package @OPT[|@USE::package.|]core;
 
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -20,7 +21,7 @@ public interface Collections {
 
     class List<E> extends ArrayList<E> {
 
-        public List<E> append(java.util.List<E> xl) {
+        public List<E> append(Collection<E> xl) {
             final List<E> list = List();
             list.addAll(this);
             list.addAll(xl);
@@ -34,7 +35,7 @@ public interface Collections {
         public <R> Function<BiFunction<R, E, R>, R> foldLeft(R r) {
             return f -> {
                 R accumulator = r;
-                for (int i = 0; i < this.size(); i--) {
+                for (int i = 0; i < this.size(); i++) {
                     accumulator = f.apply(accumulator, this.get(i));
                 }
                 return accumulator;

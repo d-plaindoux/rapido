@@ -18,14 +18,14 @@
 
 package @OPT[|@USE::package.|]core;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class BasicService {
 
@@ -45,44 +45,47 @@ public abstract class BasicService {
         final URI uri = UriBuilder.fromUri(url).build();
         final String inputData = new JSon.ObjectData(body).toJSonString();
 
-        final AtomicReference<WebTarget> builder =
-                new AtomicReference<>(client.
-                        target(uri).
-                        path(path).
-                        path(servicePath));
+        final WebTarget builder =
+                Collections.<Map.Entry<String, JSon>>List().append(params.entrySet()).
+                        foldLeft(client.target(uri).path(path).path(servicePath)).apply(
+                        (b, e) -> b.queryParam(e.getKey(), e.getValue())
+                );
 
-        params.entrySet().stream().
-                forEach(e -> builder.set(builder.get().queryParam(e.getKey(), e.getValue().toString())));
-
-        final AtomicReference<Invocation.Builder> request =
-                new AtomicReference<>(builder.get().request());
+        final Invocation.Builder request;
 
         if (header.isEmpty()) {
-            request.set(request.get().header("Content-Type", "application/json"));
+            request = builder.request().header("Content-Type", "application/json");
         } else {
-            header.entrySet().stream().
-                    forEach(e -> request.set(request.get().header(e.getKey(), e.getValue().toString())));
+            request = Collections.<Map.Entry<String, JSon>>List().append(params.entrySet()).
+                    foldLeft(builder.request()).apply(
+                    (b, e) -> b.header(e.getKey(), e.getValue())
+            );
         }
 
         switch (operation) {
             case "POST":
-                return JSon.fromString(request.get().
-                        post(Entity.entity(inputData, MediaType.APPLICATION_JSON), String.class));
+                return JSon.fromString(request.
+                        post(Entity.entity(inputData, APPLICATION_JSON), String.class));
             case "PUT":
-                return JSon.fromString(request.get().
-                        put(Entity.entity(inputData, MediaType.APPLICATION_JSON), String.class));
+                return JSon.fromString(request.
+                        put(Entity.entity(inputData, APPLICATION_JSON), String.class));
             case "GET":
-                return JSon.fromString(request.get().get(String.class));
+                return JSon.fromString(request.get(String.class));
             case "DELETE":
-                return JSon.fromString(request.get().delete(String.class));
+                return JSon.fromString(request.delete(String.class));
             default:
                 throw new UnsupportedOperationException(operation);
         }
     }
 
     static protected String getPath(JSon data, String pattern, List<List<String>> attributes) {
-        final List<String> values = Collections.List();
-        attributes.forEach(e -> values.add(getValue(data, e).toString()));
+        final List<String> values = Collections.<List<String>>List().append(attributes).
+                foldLeft(Collections.<String>List()).apply(
+                (v, e) -> {
+                    v.add(getValue(data, e).toString());
+                    return v;
+                }
+        );
 
         return String.format(pattern, values.toArray(new String[values.size()]));
     }
@@ -92,14 +95,19 @@ public abstract class BasicService {
     }
 
     static protected Map<String, JSon> getValues(JSon data, List<String> path) {
-        final Map<String, JSon> map = Collections.Map();
-        path.stream().forEach(e -> map.put(e, getValue(data, Collections.List(e))));
-        return map;
+        return Collections.<String>List().append(path).
+                foldLeft(Collections.<String, JSon>Map()).apply(
+                (m, e) -> {
+                    m.put(e, getValue(data, Collections.List(e)));
+                    return m;
+                }
+        );
     }
 
-    static protected JSon mergeData(List<? extends BasicType> data) {
-        final AtomicReference<JSon> result = new AtomicReference<>(JSon.apply(new HashMap<String, JSon>()));
-        data.stream().forEach(e -> result.set(e.toJson().overrides(result.get())));
-        return result.get();
+    static protected JSon mergeData(List<BasicType> data) {
+        return Collections.<BasicType>List().append(data).
+                foldLeft(JSon.apply(new HashMap<String, JSon>())).apply(
+                (r, e) -> e.toJson().overrides(r)
+        );
     }
 }
