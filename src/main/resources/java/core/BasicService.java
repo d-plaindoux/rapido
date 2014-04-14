@@ -51,24 +51,16 @@ public abstract class BasicService {
                         (b, e) -> b.queryParam(e.getKey(), e.getValue())
                 );
 
-        final Invocation.Builder request;
-
-        if (header.isEmpty()) {
-            request = builder.request().header("Content-Type", "application/json");
-        } else {
-            request = Collections.<Map.Entry<String, JSon>>List().append(params.entrySet()).
-                    foldLeft(builder.request()).apply(
-                    (b, e) -> b.header(e.getKey(), e.getValue())
-            );
-        }
+        final Invocation.Builder request = Collections.<Map.Entry<String, JSon>>List().append(header.entrySet()).
+                foldLeft(builder.request()).apply(
+                (b, e) -> b.header(e.getKey(), e.getValue())
+        ).header("Content-Type", "application/json");
 
         switch (operation) {
             case "POST":
-                return JSon.fromString(request.
-                        post(Entity.entity(inputData, APPLICATION_JSON), String.class));
+                return JSon.fromString(request.post(Entity.entity(inputData, APPLICATION_JSON), String.class));
             case "PUT":
-                return JSon.fromString(request.
-                        put(Entity.entity(inputData, APPLICATION_JSON), String.class));
+                return JSon.fromString(request.put(Entity.entity(inputData, APPLICATION_JSON), String.class));
             case "GET":
                 return JSon.fromString(request.get(String.class));
             case "DELETE":
