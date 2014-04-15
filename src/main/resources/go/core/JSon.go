@@ -215,20 +215,11 @@ func ValueOfJSon(v interface{}) (JSon,error) {
     }
 }
 
-func StringOfJSon(s string) (JSon, error) {
+func StringOfJSon(s string) (JSon,error) {
     var v interface{}
     error := json.Unmarshal([]byte(s),&v)
     if (error != nil) {
 	return nil, error
     }
     return ValueOfJSon(v)
-}
-
-func main() {
-    json,error := StringOfJSon(`["a",1]`)
-    if (error == nil) {
-	fmt.Printf(json.String())
-    } else {
-	fmt.Println(error)
-    }
 }
