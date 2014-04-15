@@ -4,12 +4,8 @@ package @OPT[|@USE::package.|]core
 
 import "encoding/json"
 import "fmt"
-import "strconv"
 import "strings"
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-type any interface{}
+import "errors"
 
 // ---------------------------------------------------------------------------------------------------------------------
 // JSon type definition
@@ -18,41 +14,77 @@ type any interface{}
 type JSon interface {
     isJSon()
     String() string
-    RawValue() any
+    ToJSonString() string
+    RawValue() interface{}
+    SetValue(path []string, value JSon) JSon
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Abstract JSon type
+// ---------------------------------------------------------------------------------------------------------------------
+
+type abstractJSon struct {}
+func (abstractJSon) isJSon() {}
+func (this abstractJSon) String() string {
+    return "" // TODO manage error case in a better way
+}
+func (this abstractJSon) ToJSonString() string {
+    return this.String()
+}
+func (this abstractJSon) SetValue(path []string, value JSon) JSon {
+    return value
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Number JSon type
 // ---------------------------------------------------------------------------------------------------------------------
 
-type Number struct { value int }
-func (Number) isJSon() {}
-func (this Number) String() string {
-    return strconv.Itoa(this.value)
+type Number struct {
+	abstractJSon
+	value float64
 }
-func (this Number) RawValue() any {
+func (this Number) String() string {
+    return fmt.Sprintf("%f", this.value)
+}
+func (this Number) RawValue() interface{} {
     return this.value
 }
-
+func NewNumber(value float64) JSon {
+    o := new(Number)
+    o.value = value
+    return *o
+}
 // ---------------------------------------------------------------------------------------------------------------------
 // String JSon type
 // ---------------------------------------------------------------------------------------------------------------------
 
-type String struct { value string }
-func (String) isJSon() {}
+type String struct {
+	abstractJSon
+	value string
+}
 func (this String) String() string {
     return this.value
 }
-func (this String) RawValue() any {
-    return fmt.Sprint("\"%s\"", this.value)
+func (this String) ToJSonString() string {
+    return fmt.Sprintf("\"%s\"", this.value)
+}
+func (this String) RawValue() interface{} {
+    return this.value
+}
+func NewString(value string) JSon {
+     o := new(String)
+     o.value = value
+     return *o
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Boolean JSon type
 // ---------------------------------------------------------------------------------------------------------------------
 
-type Boolean struct { value bool }
-func (Boolean) isJSon() {}
+type Boolean struct {
+	abstractJSon
+	value bool
+}
 func (this Boolean) String() string {
     if this.value {
         return "true"
@@ -60,29 +92,38 @@ func (this Boolean) String() string {
         return "false"
     }
 }
-func (this Boolean) RawValue() any {
+func (this Boolean) RawValue() interface{} {
     return this.value
+}
+func NewBoolean(value bool) JSon {
+    o := new(Boolean)
+    o.value = value
+    return o
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Null JSon type
 // ---------------------------------------------------------------------------------------------------------------------
 
-type Null struct { }
-func (Null) isJSon() {}
+type Null struct { abstractJSon }
 func (this Null) String() string {
     return "null"
 }
-func (this Null) RawValue() any {
+func (this Null) RawValue() interface{} {
     return nil
+}
+func NewNull() JSon {
+    return *new (Null)
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Array JSon type
 // ---------------------------------------------------------------------------------------------------------------------
 
-type Array struct { value []JSon }
-func (Array) isJSon() {}
+type Array struct {
+	abstractJSon
+	value []JSon
+}
 func (this Array) String() string {
     var data = make([]string, len(this.value))
     for k := range this.value {
@@ -90,73 +131,104 @@ func (this Array) String() string {
     }
     return fmt.Sprintf("[ %s ]", strings.Join(data, ", "))
 }
-func (this Array) RawValue() any {
-    var data []any
+func (this Array) RawValue() interface{} {
+    var data []interface{}
     for k := range this.value {
         data = append(data, this.value[k].RawValue())
     }
     return data
+}
+func NewArray(value []JSon) JSon {
+     o := new(Array)
+     o.value = value
+     return o
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Map JSon type
 // ---------------------------------------------------------------------------------------------------------------------
 
-type Map struct { value map[string]JSon }
-func (Map) isJSon() {}
+type Map struct {
+	abstractJSon
+	value map[string]JSon
+}
 func (this Map) String() string {
     var data []string
     for k := range this.value {
         data = append(data, fmt.Sprintf("\"%s\": %s",this.value[k].String()))
     }
-    return fmt.Sprintf("[ %s ]", strings.Join(data, ", "))
+    return fmt.Sprintf("{ %s }", strings.Join(data, ", "))
 }
-func (this Map) RawValue() any {
-    var data = map[string]any{}
+func (this Map) RawValue() interface{} {
+    var data = map[string]interface{}{}
     for k := range this.value {
         data[k] = this.value[k].RawValue()
     }
     return data
+}
+func NewMap(value map[string]JSon) JSon {
+    o := new(Map)
+    o.value = value
+    return o
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // JSon conversion function
 // ---------------------------------------------------------------------------------------------------------------------
 
-func ValueOfJSon(v any) JSon {
+func ValueOfJSon(v interface{}) (JSon,error) {
     switch e := v.(type) {
     case int:
-        return Number{e}
+        return NewNumber(float64(e)), nil
+    case float64:
+        return NewNumber(e), nil
     case string:
-        return String{e}
+        return NewString(e), nil
     case bool:
-        return Boolean{e}
-    case []any:
+        return NewBoolean(e), nil
+    case []interface{}:
         var data = make([]JSon, len(e))
         for v := range e {
-           data[v] = ValueOfJSon(e[v])
+           result,error := ValueOfJSon(e[v])
+           if (error != nil) {
+            return nil, error
+           } else {
+            data[v] = result
+           }
         }
-        return Array{data}
-    case map[string]any:
+        return NewArray(data), nil
+    case map[string]interface{}:
         var data map[string]JSon
-            for v := range e {
-           data[v] = ValueOfJSon(e[v])
+        for v := range e {
+           result,error := ValueOfJSon(e[v])
+           if (error != nil) {
+            return nil, error
+           } else {
+            data[v] = result
+           }
         }
-        return Map{data}
+        return NewMap(data), nil
+    case nil:
+	    return NewNull(), nil
+    default:
+	    return nil, errors.New(fmt.Sprintf("Unexpected type %T while creating JSon data", e))
     }
-    return Null{}
 }
 
-func StringOfJSon(v string) JSon {
-    val v any
-    json.Unmarshal([]byte(v),&v)
+func StringOfJSon(s string) (JSon, error) {
+    var v interface{}
+    error := json.Unmarshal([]byte(s),&v)
+    if (error != nil) {
+	return nil, error
+    }
     return ValueOfJSon(v)
 }
 
-// TODO
-
 func main() {
-    json := ValueOfJSon("a")
-    fmt.Printf(json.String())
+    json,error := StringOfJSon(`["a",1]`)
+    if (error == nil) {
+	fmt.Printf(json.String())
+    } else {
+	fmt.Println(error)
+    }
 }
-
