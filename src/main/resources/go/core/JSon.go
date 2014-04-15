@@ -209,9 +209,9 @@ func ValueOfJSon(v interface{}) (JSon,error) {
         }
         return NewMap(data), nil
     case nil:
-	    return NewNull(), nil
+        return NewNull(), nil
     default:
-	    return nil, errors.New(fmt.Sprintf("Unexpected type %T while creating JSon data", e))
+        return nil, errors.New(fmt.Sprintf("Unexpected type %T while creating JSon data", e))
     }
 }
 
