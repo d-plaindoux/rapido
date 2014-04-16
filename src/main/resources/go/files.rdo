@@ -4,6 +4,7 @@
         "package"
     ],
     "files": [
-        "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/JSon.go"
+        "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/json.go",
+        "@OR[|@USE::project/src/main/java/@USE::package/|][|/@USE::lang/|]core/service.go"
     ]
 }

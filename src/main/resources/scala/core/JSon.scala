@@ -41,7 +41,7 @@ sealed trait JSon {
 
   def overrides(data: JSon): JSon = p
 
-  def overridenByObjectData(data: ObjectData): JSon = data
+  def overridden(data: ObjectData): JSon = data
 }
 
 case class StringData(s: String) extends JSon {
@@ -94,9 +94,9 @@ case class ObjectData(data: Map[String, JSon]) extends JSon {
     }
 
   override def overrides(data: JSon): JSon =
-    data.overridenByObjectData(this)
+    data.overridden(this)
 
-  override def overridenByObjectData(objectData: ObjectData): JSon = {
+  override def overridden(objectData: ObjectData): JSon = {
     val k1 = Set(objectData.data.keysIterator.toList: _*)
     val k2 = Set(data.keysIterator.toList: _*)
     val intersection = k1 & k2

@@ -53,7 +53,7 @@ public interface JSon {
         return this;
     }
 
-    default JSon overridenByObjectData(ObjectData data) {
+    default JSon overridden(ObjectData data) {
         return data;
     }
 
@@ -200,10 +200,10 @@ public interface JSon {
         }
 
         public JSon overrides(JSon data) {
-            return data.overridenByObjectData(this);
+            return data.overridden(this);
         }
 
-        public JSon overridenByObjectData(ObjectData objectData) {
+        public JSon overridden(ObjectData objectData) {
             final Set<String> intersection =
                     objectData.data.keySet().stream().
                             filter(e -> data.keySet().contains(e)).
