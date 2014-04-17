@@ -47,18 +47,12 @@ type JSon interface {
 
 type abstractJSon struct {}
 func (abstractJSon) JSonType() {}
-func (abstractJSon) String { return "" }
-func (abstractJSon) ToJSonString { return "" }
-func (abstractJSon) RawValue { return nil }
 func (this abstractJSon) SetValue(path []string, value JSon) JSon {
     result := value
     for i := len(path); i > 0; i-- {
         result = NewMap(map[string]JSon{ path[i-1] : result })
     }
-    return result.Overrides(this)
-}
-func (this abstractJSon) Overrides(data JSon) JSon {
-    return this
+    return result
 }
 func (this abstractJSon) overridden(data Map) JSon {
     return data
@@ -81,10 +75,13 @@ func (this Number) ToJSonString() string {
 func (this Number) RawValue() interface{} {
     return this.value
 }
+func (this Number) Overrides(data JSon) JSon {
+    return this
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func NewNumber(value float64) *JSon {
+func NewNumber(value float64) JSon {
     o := new(Number)
     o.value = value
     return o
@@ -107,10 +104,13 @@ func (this String) ToJSonString() string {
 func (this String) RawValue() interface{} {
     return this.value
 }
+func (this String) Overrides(data JSon) JSon {
+    return this
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func NewString(value string) *JSon {
+func NewString(value string) JSon {
      o := new(String)
      o.value = value
      return o
@@ -137,10 +137,13 @@ func (this Boolean) ToJSonString() string {
 func (this Boolean) RawValue() interface{} {
     return this.value
 }
+func (this Boolean) Overrides(data JSon) JSon {
+    return this
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func NewBoolean(value bool) *JSon {
+func NewBoolean(value bool) JSon {
     o := new(Boolean)
     o.value = value
     return o
@@ -160,10 +163,13 @@ func (this Null) ToJSonString() string {
 func (this Null) RawValue() interface{} {
     return nil
 }
+func (this Null) Overrides(data JSon) JSon {
+    return this
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func NewNull() *JSon {
+func NewNull() JSon {
     return new(Null)
 }
 
@@ -195,10 +201,13 @@ func (this Array) RawValue() interface{} {
     }
     return data
 }
+func (this Array) Overrides(data JSon) JSon {
+    return this
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func NewArray(value []JSon) *JSon {
+func NewArray(value []JSon) JSon {
      o := new(Array)
      o.value = value
      return o
@@ -232,31 +241,38 @@ func (this Map) RawValue() interface{} {
     }
     return data
 }
+func (this Map) SetValue(path []string, value JSon) JSon {
+    result := value
+    for i := len(path); i > 0; i-- {
+        result = NewMap(map[string]JSon{ path[i-1] : result })
+    }
+    return result.Overrides(this)
+}
 func (this Map) Overrides(data JSon) JSon {
     return data.overridden(this)
 }
 func (this Map) overridden(data Map) JSon {
-    result := make([string]JSon)
-    for k := range this.values {
-      if value, found := data.values[k]; found {
+    result := make(map[string]JSon)
+    for k := range this.value {
+      if value, found := data.value[k]; found {
         result[k] = value.Overrides(this.value[k])
       } else {
-        result[k] = this.values[k]
+        result[k] = this.value[k]
       }
     }
-    for k := range data.values {
-      if value, found := this.values[k]; found {
-        result[k] = data.values[k].Overrides(value)
+    for k := range data.value {
+      if _, found := this.value[k]; found {
+        // Already done
       } else {
-        result[k] = data.values[k]
+        result[k] = data.value[k]
       }
     }
-    return result
+    return NewMap(result)
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-func NewMap(value map[string]JSon) *JSon {
+func NewMap(value map[string]JSon) JSon {
     o := new(Map)
     o.value = value
     return o
@@ -311,14 +327,4 @@ func StringOfJSon(s string) (JSon,error) {
     } else {
 	return nil, error
     }
-}
-
-func main() {
-    if json,error := StringOfJSon(`["a",12,true,{"a":12}]`); error == nil {
-	fmt.Println(json.ToJSonString())
-    } else {
-	fmt.Println(error)
-    }
-    m := NewMap(make(map[string]JSon))
-    fmt.Println(m.SetValue([]string{"a","b"}, NewString("test")))
 }
